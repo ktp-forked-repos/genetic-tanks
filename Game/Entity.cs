@@ -179,6 +179,7 @@ namespace GeneticTanks.Game
       }
 
       m_components.Clear();
+      m_updateComponents.Clear();
       Name = null;
 
       m_disposed = true;
