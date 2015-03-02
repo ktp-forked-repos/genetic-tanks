@@ -65,7 +65,9 @@
   <ItemGroup>
     <Compile Include="Game\Components\Component.cs" />
     <Compile Include="Game\Entity.cs" />
+    <Compile Include="Game\EntityManager.cs" />
     <Compile Include="Game\EventManager.cs" />
+    <Compile Include="Game\Events\EntityEvents.cs" />
     <Compile Include="Game\Events\Event.cs" />
     <Compile Include="GeneticTanks.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -136,7 +136,8 @@ namespace GeneticTanks.Game
 
       var type = evt.GetType();
       EventListener listener;
-      if (m_eventListeners.TryGetValue(type, out listener))
+      if (m_eventListeners.TryGetValue(type, out listener) && 
+          listener != null)
       {
         Log.DebugFormat("Firing {0}", type.Name);
         listener(evt);

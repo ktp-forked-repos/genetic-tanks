@@ -16,7 +16,6 @@ namespace GeneticTanks.Game
     /// </summary>
     public const uint InvalidId = 0;
 
-    private bool m_disposed = false;
     private readonly Dictionary<Type, Component> m_components =
       new Dictionary<Type, Component>();
     private readonly List<Component> m_updateComponents = new List<Component>();
@@ -147,6 +146,8 @@ namespace GeneticTanks.Game
     }
 
     #region IDisposable Implementation
+
+    private bool m_disposed = false;
 
     /// <summary>
     /// Clean up the resources for this entity.
