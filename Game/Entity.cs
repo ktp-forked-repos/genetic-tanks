@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using GeneticTanks.Game.Components;
+using log4net;
+using log4net.Repository.Hierarchy;
 
 namespace GeneticTanks.Game
 {
@@ -11,6 +15,9 @@ namespace GeneticTanks.Game
   sealed class Entity 
     : IDisposable
   {
+    private static readonly ILog Log = LogManager.GetLogger(
+      MethodBase.GetCurrentMethod().DeclaringType);
+
     /// <summary>
     /// The only id number that it's not valid to use.
     /// </summary>
@@ -56,7 +63,29 @@ namespace GeneticTanks.Game
     /// Should only be considered valid after all components are added to the 
     /// entity.
     /// </summary>
-    public bool NeedsUpdate { get; set; }
+    public bool NeedsUpdate { get; private set; }
+
+    /// <summary>
+    /// Initializes all the components in the entity.
+    /// </summary>
+    /// <returns>Initialization success or failure.</returns>
+    public bool Initialize()
+    {
+      var result = true;
+      foreach (var component in m_components.Values)
+      {
+        if (!component.Initialize())
+        {
+          Log.ErrorFormat("Failed to initialize {0} in entity {1} ({2})",
+            component.GetType().Name, Id, 
+            string.IsNullOrEmpty(Name) ? "<none" : Name
+            );
+          result = false;
+        }
+      }
+
+      return result;
+    }
 
     /// <summary>
     /// Performs a logic update on the entity.
@@ -77,7 +106,8 @@ namespace GeneticTanks.Game
     /// </summary>
     /// <typeparam name="T">The component type to query.</typeparam>
     /// <returns>True if the entity has that component.</returns>
-    public bool HasComponent<T>() where T : Component
+    public bool HasComponent<T>() 
+      where T : Component
     {
       var type = typeof (T);
       return m_components.ContainsKey(type);
@@ -122,7 +152,8 @@ namespace GeneticTanks.Game
     /// <typeparam name="T">The component type to query.</typeparam>
     /// <param name="component"></param>
     /// <returns>True if T was found.</returns>
-    public bool TryGetComponent<T>(out T component) where T : Component
+    public bool TryGetComponent<T>(out T component) 
+      where T : Component
     {
       component = GetComponent<T>();
       return component != null;
@@ -133,7 +164,8 @@ namespace GeneticTanks.Game
     /// </summary>
     /// <typeparam name="T">The component type to query.</typeparam>
     /// <returns>The component if found, otherwise null.</returns>
-    public T GetComponent<T>() where T : Component
+    public T GetComponent<T>() 
+      where T : Component
     {
       var type = typeof (T);
       Component c;
@@ -143,6 +175,17 @@ namespace GeneticTanks.Game
       }
 
       return null;
+    }
+
+    /// <summary>
+    /// Searches the entity for all components that can be cast to type T.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns>The matching components</returns>
+    public List<T> GetComponentsByBase<T>()
+      where T : Component
+    {
+      return m_components.Values.OfType<T>().ToList();
     }
 
     #region IDisposable Implementation

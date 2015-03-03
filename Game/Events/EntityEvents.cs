@@ -1,7 +1,9 @@
-﻿namespace GeneticTanks.Game.Events
+﻿using System;
+
+namespace GeneticTanks.Game.Events
 {
   /// <summary>
-  /// The base class for all events involving entities.
+  /// The base class for all events involving entities directly.
   /// </summary>
   abstract class EntityEvent
     : Event
@@ -9,14 +11,40 @@
     /// <summary>
     /// Create an entity event.
     /// </summary>
+    /// <param name="e"></param>
+    /// <exception cref="ArgumentNullException">e is null</exception>
+    protected EntityEvent(Entity e)
+    {
+      if (e == null)
+      {
+        throw new ArgumentNullException("e");
+      }
+      Entity = e;
+    }
+
+    /// <summary>
+    /// The entity tied to this event.
+    /// </summary>
+    public Entity Entity { get; private set; }
+  }
+
+  /// <summary>
+  /// The base class for all events that reference entities by id.
+  /// </summary>
+  abstract class EntityIdEvent
+    : Event
+  {
+    /// <summary>
+    /// Create the event.
+    /// </summary>
     /// <param name="id"></param>
-    protected EntityEvent(uint id)
+    protected EntityIdEvent(uint id)
     {
       Id = id;
     }
 
     /// <summary>
-    /// The entity id tied to this event.
+    /// The id of the entity referenced by the event.
     /// </summary>
     public uint Id { get; private set; }
   }
@@ -31,9 +59,10 @@
     /// <summary>
     /// Create the event
     /// </summary>
-    /// <param name="id"></param>
-    public EntityAddedEvent(uint id) 
-      : base(id)
+    /// <param name="e"></param>
+    /// <exception cref="ArgumentNullException">e is null</exception>
+    public EntityAddedEvent(Entity e) 
+      : base(e)
     {
     }
   }
@@ -48,9 +77,10 @@
     /// <summary>
     /// Create the event
     /// </summary>
-    /// <param name="id"></param>
-    public EntityRemovedEvent(uint id) 
-      : base(id)
+    /// <param name="e"></param>
+    /// <exception cref="ArgumentNullException">e is null</exception>
+    public EntityRemovedEvent(Entity e) 
+      : base(e)
     {
     }
   }
@@ -59,7 +89,7 @@
   /// Requests that the entity manager remove an entity.
   /// </summary>
   sealed class RequestEntityRemovalEvent
-    : EntityEvent
+    : EntityIdEvent
   {
     /// <summary>
     /// Create the event

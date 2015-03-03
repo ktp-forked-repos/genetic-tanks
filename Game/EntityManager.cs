@@ -83,7 +83,7 @@ namespace GeneticTanks.Game
       {
         m_updateEntities.Add(e);
       }
-      m_eventManager.QueueEvent(new EntityAddedEvent(e.Id));
+      m_eventManager.QueueEvent(new EntityAddedEvent(e));
       Log.DebugFormat("Added entity {0}", e.Id);
     }
 
@@ -97,7 +97,7 @@ namespace GeneticTanks.Game
       if (e != null)
       {
         m_pendingRemovalQueue.Enqueue(e);
-        m_eventManager.QueueEvent(new EntityRemovedEvent(e.Id));
+        m_eventManager.QueueEvent(new EntityRemovedEvent(e));
         Log.DebugFormat("Entity {0} queued for removal", e.Id);
       }
     }
@@ -133,7 +133,7 @@ namespace GeneticTanks.Game
         Log.DebugFormat("Entity {0} queued for removal", e.Id);
         // event must be manually triggered so the entity can be removed
         // in the next frame
-        m_eventManager.TriggerEvent(new EntityRemovedEvent(e.Id));
+        m_eventManager.TriggerEvent(new EntityRemovedEvent(entity));
       }
     }
 

@@ -35,9 +35,10 @@ namespace GeneticTanks.Game.Components
     /// the subclass or Update will not be called.
     /// </summary>
     public bool NeedsUpdate { get; protected set; }
-    
+
     /// <summary>
-    /// Initialize the component to a useable state.
+    /// Initialize the component to a useable state.  Is called after all 
+    /// components have been added to an entity.
     /// </summary>
     /// <returns>The success or failure of initialization.</returns>
     public abstract bool Initialize();
