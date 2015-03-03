@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace GeneticTanks.Game.Events
+﻿namespace GeneticTanks.Game.Events
 {
   /// <summary>
   /// The base class for all events involving entities.
@@ -11,25 +9,21 @@ namespace GeneticTanks.Game.Events
     /// <summary>
     /// Create an entity event.
     /// </summary>
-    /// <param name="e"></param>
-    /// <exception cref="ArgumentNullException">e is null</exception>
-    protected EntityEvent(Entity e)
+    /// <param name="id"></param>
+    protected EntityEvent(uint id)
     {
-      if (e == null)
-      {
-        throw new ArgumentNullException("e");
-      }
-      Entity = e;
+      Id = id;
     }
 
     /// <summary>
-    /// The entity tied to this event.
+    /// The entity id tied to this event.
     /// </summary>
-    public Entity Entity { get; private set; }
+    public uint Id { get; private set; }
   }
 
   /// <summary>
-  /// Signals that a new entity was added to the game.
+  /// Signals that a new entity was added to the game.  The entity is valid 
+  /// for retrieval when this event fires.
   /// </summary>
   sealed class EntityAdded
     : EntityEvent
@@ -37,16 +31,16 @@ namespace GeneticTanks.Game.Events
     /// <summary>
     /// Create the event
     /// </summary>
-    /// <param name="e"></param>
-    /// <exception cref="ArgumentNullException">e is null</exception>
-    public EntityAdded(Entity e) 
-      : base(e)
+    /// <param name="id"></param>
+    public EntityAdded(uint id) 
+      : base(id)
     {
     }
   }
 
   /// <summary>
-  /// Signals that an entity is queued for removal in the next frame.
+  /// Signals that an entity is queued for removal in the next frame.  The 
+  /// entity is valid for retrieval when this event fires.
   /// </summary>
   sealed class EntityRemoved
     : EntityEvent
@@ -54,10 +48,25 @@ namespace GeneticTanks.Game.Events
     /// <summary>
     /// Create the event
     /// </summary>
-    /// <param name="e"></param>
-    /// <exception cref="ArgumentNullException">e is null</exception>
-    public EntityRemoved(Entity e) 
-      : base(e)
+    /// <param name="id"></param>
+    public EntityRemoved(uint id) 
+      : base(id)
+    {
+    }
+  }
+
+  /// <summary>
+  /// Requests that the entity manager remove an entity.
+  /// </summary>
+  sealed class RequestEntityRemoval
+    : EntityEvent
+  {
+    /// <summary>
+    /// Create the event
+    /// </summary>
+    /// <param name="id"></param>
+    public RequestEntityRemoval(uint id) 
+      : base(id)
     {
     }
   }

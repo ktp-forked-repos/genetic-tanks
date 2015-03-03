@@ -1,27 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Tracing;
 using System.Reflection;
 using GeneticTanks.Game.Events;
 using log4net;
 
 namespace GeneticTanks.Game
 {
+  /// <summary>
+  /// Owns and manages all entities in the game.
+  /// </summary>
   sealed class EntityManager
     : IDisposable
   {
     private static readonly ILog Log = LogManager.GetLogger(
       MethodBase.GetCurrentMethod().DeclaringType);
 
-    public const float UpdateInterval = 1f / 30f;
-
-    private float m_updateTime = 0;
+    #region Private Fields
+    // the game event manager
     private readonly EventManager m_eventManager;
+    // the main entity map
     private readonly Dictionary<uint, Entity> m_entities = 
       new Dictionary<uint, Entity>();
+    // entities that require per frame updates
     private readonly List<Entity> m_updateEntities = new List<Entity>(50);
-    private readonly Queue<Entity> m_removalQueue = new Queue<Entity>();
+    // entities that will be removed in the next frame
+    private readonly Queue<Entity> m_pendingRemovalQueue = new Queue<Entity>();
+    #endregion
 
     /// <summary>
     /// Create the entity manager.
@@ -36,6 +41,7 @@ namespace GeneticTanks.Game
       }
 
       m_eventManager = em;
+      m_eventManager.AddListener<RequestEntityRemoval>(HandleRemovalRequest);
     }
 
     /// <summary>
@@ -46,21 +52,15 @@ namespace GeneticTanks.Game
     /// </param>
     public void Update(float deltaTime)
     {
-      while (m_removalQueue.Count > 0)
+      while (m_pendingRemovalQueue.Count > 0)
       {
-        var e = m_removalQueue.Dequeue();
+        var e = m_pendingRemovalQueue.Dequeue();
         RemoveEntity(e);
       }
 
-      m_updateTime += deltaTime;
-      while (m_updateTime >= UpdateInterval)
+      foreach (var entity in m_updateEntities)
       {
-        m_updateTime -= UpdateInterval;
-
-        foreach (var entity in m_updateEntities)
-        {
-          entity.Update(UpdateInterval);
-        }
+        entity.Update(deltaTime);
       }
     }
 
@@ -82,7 +82,7 @@ namespace GeneticTanks.Game
       {
         m_updateEntities.Add(e);
       }
-      m_eventManager.QueueEvent(new EntityAdded(e));
+      m_eventManager.QueueEvent(new EntityAdded(e.Id));
       Log.DebugFormat("Added entity {0}", e.Id);
     }
 
@@ -95,8 +95,8 @@ namespace GeneticTanks.Game
       var e = GetEntity(id);
       if (e != null)
       {
-        m_removalQueue.Enqueue(e);
-        m_eventManager.QueueEvent(new EntityRemoved(e));
+        m_pendingRemovalQueue.Enqueue(e);
+        m_eventManager.QueueEvent(new EntityRemoved(e.Id));
         Log.DebugFormat("Entity {0} queued for removal", e.Id);
       }
     }
@@ -113,6 +113,33 @@ namespace GeneticTanks.Game
       return e;
     }
 
+    #region Private Methods
+
+    /// <summary>
+    /// Handles the event request to remove an entity.
+    /// </summary>
+    /// <param name="evt"></param>
+    private void HandleRemovalRequest(Event evt)
+    {
+      Debug.Assert(evt != null);
+      var e = evt as RequestEntityRemoval;
+      Debug.Assert(e != null);
+
+      var entity = GetEntity(e.Id);
+      if (entity != null)
+      {
+        m_pendingRemovalQueue.Enqueue(entity);
+        Log.DebugFormat("Entity {0} queued for removal", e.Id);
+        // event must be manually triggered so the entity can be removed
+        // in the next frame
+        m_eventManager.TriggerEvent(new EntityRemoved(e.Id));
+      }
+    }
+
+    /// <summary>
+    /// Finalizes the removal of an entity and disposes of it.
+    /// </summary>
+    /// <param name="e"></param>
     private void RemoveEntity(Entity e)
     {
       Debug.Assert(e != null);
@@ -123,6 +150,8 @@ namespace GeneticTanks.Game
       e.Dispose();
       Log.DebugFormat("Removed entity {0}", id);
     }
+
+    #endregion
 
     #region IDisposable Implementation
 
@@ -154,6 +183,7 @@ namespace GeneticTanks.Game
 
       m_entities.Clear();
       m_updateEntities.Clear();
+      m_eventManager.RemoveListener<RequestEntityRemoval>(HandleRemovalRequest);
 
       m_disposed = true;
     }
