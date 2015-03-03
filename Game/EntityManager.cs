@@ -41,7 +41,8 @@ namespace GeneticTanks.Game
       }
 
       m_eventManager = em;
-      m_eventManager.AddListener<RequestEntityRemoval>(HandleRemovalRequest);
+      m_eventManager.AddListener<RequestEntityRemovalEvent>(
+        HandleRemovalRequest);
     }
 
     /// <summary>
@@ -82,7 +83,7 @@ namespace GeneticTanks.Game
       {
         m_updateEntities.Add(e);
       }
-      m_eventManager.QueueEvent(new EntityAdded(e.Id));
+      m_eventManager.QueueEvent(new EntityAddedEvent(e.Id));
       Log.DebugFormat("Added entity {0}", e.Id);
     }
 
@@ -96,7 +97,7 @@ namespace GeneticTanks.Game
       if (e != null)
       {
         m_pendingRemovalQueue.Enqueue(e);
-        m_eventManager.QueueEvent(new EntityRemoved(e.Id));
+        m_eventManager.QueueEvent(new EntityRemovedEvent(e.Id));
         Log.DebugFormat("Entity {0} queued for removal", e.Id);
       }
     }
@@ -122,7 +123,7 @@ namespace GeneticTanks.Game
     private void HandleRemovalRequest(Event evt)
     {
       Debug.Assert(evt != null);
-      var e = evt as RequestEntityRemoval;
+      var e = evt as RequestEntityRemovalEvent;
       Debug.Assert(e != null);
 
       var entity = GetEntity(e.Id);
@@ -132,7 +133,7 @@ namespace GeneticTanks.Game
         Log.DebugFormat("Entity {0} queued for removal", e.Id);
         // event must be manually triggered so the entity can be removed
         // in the next frame
-        m_eventManager.TriggerEvent(new EntityRemoved(e.Id));
+        m_eventManager.TriggerEvent(new EntityRemovedEvent(e.Id));
       }
     }
 
@@ -183,7 +184,8 @@ namespace GeneticTanks.Game
 
       m_entities.Clear();
       m_updateEntities.Clear();
-      m_eventManager.RemoveListener<RequestEntityRemoval>(HandleRemovalRequest);
+      m_eventManager.RemoveListener<RequestEntityRemovalEvent>(
+        HandleRemovalRequest);
 
       m_disposed = true;
     }

@@ -25,14 +25,14 @@
   /// Signals that a new entity was added to the game.  The entity is valid 
   /// for retrieval when this event fires.
   /// </summary>
-  sealed class EntityAdded
+  sealed class EntityAddedEvent
     : EntityEvent
   {
     /// <summary>
     /// Create the event
     /// </summary>
     /// <param name="id"></param>
-    public EntityAdded(uint id) 
+    public EntityAddedEvent(uint id) 
       : base(id)
     {
     }
@@ -42,14 +42,14 @@
   /// Signals that an entity is queued for removal in the next frame.  The 
   /// entity is valid for retrieval when this event fires.
   /// </summary>
-  sealed class EntityRemoved
+  sealed class EntityRemovedEvent
     : EntityEvent
   {
     /// <summary>
     /// Create the event
     /// </summary>
     /// <param name="id"></param>
-    public EntityRemoved(uint id) 
+    public EntityRemovedEvent(uint id) 
       : base(id)
     {
     }
@@ -58,14 +58,14 @@
   /// <summary>
   /// Requests that the entity manager remove an entity.
   /// </summary>
-  sealed class RequestEntityRemoval
+  sealed class RequestEntityRemovalEvent
     : EntityEvent
   {
     /// <summary>
     /// Create the event
     /// </summary>
     /// <param name="id"></param>
-    public RequestEntityRemoval(uint id) 
+    public RequestEntityRemovalEvent(uint id) 
       : base(id)
     {
     }
