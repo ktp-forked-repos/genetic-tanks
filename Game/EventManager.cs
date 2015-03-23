@@ -31,8 +31,13 @@ namespace GeneticTanks.Game
     // maps event types to listeners
     private readonly Dictionary<Type, EventListener> m_eventListeners = 
       new Dictionary<Type, EventListener>();
-    // acts as a queue for unprocessed events
-    private readonly List<Event> m_pendingEvents = new List<Event>(50);
+    // each list acts as a queue for unprocessed events
+    private readonly List<Event>[] m_pendingEvents = {
+      new List<Event>(25),
+      new List<Event>(25)
+    };
+    private int m_readIndex;
+    private int m_writeIndex = 1;
     #endregion
 
     /// <summary>
@@ -44,30 +49,10 @@ namespace GeneticTanks.Game
     /// </param>
     public void Update(float maxEventTime)
     {
-      if (m_pendingEvents.Count == 0)
-      {
-        return;
-      }
-
-      var count = 0;
-      m_eventTimer.Restart();
-      while (m_pendingEvents.Count > 0)
-      {
-        if (m_eventTimer.Elapsed.TotalSeconds >= maxEventTime)
-        {
-          Log.DebugFormat("Update aborted with {0} events in the queue",
-            m_pendingEvents.Count);
-          break;
-        }
-
-        var evt = m_pendingEvents.First();
-        m_pendingEvents.RemoveAt(0);
-        TriggerEvent(evt);
-        count++;
-      }
-
-      Log.DebugFormat("Processed {0} events in {1:F4} s", count,
-        m_eventTimer.Elapsed.TotalSeconds);
+      // queues are swapped so that any new events added in response to an 
+      // event firing are processed in the next frame
+      SwapQueues();
+      ProcessReadQueue(maxEventTime);
     }
 
     /// <summary>
@@ -159,12 +144,13 @@ namespace GeneticTanks.Game
       {
         throw new ArgumentNullException("evt");
       }
-      m_pendingEvents.Add(evt);
+      m_pendingEvents[m_writeIndex].Add(evt);
       Log.DebugFormat("Queued {0}", evt.GetType().Name);
     }
 
     /// <summary>
-    /// Aborts the oldest event of type T.
+    /// Aborts the oldest event of type T.  Events cannot be aborted after 
+    /// Update() has been called and event processing begun.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <returns>True if an event was aborted.</returns>
@@ -172,19 +158,21 @@ namespace GeneticTanks.Game
       where T : Event
     {
       var type = typeof (T);
-      var toRemove = m_pendingEvents.First(evt => evt.GetType() == type);
+      var toRemove = m_pendingEvents[m_writeIndex]
+        .First(evt => evt.GetType() == type);
       if (toRemove == null)
       {
         return false;
       }
 
-      m_pendingEvents.Remove(toRemove);
+      m_pendingEvents[m_writeIndex].Remove(toRemove);
       Log.DebugFormat("Aborted event {0}", type.Name);
       return true;
     }
 
     /// <summary>
-    /// Removes all pending events of type T.
+    /// Removes all pending events of type T.  Events cannot be aborted after 
+    /// Update() has been called and event processing begun.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <returns>The number of events removed.</returns>
@@ -192,21 +180,63 @@ namespace GeneticTanks.Game
       where T : Event
     {
       var type = typeof (T);
-      var result = m_pendingEvents.RemoveAll(evt => evt.GetType() == type);
+      var result = m_pendingEvents[m_writeIndex]
+        .RemoveAll(evt => evt.GetType() == type);
       Log.DebugFormat("Aborted {0} events of type {1}", result, type.Name);
       return result;
     }
 
     /// <summary>
-    /// Clears all events from the queue.
+    /// Clears all events from the queue.  Events cannot be aborted after 
+    /// Update() has been called and event processing begun.
     /// </summary>
     /// <returns>The number of events cleared.</returns>
     public int AbortAllEvents()
     {
       var result = m_pendingEvents.Count();
-      m_pendingEvents.Clear();
+      m_pendingEvents[m_writeIndex].Clear();
       Log.DebugFormat("Cleared {0} events from queue", result);
       return result;
     }
+
+    #region Private Methods
+
+    private void SwapQueues()
+    {
+      // both queue indices are toggled between 0 and 1
+      m_readIndex = (m_readIndex + 1) & 1;
+      m_writeIndex = (m_writeIndex + 1) & 1;
+    }
+
+    private void ProcessReadQueue(float maxEventTime)
+    {
+      if (m_pendingEvents[m_readIndex].Count == 0)
+      {
+        return;
+      }
+
+      var count = 0;
+      m_eventTimer.Restart();
+      while (m_pendingEvents[m_readIndex].Count > 0)
+      {
+        if (m_eventTimer.Elapsed.TotalSeconds >= maxEventTime)
+        {
+          Log.DebugFormat(
+            "Queue processing aborted with {0} events in the queue",
+            m_pendingEvents[m_readIndex].Count);
+          break;
+        }
+
+        var evt = m_pendingEvents[m_readIndex].First();
+        m_pendingEvents[m_readIndex].RemoveAt(0);
+        TriggerEvent(evt);
+        count++;
+      }
+
+      Log.DebugFormat("Processed {0} events in {1:F4} s", count,
+        m_eventTimer.Elapsed.TotalSeconds);
+    }
+
+    #endregion
   }
 }
