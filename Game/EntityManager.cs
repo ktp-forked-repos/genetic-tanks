@@ -15,6 +15,22 @@ namespace GeneticTanks.Game
   {
     private static readonly ILog Log = LogManager.GetLogger(
       MethodBase.GetCurrentMethod().DeclaringType);
+    private static uint _lastEntityId = Entity.InvalidId;
+
+    /// <summary>
+    /// The next useable entity id.  All entity creation should use this to 
+    /// obtain a unique id.
+    /// </summary>
+    /// <remarks>This totally ignores integer overflow.  I really doubt it will
+    /// be a problem.</remarks>
+    public static uint NextId
+    {
+      get
+      {
+        _lastEntityId++;
+        return _lastEntityId;
+      }
+    }
 
     #region Private Fields
     // the game event manager
