@@ -22,18 +22,36 @@ namespace GeneticTanks.Game
 
     // Update time to achieve 60 fps
     private const float UpdateInterval = 1f / 60f;
+    // Closest zoom is 10m wide
+    private const float MinViewWidth = 10f;
 
     #region Private Fields
+
     // event manager dependency
     private readonly EventManager m_eventManager;
+    
+    // the sfml window
     private readonly RenderWindow m_renderWindow;
+
+    // view control variables
+    private bool m_draggingView = false;
+    private Vector2i m_mousePos;
+    private float m_viewWidth = 100;
+    private readonly View m_view = new View
+    {
+      Center = new Vector2f(0, 0),
+      Viewport = new FloatRect(0, 0, 1, 1)
+    };
+
     // signals that something in the render state has changed and needs updating
     private bool m_dirtyState = false;
     // accumulates time since the last render
     private float m_timeSinceLastRender = 0;
+    
     // holds all components that require rendering
     private readonly List<RenderComponent> m_renderComponents = 
       new List<RenderComponent>();
+
     #endregion
 
     /// <summary>
@@ -53,9 +71,16 @@ namespace GeneticTanks.Game
       m_eventManager.AddListener<EntityRemovedEvent>(HandleEntityRemoved);
 
       m_renderWindow = new RenderWindow(windowHandle,
-        new ContextSettings { AntialiasingLevel = 8 });
-    }
+        new ContextSettings {AntialiasingLevel = 8});
+      UpdateViewSize();
 
+      m_renderWindow.Resized += (sender, args) => UpdateViewSize();
+      m_renderWindow.MouseWheelMoved += HandleMouseWheelMoved;
+      m_renderWindow.MouseButtonPressed += HandleMouseButtonPressed;
+      m_renderWindow.MouseButtonReleased += HandleMouseButtonReleased;
+      m_renderWindow.MouseMoved += HandleMouseMoved;
+    }
+    
     /// <summary>
     /// Updates the renderer and draws to the target.
     /// </summary>
@@ -79,13 +104,7 @@ namespace GeneticTanks.Game
         m_dirtyState = false;
       }
 
-      var view = new SFML.Graphics.View
-      {
-        Size = new Vector2f(80, 60),
-        Center = new Vector2f(0, 0),
-        Viewport = new FloatRect(0, 0, 1, 1)
-      };
-      m_renderWindow.SetView(view);
+      m_renderWindow.SetView(m_view);
       m_renderWindow.Clear(Color.White);
 
       foreach (var component in m_renderComponents)
@@ -94,13 +113,17 @@ namespace GeneticTanks.Game
       }
       m_renderWindow.Display();
     }
+
+    private void UpdateViewSize()
+    {
+      var size = m_renderWindow.Size;
+      var ratio = (float) size.Y / size.X;
+      m_view.Size = new Vector2f(m_viewWidth, m_viewWidth * ratio);
+    }
     
     #region Callbacks
     
-    /// <summary>
-    /// Grabs the render components from a new entity when it is added.
-    /// </summary>
-    /// <param name="evt"></param>
+    // Grabs the render components from a new entity.
     private void HandleEntityAdded(Event evt)
     {
       Debug.Assert(evt != null);
@@ -117,10 +140,7 @@ namespace GeneticTanks.Game
       }
     }
 
-    /// <summary>
-    /// Removes an entities render components when it is removed.
-    /// </summary>
-    /// <param name="evt"></param>
+    // Removes an entity from the render list.
     private void HandleEntityRemoved(Event evt)
     {
       Debug.Assert(evt != null);
@@ -135,6 +155,64 @@ namespace GeneticTanks.Game
         Log.DebugFormat("Removed {0} components from entity {1}",
           count, e.Entity.Id);
       }
+    }
+
+    // Zooms the view in or out 10% for each mouse wheel click.
+    private void HandleMouseWheelMoved(object sender, 
+      MouseWheelEventArgs mouseWheelEventArgs)
+    {
+      // delta is +1/-1
+      // but invert it to make forward scrolling zoom in
+      m_viewWidth += -mouseWheelEventArgs.Delta * (m_viewWidth / 10f);
+      m_viewWidth = Math.Max(m_viewWidth, MinViewWidth);
+      UpdateViewSize();
+    }
+
+    // Begins dragging the view.
+    private void HandleMouseButtonPressed(object sender,
+      MouseButtonEventArgs mouseButtonEventArgs)
+    {
+      if (mouseButtonEventArgs.Button != Mouse.Button.Left)
+      {
+        return;
+      }
+
+      m_draggingView = true;
+      m_mousePos = new Vector2i(mouseButtonEventArgs.X, mouseButtonEventArgs.Y);
+    }
+
+    // Ends dragging the view.
+    private void HandleMouseButtonReleased(object sender,
+      MouseButtonEventArgs mouseButtonEventArgs)
+    {
+      if (mouseButtonEventArgs.Button != Mouse.Button.Left)
+      {
+        return;
+      }
+
+      m_draggingView = false;
+    }
+
+    // Moves the view, if dragging.
+    private void HandleMouseMoved(object sender,
+      MouseMoveEventArgs mouseMoveEventArgs)
+    {
+      if (!m_draggingView)
+      {
+        return;
+      }
+
+      var oldPos = m_mousePos;
+      m_mousePos = new Vector2i(mouseMoveEventArgs.X, mouseMoveEventArgs.Y);
+      var delta = oldPos - m_mousePos;
+
+      var windowSize = m_renderWindow.Size;
+      var viewSize = m_view.Size;
+      var movement = new Vector2f(
+        ((float)delta.X / windowSize.X) * viewSize.X,
+        ((float)delta.Y / windowSize.Y) * viewSize.Y
+        );
+      m_view.Center += movement;
     }
     
     #endregion
