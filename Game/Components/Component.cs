@@ -31,6 +31,12 @@ namespace GeneticTanks.Game.Components
     public Entity Parent { get; private set; }
 
     /// <summary>
+    /// Tracks the initialization state of the component.  Must be set by the 
+    /// subclass.
+    /// </summary>
+    public bool Initialized { get; protected set; }
+
+    /// <summary>
     /// Signifies that the component requires logic updates.  Must be set by 
     /// the subclass or Update will not be called.
     /// </summary>
@@ -71,7 +77,7 @@ namespace GeneticTanks.Game.Components
     /// </param>
     protected virtual void Dispose(bool disposing)
     {
-      if (m_disposed)
+      if (m_disposed || !Initialized)
       {
         return;
       }

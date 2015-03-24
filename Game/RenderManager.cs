@@ -6,6 +6,8 @@ using GeneticTanks.Game.Components;
 using GeneticTanks.Game.Events;
 using log4net;
 using SFML.Graphics;
+using SFML.Window;
+using Event = GeneticTanks.Game.Events.Event;
 
 namespace GeneticTanks.Game
 {
@@ -24,6 +26,7 @@ namespace GeneticTanks.Game
     #region Private Fields
     // event manager dependency
     private readonly EventManager m_eventManager;
+    private readonly RenderWindow m_renderWindow;
     // signals that something in the render state has changed and needs updating
     private bool m_dirtyState = false;
     // accumulates time since the last render
@@ -37,7 +40,8 @@ namespace GeneticTanks.Game
     /// Create the render manager.
     /// </summary>
     /// <param name="em"></param>
-    public RenderManager(EventManager em)
+    /// <param name="windowHandle"></param>
+    public RenderManager(EventManager em, IntPtr windowHandle)
     {
       if (em == null)
       {
@@ -47,6 +51,9 @@ namespace GeneticTanks.Game
       m_eventManager = em;
       m_eventManager.AddListener<EntityAddedEvent>(HandleEntityAdded);
       m_eventManager.AddListener<EntityRemovedEvent>(HandleEntityRemoved);
+
+      m_renderWindow = new RenderWindow(windowHandle,
+        new ContextSettings { AntialiasingLevel = 8 });
     }
 
     /// <summary>
@@ -55,10 +62,9 @@ namespace GeneticTanks.Game
     /// <param name="deltaTime">
     /// The time since Update was last called, in seconds.
     /// </param>
-    /// <param name="target"></param>
-    public void Update(float deltaTime, RenderTarget target)
+    public void Update(float deltaTime)
     {
-      Debug.Assert(target != null);
+      m_renderWindow.DispatchEvents();
 
       m_timeSinceLastRender += deltaTime;
       if (m_timeSinceLastRender < UpdateInterval)
@@ -73,10 +79,20 @@ namespace GeneticTanks.Game
         m_dirtyState = false;
       }
 
+      var view = new SFML.Graphics.View
+      {
+        Size = new Vector2f(80, 60),
+        Center = new Vector2f(0, 0),
+        Viewport = new FloatRect(0, 0, 1, 1)
+      };
+      m_renderWindow.SetView(view);
+      m_renderWindow.Clear(Color.White);
+
       foreach (var component in m_renderComponents)
       {
-        component.Draw(target);
+        component.Draw(m_renderWindow);
       }
+      m_renderWindow.Display();
     }
     
     #region Callbacks

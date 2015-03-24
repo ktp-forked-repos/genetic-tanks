@@ -20,7 +20,9 @@ namespace GeneticTanks.Game.Components
     public TransformComponent(Entity parent) 
       : base(parent)
     {
+      NeedsUpdate = false;
       Position = Vector2.Zero;
+      Initialized = true;
     }
 
     /// <summary>
