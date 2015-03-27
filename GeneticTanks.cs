@@ -42,10 +42,15 @@ namespace GeneticTanks
       new GeneticTanks().Run();
     }
 
+    private MainWindow m_window;
+    private RenderWindow m_renderWindow;
+
     private EventManager m_eventManager;
     private EntityManager m_entityManager;
     private RenderManager m_renderManager;
-    private MainWindow m_window;
+    private InputManager m_inputManager;
+    private ViewManager m_viewManager;
+    
     private TankFactory m_tankFactory;
     
     public void Run()
@@ -61,11 +66,15 @@ namespace GeneticTanks
         Text = "Genetic Tanks PID " + Process.GetCurrentProcess().Id
       };
       m_window.Show();
+
+      m_renderWindow = new RenderWindow(m_window.DrawingPanelHandle,
+        new ContextSettings { AntialiasingLevel = 8 });
       
       m_eventManager = new EventManager();
       m_entityManager = new EntityManager(m_eventManager);
-      m_renderManager = new RenderManager(m_eventManager, 
-        m_window.DrawingPanelHandle);
+      m_renderManager = new RenderManager(m_eventManager);
+      m_inputManager = new InputManager(m_renderWindow, m_eventManager);
+      m_viewManager = new ViewManager(m_eventManager, m_renderWindow);
 
       m_tankFactory = new TankFactory(m_entityManager);
     }
@@ -81,10 +90,15 @@ namespace GeneticTanks
         float lastFrameTime = (float)frameTime.Elapsed.TotalSeconds;
         frameTime.Restart();
 
-        m_renderManager.Update(lastFrameTime);
-        m_entityManager.Update(lastFrameTime);
+        m_renderWindow.SetView(m_viewManager.View);
+        if (m_renderManager.Update(lastFrameTime, m_renderWindow))
+        {
+          m_renderWindow.Display();
+        }
 
         Application.DoEvents();
+        m_inputManager.Update(lastFrameTime);
+        m_entityManager.Update(lastFrameTime);
 
         var maxEventTime = MaxFrameTime - (float)frameTime.Elapsed.TotalSeconds;
         m_eventManager.Update(maxEventTime);
