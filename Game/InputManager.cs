@@ -7,6 +7,9 @@ using SFML.Window;
 
 namespace GeneticTanks.Game
 {
+  /// <summary>
+  /// Captures input from the window and translates it to game events.
+  /// </summary>
   sealed class InputManager
   {
     private static readonly ILog Log = LogManager.GetLogger(

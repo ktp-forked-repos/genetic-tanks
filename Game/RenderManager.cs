@@ -6,7 +6,6 @@ using GeneticTanks.Game.Components;
 using GeneticTanks.Game.Events;
 using log4net;
 using SFML.Graphics;
-using SFML.Window;
 using Event = GeneticTanks.Game.Events.Event;
 
 namespace GeneticTanks.Game
@@ -28,7 +27,6 @@ namespace GeneticTanks.Game
     private const float UpdateInterval = 1f / TargetFrameRate;
 
     #region Private Fields
-
     // event manager dependency
     private readonly EventManager m_eventManager;
     // signals that something in the render state has changed and needs updating
@@ -38,13 +36,15 @@ namespace GeneticTanks.Game
     // holds all components that require rendering
     private readonly List<RenderComponent> m_renderComponents = 
       new List<RenderComponent>();
-
     #endregion
 
     /// <summary>
     /// Create the render manager.
     /// </summary>
     /// <param name="em"></param>
+    /// <exception cref="ArgumentNullException">
+    /// em is null
+    /// </exception>
     public RenderManager(EventManager em)
     {
       if (em == null)
@@ -74,8 +74,8 @@ namespace GeneticTanks.Game
       {
         return false;
       }
-      m_timeSinceLastRender = 0;
-      
+
+      m_timeSinceLastRender -= UpdateInterval;
       Draw(target);
       return true;
     }

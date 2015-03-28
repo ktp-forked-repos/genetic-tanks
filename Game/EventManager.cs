@@ -36,7 +36,9 @@ namespace GeneticTanks.Game
       new List<Event>(25),
       new List<Event>(25)
     };
-    private int m_readIndex;
+    // read queue index
+    private int m_readIndex = 0;
+    // write queue index
     private int m_writeIndex = 1;
     #endregion
 
@@ -111,7 +113,9 @@ namespace GeneticTanks.Game
     /// Immediately triggers an event, ignoring the queue.
     /// </summary>
     /// <param name="evt"></param>
-    /// <exception cref="ArgumentNullException">evt is null</exception>
+    /// <exception cref="ArgumentNullException">
+    /// evt is null.
+    /// </exception>
     public void TriggerEvent(Event evt)
     {
       if (evt == null)
@@ -137,13 +141,16 @@ namespace GeneticTanks.Game
     /// Adds an event to the queue.
     /// </summary>
     /// <param name="evt"></param>
-    /// <exception cref="ArgumentNullException">evt is null</exception>
+    /// <exception cref="ArgumentNullException">
+    /// evt is null.
+    /// </exception>
     public void QueueEvent(Event evt)
     {
       if (evt == null)
       {
         throw new ArgumentNullException("evt");
       }
+
       m_pendingEvents[m_writeIndex].Add(evt);
       Log.DebugFormat("Queued {0}", evt.GetType().Name);
     }
@@ -153,7 +160,9 @@ namespace GeneticTanks.Game
     /// Update() has been called and event processing begun.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <returns>True if an event was aborted.</returns>
+    /// <returns>
+    /// True if an event was aborted.
+    /// </returns>
     public bool AbortFirstEvent<T>() 
       where T : Event
     {
@@ -175,7 +184,9 @@ namespace GeneticTanks.Game
     /// Update() has been called and event processing begun.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <returns>The number of events removed.</returns>
+    /// <returns>
+    /// The number of events removed.
+    /// </returns>
     public int AbortEvents<T>() 
       where T : Event
     {
@@ -190,7 +201,9 @@ namespace GeneticTanks.Game
     /// Clears all events from the queue.  Events cannot be aborted after 
     /// Update() has been called and event processing begun.
     /// </summary>
-    /// <returns>The number of events cleared.</returns>
+    /// <returns>
+    /// The number of events cleared.
+    /// </returns>
     public int AbortAllEvents()
     {
       var result = m_pendingEvents.Count();

@@ -8,7 +8,10 @@ namespace GeneticTanks.Game.Components
   sealed class TankStateComponent
     : Component
   {
+    #region Private Fields
+    // the rotation state of the tank turret
     private float m_turretRotation = 0f;
+    #endregion
 
     public TankStateComponent(Entity parent) 
       : base(parent)
@@ -64,6 +67,8 @@ namespace GeneticTanks.Game.Components
     /// </summary>
     public float HealthPercent { get; set; }
 
+    #region Component Implementation
+
     public override bool Initialize()
     {
       return true;
@@ -72,5 +77,7 @@ namespace GeneticTanks.Game.Components
     public override void Update(float deltaTime)
     {
     }
+
+    #endregion
   }
 }

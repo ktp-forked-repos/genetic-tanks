@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Reflection;
-using GeneticTanks.Extensions;
 using GeneticTanks.Game.Events;
 using log4net;
 using SFML.Graphics;
@@ -10,19 +8,38 @@ using Event = GeneticTanks.Game.Events.Event;
 
 namespace GeneticTanks.Game
 {
+  /// <summary>
+  /// Controls the user's view into the game map.
+  /// </summary>
   sealed class ViewManager
   {
     private static readonly ILog Log = LogManager.GetLogger(
       MethodBase.GetCurrentMethod().DeclaringType);
 
+    // initial view width
     private const float BaseViewWidth = 100;
+    // smallest allowable view
     private const float MinViewWidth = 10;
-    private const float ZoomIncrement = 10;
+    // the amount the zoom changes on every zoom event
+    private const float ZoomPercentIncrement = 10;
 
+    #region Private Fields
     private readonly EventManager m_eventManager;
-    private Vector2u m_windowSize;
-    private float m_viewWidth = BaseViewWidth;
 
+    // tracks the size of the rendering window
+    private Vector2u m_windowSize;
+    // current width of the view
+    private float m_viewWidth = BaseViewWidth;
+    #endregion
+
+    /// <summary>
+    /// Create a view manager.
+    /// </summary>
+    /// <param name="em"></param>
+    /// <param name="window"></param>
+    /// <exception cref="ArgumentNullException">
+    /// em or window is null.
+    /// </exception>
     public ViewManager(EventManager em, Window window)
     {
       if (em == null)
@@ -49,7 +66,12 @@ namespace GeneticTanks.Game
       m_eventManager.AddListener<MapZoomEvent>(HandleMapZoom);
     }
 
+    /// <summary>
+    /// The current view for rendering.
+    /// </summary>
     public View View { get; private set; }
+
+    #region Private Methods
 
     private void UpdateViewSize()
     {
@@ -57,12 +79,20 @@ namespace GeneticTanks.Game
       View.Size = new Vector2f(m_viewWidth, m_viewWidth * ratio);
     }
 
+    #endregion
     #region Callbacks
 
     private void HandleWindowResize(Event e)
     {
+      if (e == null)
+      {
+        throw new ArgumentNullException("e");
+      }
       var evt = e as WindowResizeEvent;
-      Debug.Assert(evt != null);
+      if (evt == null)
+      {
+        throw new ArgumentException("e is not WindowResizeEvent", "e");
+      }
 
       m_windowSize = evt.Size;
       UpdateViewSize();
@@ -70,8 +100,15 @@ namespace GeneticTanks.Game
 
     private void HandleMapDrag(Event e)
     {
+      if (e == null)
+      {
+        throw new ArgumentNullException("e");
+      }
       var evt = e as MapDragEvent;
-      Debug.Assert(evt != null);
+      if (evt == null)
+      {
+        throw new ArgumentException("e is not MapDragEvent", "e");
+      }
 
       var delta = evt.Delta;
       var size = View.Size;
@@ -80,10 +117,17 @@ namespace GeneticTanks.Game
 
     private void HandleMapZoom(Event e)
     {
+      if (e == null)
+      {
+        throw new ArgumentNullException("e");
+      }
       var evt = e as MapZoomEvent;
-      Debug.Assert(evt != null);
+      if (evt == null)
+      {
+        throw new ArgumentException("e is not MapZoomEvent", "e");
+      }
 
-      m_viewWidth += -evt.Amount * (m_viewWidth / ZoomIncrement);
+      m_viewWidth += -evt.Amount * (m_viewWidth / ZoomPercentIncrement);
       m_viewWidth = Math.Max(m_viewWidth, MinViewWidth);
       UpdateViewSize();
     }

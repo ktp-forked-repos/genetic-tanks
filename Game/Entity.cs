@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using GeneticTanks.Game.Components;
 using log4net;
-using log4net.Repository.Hierarchy;
 
 namespace GeneticTanks.Game
 {
@@ -23,9 +22,13 @@ namespace GeneticTanks.Game
     /// </summary>
     public const uint InvalidId = 0;
 
+    #region Private Fields
+    // the components that make up the entity
     private readonly Dictionary<Type, Component> m_components =
       new Dictionary<Type, Component>();
+    // Only the components that require update calls
     private readonly List<Component> m_updateComponents = new List<Component>();
+    #endregion
 
     /// <summary>
     /// Creates a new entity.
@@ -68,7 +71,10 @@ namespace GeneticTanks.Game
     /// <summary>
     /// Initializes all the components in the entity.
     /// </summary>
-    /// <returns>Initialization success or failure.</returns>
+    /// <returns>
+    /// Initialization success or failure.  After failed initialization an 
+    /// entity should be considered unusable and immediately disposed.
+    /// </returns>
     public bool Initialize()
     {
       var result = true;
@@ -81,6 +87,7 @@ namespace GeneticTanks.Game
             string.IsNullOrEmpty(Name) ? "<none" : Name
             );
           result = false;
+          break;
         }
       }
 
@@ -104,8 +111,12 @@ namespace GeneticTanks.Game
     /// <summary>
     /// Checks if the entity contains a particular component.
     /// </summary>
-    /// <typeparam name="T">The component type to query.</typeparam>
-    /// <returns>True if the entity has that component.</returns>
+    /// <typeparam name="T">
+    /// The component type to query.
+    /// </typeparam>
+    /// <returns>
+    /// True if the entity has that component.
+    /// </returns>
     public bool HasComponent<T>() 
       where T : Component
     {
@@ -117,9 +128,6 @@ namespace GeneticTanks.Game
     /// Adds a component to the entity.
     /// </summary>
     /// <param name="component"></param>
-    /// <exception cref="ArgumentNullException">
-    /// The component is null.
-    /// </exception>
     /// <exception cref="ArgumentException">
     /// Attempted to add a duplicate component.
     /// </exception>
@@ -127,7 +135,7 @@ namespace GeneticTanks.Game
     {
       if (component == null)
       {
-        throw new ArgumentNullException("component");
+        return;
       }
       if (m_components.ContainsKey(component.GetType()))
       {
@@ -149,9 +157,13 @@ namespace GeneticTanks.Game
     /// <summary>
     /// Attempts to retrieve a component from the entity.
     /// </summary>
-    /// <typeparam name="T">The component type to query.</typeparam>
+    /// <typeparam name="T">
+    /// The component type to query.
+    /// </typeparam>
     /// <param name="component"></param>
-    /// <returns>True if T was found.</returns>
+    /// <returns>
+    /// True if T was found.
+    /// </returns>
     public bool TryGetComponent<T>(out T component) 
       where T : Component
     {
@@ -162,8 +174,12 @@ namespace GeneticTanks.Game
     /// <summary>
     /// Gets a component from the entity.
     /// </summary>
-    /// <typeparam name="T">The component type to query.</typeparam>
-    /// <returns>The component if found, otherwise null.</returns>
+    /// <typeparam name="T">
+    /// The component type to query.
+    /// </typeparam>
+    /// <returns>
+    /// The component if found, otherwise null.
+    /// </returns>
     public T GetComponent<T>() 
       where T : Component
     {
@@ -180,8 +196,12 @@ namespace GeneticTanks.Game
     /// <summary>
     /// Searches the entity for all components that can be cast to type T.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <returns>The matching components</returns>
+    /// <typeparam name="T">
+    /// The component base type to query.
+    /// </typeparam>
+    /// <returns>
+    /// The matching components.
+    /// </returns>
     public List<T> GetComponentsByBase<T>()
       where T : Component
     {
@@ -224,16 +244,15 @@ namespace GeneticTanks.Game
 
       m_components.Clear();
       m_updateComponents.Clear();
-      Name = null;
 
       m_disposed = true;
     }
+
+    #endregion
 
     ~Entity()
     {
       Dispose(false);
     }
-
-    #endregion
   }
 }

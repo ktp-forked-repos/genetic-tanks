@@ -1,8 +1,5 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using GeneticTanks.Extensions;
-using GeneticTanks.Game;
-using GeneticTanks.Game.Components;
 using log4net;
 using Microsoft.Xna.Framework;
 using SFML.Graphics;
@@ -19,8 +16,10 @@ namespace GeneticTanks.Game.Components
     private static readonly ILog Log = LogManager.GetLogger(
       MethodBase.GetCurrentMethod().DeclaringType);
 
+    // outline thickness on tank shapes
     private const float OutlineThickness = 0.25f;
 
+    #region Private Fields
     // hold a reference to this component because we'll use it often
     private TankStateComponent m_state;
 
@@ -37,13 +36,18 @@ namespace GeneticTanks.Game.Components
     // holds the offset of the body fill from the body itself
     private Transform m_bodyFillTransform = 
       SFML.Graphics.Transform.Identity;
-
+    // common rendering state for all of the body pieces
     private RenderStates m_renderStates = new RenderStates
     {
       BlendMode = BlendMode.Alpha,
       Transform = SFML.Graphics.Transform.Identity
     };
+    #endregion
 
+    /// <summary>
+    /// Create a tank component.
+    /// </summary>
+    /// <param name="parent"></param>
     public TankRenderComponent(Entity parent) 
       : base(parent)
     {
@@ -56,6 +60,8 @@ namespace GeneticTanks.Game.Components
     /// The fill color of the tank's body.
     /// </summary>
     public Color BodyColor { get; set; }
+
+    #region RenderComponent Implementation
 
     public override bool Initialize()
     {
@@ -162,6 +168,7 @@ namespace GeneticTanks.Game.Components
       target.Draw(m_turretShape, m_renderStates);
     }
 
+    #endregion
     #region IDisposable Implementation
 
     private bool m_disposed = false;
@@ -175,11 +182,26 @@ namespace GeneticTanks.Game.Components
 
       if (disposing)
       {
-        m_bodyShape.Dispose();
-        m_bodyFillShape.Dispose();
-        m_trackShape.Dispose();
-        m_barrelShape.Dispose();
-        m_turretShape.Dispose();
+        if (m_bodyShape != null)
+        {
+          m_bodyShape.Dispose();
+        }
+        if (m_bodyFillShape != null)
+        {
+          m_bodyFillShape.Dispose();
+        }
+        if (m_trackShape != null)
+        {
+          m_trackShape.Dispose();
+        }
+        if (m_barrelShape != null)
+        {
+          m_barrelShape.Dispose();
+        }
+        if (m_turretShape != null)
+        {
+          m_turretShape.Dispose();
+        }
       }
 
       m_disposed = true;

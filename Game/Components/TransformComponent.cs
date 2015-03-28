@@ -11,7 +11,10 @@ namespace GeneticTanks.Game.Components
   sealed class TransformComponent
     : Component
   {
+    #region Private Field
+    // the rotation state
     private float m_rotation;
+    #endregion
 
     /// <summary>
     /// Create the transform component.
@@ -36,7 +39,7 @@ namespace GeneticTanks.Game.Components
     /// </summary>
     public float Rotation
     {
-      get {return m_rotation; }
+      get { return m_rotation; }
       set
       {
         m_rotation = value;
@@ -79,7 +82,9 @@ namespace GeneticTanks.Game.Components
     /// Move the transform by the amount in the offset vector.
     /// </summary>
     /// <param name="offset"></param>
-    /// <exception cref="ArgumentNullException">offset is null</exception>
+    /// <exception cref="ArgumentNullException">
+    /// offset is null
+    /// </exception>
     public void Move(Vector2 offset)
     {
       if (offset == null)

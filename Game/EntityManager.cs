@@ -15,14 +15,18 @@ namespace GeneticTanks.Game
   {
     private static readonly ILog Log = LogManager.GetLogger(
       MethodBase.GetCurrentMethod().DeclaringType);
+
+    // tracks the last used id
     private static uint _lastEntityId = Entity.InvalidId;
 
     /// <summary>
     /// The next useable entity id.  All entity creation should use this to 
     /// obtain a unique id.
     /// </summary>
-    /// <remarks>This totally ignores integer overflow.  I really doubt it will
-    /// be a problem.</remarks>
+    /// <remarks>
+    /// This totally ignores integer overflow.  I really doubt it will be a 
+    /// problem.
+    /// </remarks>
     public static uint NextId
     {
       get
@@ -48,7 +52,9 @@ namespace GeneticTanks.Game
     /// Create the entity manager.
     /// </summary>
     /// <param name="em"></param>
-    /// <exception cref="ArgumentNullException">em is null.</exception>
+    /// <exception cref="ArgumentNullException">
+    /// em is null.
+    /// </exception>
     public EntityManager(EventManager em)
     {
       if (em == null)
@@ -58,7 +64,7 @@ namespace GeneticTanks.Game
 
       m_eventManager = em;
       m_eventManager.AddListener<RequestEntityRemovalEvent>(
-        HandleRemovalRequest);
+        HandleRequestEntityRemoval);
     }
 
     /// <summary>
@@ -84,15 +90,19 @@ namespace GeneticTanks.Game
     /// <summary>
     /// Adds an entity to the manager.
     /// </summary>
-    /// <param name="e"></param>
-    /// <exception cref="ArgumentNullException">e is null.</exception>
+    /// <param name="e">
+    /// A valid, initialized, entity.
+    /// </param>
     public void AddEntity(Entity e)
     {
       if (e == null)
       {
         throw new ArgumentNullException("e");
       }
-      Debug.Assert(!m_entities.ContainsKey(e.Id));
+      if (m_entities.ContainsKey(e.Id))
+      {
+        throw new ArgumentException("Duplicate entity id " + e.Id, "e");
+      }
 
       m_entities[e.Id] = e;
       if (e.NeedsUpdate)
@@ -110,19 +120,24 @@ namespace GeneticTanks.Game
     public void RemoveEntity(uint id)
     {
       var e = GetEntity(id);
-      if (e != null)
+      if (e == null)
       {
-        m_pendingRemovalQueue.Enqueue(e);
-        m_eventManager.QueueEvent(new EntityRemovedEvent(e));
-        Log.DebugFormat("Entity {0} queued for removal", e.Id);
+        Log.WarnFormat("Tried to remove non existing entity {0}", id);
+        return;
       }
+
+      m_pendingRemovalQueue.Enqueue(e);
+      m_eventManager.QueueEvent(new EntityRemovedEvent(e));
+      Log.DebugFormat("Entity {0} queued for removal", e.Id);
     }
 
     /// <summary>
     /// Retrieve an entity.
     /// </summary>
     /// <param name="id"></param>
-    /// <returns>The entity, or null if it doesn't exist.</returns>
+    /// <returns>
+    /// The entity, or null if it doesn't exist.
+    /// </returns>
     public Entity GetEntity(uint id)
     {
       Entity e;
@@ -133,39 +148,53 @@ namespace GeneticTanks.Game
     #region Private Methods
 
     /// <summary>
-    /// Handles the event request to remove an entity.
-    /// </summary>
-    /// <param name="evt"></param>
-    private void HandleRemovalRequest(Event evt)
-    {
-      Debug.Assert(evt != null);
-      var e = evt as RequestEntityRemovalEvent;
-      Debug.Assert(e != null);
-
-      var entity = GetEntity(e.Id);
-      if (entity != null)
-      {
-        m_pendingRemovalQueue.Enqueue(entity);
-        Log.DebugFormat("Entity {0} queued for removal", e.Id);
-        // event must be manually triggered so the entity can be removed
-        // in the next frame
-        m_eventManager.TriggerEvent(new EntityRemovedEvent(entity));
-      }
-    }
-
-    /// <summary>
     /// Finalizes the removal of an entity and disposes of it.
     /// </summary>
     /// <param name="e"></param>
     private void RemoveEntity(Entity e)
     {
-      Debug.Assert(e != null);
+      if (e == null)
+      {
+        return;
+      }
 
       var id = e.Id;
       m_updateEntities.Remove(e);
       m_entities.Remove(e.Id);
       e.Dispose();
       Log.DebugFormat("Removed entity {0}", id);
+    }
+
+    #endregion
+
+    #region Callbacks
+
+    // Removes an entity by event request
+    private void HandleRequestEntityRemoval(Event e)
+    {
+      if (e == null)
+      {
+        throw new ArgumentNullException("e");
+      }
+      var evt = e as RequestEntityRemovalEvent;
+      if (evt == null)
+      {
+        throw new ArgumentException("Event is not RequestEntityRemovalEvent", 
+          "e");
+      }
+
+      var entity = GetEntity(evt.Id);
+      if (entity == null)
+      {
+        Log.WarnFormat("Request to remove non existing entity {0}", evt.Id);
+        return;
+      }
+
+      m_pendingRemovalQueue.Enqueue(entity);
+      Log.DebugFormat("Entity {0} queued for removal", evt.Id);
+      // event must be manually triggered so the entity can be removed
+      // in the next frame
+      m_eventManager.TriggerEvent(new EntityRemovedEvent(entity));
     }
 
     #endregion
@@ -201,16 +230,16 @@ namespace GeneticTanks.Game
       m_entities.Clear();
       m_updateEntities.Clear();
       m_eventManager.RemoveListener<RequestEntityRemovalEvent>(
-        HandleRemovalRequest);
+        HandleRequestEntityRemoval);
 
       m_disposed = true;
     }
+
+    #endregion
 
     ~EntityManager()
     {
       Dispose(false);
     }
-
-    #endregion
   }
 }

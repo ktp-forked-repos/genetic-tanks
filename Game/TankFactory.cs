@@ -2,7 +2,6 @@
 using System.Reflection;
 using GeneticTanks.Game.Components;
 using log4net;
-using log4net.Repository.Hierarchy;
 using Microsoft.Xna.Framework;
 
 namespace GeneticTanks.Game

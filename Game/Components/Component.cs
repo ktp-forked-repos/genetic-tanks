@@ -3,13 +3,16 @@
 namespace GeneticTanks.Game.Components
 {
   /// <summary>
-  /// The base class for all entity components.
+  /// The base class for all entity components.   
   /// </summary>
+  /// <remarks>
+  /// All component subclasses must implement IDisposable so that it is safe to 
+  /// dispose the component even if it wasn't initialized, or initialization 
+  /// failed.
+  /// </remarks>
   abstract class Component 
     : IDisposable
   {
-    private bool m_disposed = false;
-
     /// <summary>
     /// Creates a new component.
     /// </summary>
@@ -23,6 +26,8 @@ namespace GeneticTanks.Game.Components
       }
 
       Parent = parent;
+      Initialized = false;
+      NeedsUpdate = false;
     }
 
     /// <summary>
@@ -46,7 +51,9 @@ namespace GeneticTanks.Game.Components
     /// Initialize the component to a useable state.  Is called after all 
     /// components have been added to an entity.
     /// </summary>
-    /// <returns>The success or failure of initialization.</returns>
+    /// <returns>
+    /// The success or failure of initialization.
+    /// </returns>
     public abstract bool Initialize();
 
     /// <summary>
@@ -58,6 +65,8 @@ namespace GeneticTanks.Game.Components
     public abstract void Update(float deltaTime);
 
     #region IDisposable Implementation
+
+    private bool m_disposed = false;
 
     /// <summary>
     /// Clean up the component's resources
@@ -85,12 +94,12 @@ namespace GeneticTanks.Game.Components
       Parent = null;
       m_disposed = true;
     }
+    
+    #endregion
 
     ~Component()
     {
       Dispose(false);
     }
-
-    #endregion
   }
 }

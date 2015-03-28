@@ -28,7 +28,7 @@ namespace GeneticTanks.Game.Components
     /// The depth that this component renders at, with smaller numbers being 
     /// closer to the camera and larger numbers farther away.
     /// </summary>
-    public int ZDepth { get; set; }
+    public int ZDepth { get; protected set; }
 
     /// <summary>
     /// Rendering always requires the entity's transform, so hold onto it here.
@@ -38,9 +38,18 @@ namespace GeneticTanks.Game.Components
     protected TransformComponent Transform { get; private set; }
 
     /// <summary>
+    /// Draw the component onto the provided target.
+    /// </summary>
+    /// <param name="target"></param>
+    public abstract void Draw(RenderTarget target);
+
+    #region Component Implementation
+    /// <summary>
     /// Initializes the component, must always be called by subclasses.
     /// </summary>
-    /// <returns>Success or failure of initialization.</returns>
+    /// <returns>
+    /// Success or failure of initialization.
+    /// </returns>
     public override bool Initialize()
     {
       var transform = Parent.GetComponent<TransformComponent>();
@@ -53,11 +62,8 @@ namespace GeneticTanks.Game.Components
       return true;
     }
 
-    /// <summary>
-    /// Draw the component onto the provided target.
-    /// </summary>
-    /// <param name="target"></param>
-    public abstract void Draw(RenderTarget target);
+    #endregion
+    #region IComparable Implementation
 
     /// <summary>
     /// Compares render components based on their Z depth, with far objects 
@@ -67,6 +73,11 @@ namespace GeneticTanks.Game.Components
     /// <returns></returns>
     public int CompareTo(RenderComponent other)
     {
+      if (other == null)
+      {
+        throw new ArgumentNullException("other");
+      }
+
       if (ZDepth > other.ZDepth)
       {
         return -1;
@@ -80,5 +91,7 @@ namespace GeneticTanks.Game.Components
         return 1;
       }
     }
+
+    #endregion
   }
 }
