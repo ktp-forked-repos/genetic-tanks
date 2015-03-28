@@ -23,7 +23,6 @@ namespace GeneticTanks.Game
     public const uint InvalidId = 0;
 
     #region Private Fields
-    // the components that make up the entity
     private readonly Dictionary<Type, Component> m_components =
       new Dictionary<Type, Component>();
     // Only the components that require update calls

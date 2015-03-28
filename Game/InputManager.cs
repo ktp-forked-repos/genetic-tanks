@@ -16,13 +16,9 @@ namespace GeneticTanks.Game
       MethodBase.GetCurrentMethod().DeclaringType);
 
     #region Private Fields
-    // the window that is the event source
     private readonly Window m_window;
-    // event manager dependency
     private readonly EventManager m_eventManager;
-    // window drag state
     private bool m_dragging = false;
-    // mouse position, so we can calculate deltas while dragging
     private Vector2i m_mousePos;
     #endregion
 

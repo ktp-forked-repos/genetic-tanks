@@ -26,9 +26,7 @@ namespace GeneticTanks.Game
     public delegate void EventListener(Event evt);
 
     #region Private Fields
-    // times event processing
     private readonly Stopwatch m_eventTimer = new Stopwatch();
-    // maps event types to listeners
     private readonly Dictionary<Type, EventListener> m_eventListeners = 
       new Dictionary<Type, EventListener>();
     // each list acts as a queue for unprocessed events
@@ -36,9 +34,7 @@ namespace GeneticTanks.Game
       new List<Event>(25),
       new List<Event>(25)
     };
-    // read queue index
     private int m_readIndex = 0;
-    // write queue index
     private int m_writeIndex = 1;
     #endregion
 

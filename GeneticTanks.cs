@@ -42,6 +42,7 @@ namespace GeneticTanks
       new GeneticTanks().Run();
     }
 
+    #region Private Fields
     private MainWindow m_window;
     private RenderWindow m_renderWindow;
 
@@ -52,12 +53,15 @@ namespace GeneticTanks
     private ViewManager m_viewManager;
     
     private TankFactory m_tankFactory;
-    
+    #endregion
+
     public void Run()
     {
       Initialize();
       MainLoop();
     }
+
+    #region Private Methods
 
     private void Initialize()
     {
@@ -109,5 +113,7 @@ namespace GeneticTanks
         }
       }
     }
+
+    #endregion
   }
 }

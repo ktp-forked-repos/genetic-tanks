@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
 using GeneticTanks.Game.Events;
 using log4net;
@@ -37,14 +36,10 @@ namespace GeneticTanks.Game
     }
 
     #region Private Fields
-    // the game event manager
     private readonly EventManager m_eventManager;
-    // the main entity map
     private readonly Dictionary<uint, Entity> m_entities = 
       new Dictionary<uint, Entity>();
-    // entities that require per frame updates
     private readonly List<Entity> m_updateEntities = new List<Entity>(50);
-    // entities that will be removed in the next frame
     private readonly Queue<Entity> m_pendingRemovalQueue = new Queue<Entity>();
     #endregion
 

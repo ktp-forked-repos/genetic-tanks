@@ -27,13 +27,9 @@ namespace GeneticTanks.Game
     private const float UpdateInterval = 1f / TargetFrameRate;
 
     #region Private Fields
-    // event manager dependency
     private readonly EventManager m_eventManager;
-    // signals that something in the render state has changed and needs updating
     private bool m_dirtyState = false;
-    // accumulates time since the last render
     private float m_timeSinceLastRender = 0;
-    // holds all components that require rendering
     private readonly List<RenderComponent> m_renderComponents = 
       new List<RenderComponent>();
     #endregion
