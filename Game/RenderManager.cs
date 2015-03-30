@@ -104,34 +104,32 @@ namespace GeneticTanks.Game
     #region Callbacks
     
     // Grabs the render components from a new entity.
-    private void HandleEntityAdded(Event evt)
+    private void HandleEntityAdded(Event e)
     {
-      var e = evt as EntityAddedEvent;
-      Debug.Assert(e != null);
+      var evt = (EntityAddedEvent) e;
 
-      var components = e.Entity.GetComponentsByBase<RenderComponent>();
+      var components = evt.Entity.GetComponentsByBase<RenderComponent>();
       if (components.Count > 0)
       {
         m_dirtyState = true;
         m_renderComponents.AddRange(components);
         Log.DebugFormat("Added {0} components from entity {1}",
-          components.Count, e.Entity.Id);
+          components.Count, evt.Entity.Id);
       }
     }
 
     // Removes an entity from the render list.
-    private void HandleEntityRemoved(Event evt)
+    private void HandleEntityRemoved(Event e)
     {
-      var e = evt as EntityRemovedEvent;
-      Debug.Assert(e != null);
+      var evt = (EntityRemovedEvent) e;
 
       var count = m_renderComponents.RemoveAll(
-        component => component.Parent.Id == e.Entity.Id);
+        component => component.Parent.Id == evt.Entity.Id);
       if (count > 0)
       {
         m_dirtyState = true;
         Log.DebugFormat("Removed {0} components from entity {1}",
-          count, e.Entity.Id);
+          count, evt.Entity.Id);
       }
     }
     

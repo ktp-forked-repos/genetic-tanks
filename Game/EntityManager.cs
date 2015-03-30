@@ -167,16 +167,7 @@ namespace GeneticTanks.Game
     // Removes an entity by event request
     private void HandleRequestEntityRemoval(Event e)
     {
-      if (e == null)
-      {
-        throw new ArgumentNullException("e");
-      }
-      var evt = e as RequestEntityRemovalEvent;
-      if (evt == null)
-      {
-        throw new ArgumentException("Event is not RequestEntityRemovalEvent", 
-          "e");
-      }
+      var evt = (RequestEntityRemovalEvent) e;
 
       var entity = GetEntity(evt.Id);
       if (entity == null)

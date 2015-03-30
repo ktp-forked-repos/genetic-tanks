@@ -84,15 +84,7 @@ namespace GeneticTanks.Game
 
     private void HandleWindowResize(Event e)
     {
-      if (e == null)
-      {
-        throw new ArgumentNullException("e");
-      }
-      var evt = e as WindowResizeEvent;
-      if (evt == null)
-      {
-        throw new ArgumentException("e is not WindowResizeEvent", "e");
-      }
+      var evt = (WindowResizeEvent) e;
 
       m_windowSize = evt.Size;
       UpdateViewSize();
@@ -100,15 +92,7 @@ namespace GeneticTanks.Game
 
     private void HandleMapDrag(Event e)
     {
-      if (e == null)
-      {
-        throw new ArgumentNullException("e");
-      }
-      var evt = e as MapDragEvent;
-      if (evt == null)
-      {
-        throw new ArgumentException("e is not MapDragEvent", "e");
-      }
+      var evt = (MapDragEvent) e;
 
       var delta = evt.Delta;
       var size = View.Size;
@@ -117,15 +101,7 @@ namespace GeneticTanks.Game
 
     private void HandleMapZoom(Event e)
     {
-      if (e == null)
-      {
-        throw new ArgumentNullException("e");
-      }
-      var evt = e as MapZoomEvent;
-      if (evt == null)
-      {
-        throw new ArgumentException("e is not MapZoomEvent", "e");
-      }
+      var evt = (MapZoomEvent) e;
 
       m_viewWidth += -evt.Amount * (m_viewWidth / ZoomPercentIncrement);
       m_viewWidth = Math.Max(m_viewWidth, MinViewWidth);
