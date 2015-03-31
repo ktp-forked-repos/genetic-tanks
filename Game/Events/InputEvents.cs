@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Reflection.Emit;
+using GeneticTanks.Game.Components;
+using Microsoft.Xna.Framework;
 using SFML.Window;
 
 // All events triggered by user input go here.
@@ -46,6 +48,23 @@ namespace GeneticTanks.Game.Events
     /// zoom out.
     /// </summary>
     public int Amount { get; private set; }
+  }
+
+  /// <summary>
+  /// Signals user input to move an object.
+  /// </summary>
+  sealed class UserMoveEvent
+    : InputEvent
+  {
+    public UserMoveEvent(MoveState state,
+      MoveDirection dir = MoveDirection.None)
+    {
+      State = state;
+      Direction = dir;
+    }
+
+    public MoveState State { get; private set; }
+    public MoveDirection Direction { get; private set; }
   }
 
   /// <summary>

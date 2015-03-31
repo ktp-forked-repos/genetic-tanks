@@ -52,13 +52,13 @@ namespace GeneticTanks.Game.Components
     /// </returns>
     public override bool Initialize()
     {
-      var transform = Parent.GetComponent<TransformComponent>();
-      if (transform == null)
+      TransformComponent tc;
+      if (!RetrieveSibling(out tc))
       {
-        Log.Error("Initializing, could not find TransformComponent in parent");
         return false;
       }
-      Transform = transform;
+      
+      Transform = tc;
       return true;
     }
 

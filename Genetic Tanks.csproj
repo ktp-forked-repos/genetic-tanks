@@ -66,6 +66,8 @@
     <Compile Include="Extensions\Vector.cs" />
     <Compile Include="Game\Components\Component.cs" />
     <Compile Include="Game\Components\RenderComponent.cs" />
+    <Compile Include="Game\Components\TankKeyboardControlComponent.cs" />
+    <Compile Include="Game\Components\TankPhysicsComponent.cs" />
     <Compile Include="Game\Components\TankRenderComponent.cs" />
     <Compile Include="Game\Components\TankStateComponent.cs" />
     <Compile Include="Game\Components\TransformComponent.cs" />
@@ -74,8 +76,10 @@
     <Compile Include="Game\EventManager.cs" />
     <Compile Include="Game\Events\EntityEvents.cs" />
     <Compile Include="Game\Events\Event.cs" />
-    <Compile Include="Game\Events\InputEvent.cs" />
+    <Compile Include="Game\Events\InputEvents.cs" />
+    <Compile Include="Game\Events\PhysicsEvents.cs" />
     <Compile Include="Game\InputManager.cs" />
+    <Compile Include="Game\PhysicsManager.cs" />
     <Compile Include="Game\RenderManager.cs" />
     <Compile Include="Game\TankFactory.cs" />
     <Compile Include="Game\ViewManager.cs" />

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using GeneticTanks.Game.Components;
 using GeneticTanks.Game.Events;
 using log4net;
 using Microsoft.Xna.Framework;
@@ -47,6 +48,8 @@ namespace GeneticTanks.Game
       m_window.MouseButtonPressed += HandleMouseButtonPressed;
       m_window.MouseButtonReleased += HandleMouseButtonReleased;
       m_window.MouseMoved += HandleMouseMoved;
+      m_window.KeyPressed += HandleKeyPressed;
+      m_window.KeyReleased += HandleKeyReleased;
     }
     
     /// <summary>
@@ -119,6 +122,58 @@ namespace GeneticTanks.Game
         );
 
       m_eventManager.QueueEvent(new MapDragEvent(deltaPercent));
+    }
+
+    private void HandleKeyPressed(object sender, KeyEventArgs keyEventArgs)
+    {
+      switch (keyEventArgs.Code)
+      {
+        case Keyboard.Key.Left:
+          m_eventManager.QueueEvent(
+            new UserMoveEvent(MoveState.Begin, MoveDirection.Left));
+          break;
+
+        case Keyboard.Key.Right:
+          m_eventManager.QueueEvent(
+            new UserMoveEvent(MoveState.Begin, MoveDirection.Right));
+          break;
+
+        case Keyboard.Key.Up:
+          m_eventManager.QueueEvent(
+            new UserMoveEvent(MoveState.Begin, MoveDirection.Forward));
+          break;
+
+        case Keyboard.Key.Down:
+          m_eventManager.QueueEvent(
+            new UserMoveEvent(MoveState.Begin, MoveDirection.Back));
+          break;
+      }
+    }
+
+    private void HandleKeyReleased(object sender, KeyEventArgs keyEventArgs)
+    {
+      switch (keyEventArgs.Code)
+      {
+        case Keyboard.Key.Left:
+          m_eventManager.QueueEvent(
+            new UserMoveEvent(MoveState.End, MoveDirection.Left));
+          break;
+
+        case Keyboard.Key.Right:
+          m_eventManager.QueueEvent(
+            new UserMoveEvent(MoveState.End, MoveDirection.Right));
+          break;
+
+        case Keyboard.Key.Up:
+          m_eventManager.QueueEvent(
+            new UserMoveEvent(MoveState.End, MoveDirection.Forward));
+          break;
+
+        case Keyboard.Key.Down:
+          m_eventManager.QueueEvent(
+            new UserMoveEvent(MoveState.End, MoveDirection.Back));
+          break;
+      }
     }
 
     #endregion

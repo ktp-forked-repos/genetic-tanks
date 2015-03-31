@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Reflection;
+using log4net;
 
 namespace GeneticTanks.Game.Components
 {
@@ -13,6 +15,9 @@ namespace GeneticTanks.Game.Components
   abstract class Component 
     : IDisposable
   {
+    private static readonly ILog Log = LogManager.GetLogger(
+      MethodBase.GetCurrentMethod().DeclaringType);
+
     /// <summary>
     /// Creates a new component.
     /// </summary>
@@ -63,6 +68,30 @@ namespace GeneticTanks.Game.Components
     /// The seconds elapsed since the last update.
     /// </param>
     public abstract void Update(float deltaTime);
+
+    /// <summary>
+    /// Searches the parent for a component of the requested type.  Logs an 
+    /// error message if the component was not found.
+    /// </summary>
+    /// <typeparam name="T">
+    /// The component type to retrieve. 
+    /// </typeparam>
+    /// <param name="component"> </param>
+    /// <returns>True if component was populated.</returns>
+    protected bool RetrieveSibling<T>(out T component)
+      where T : Component
+    {
+      component = Parent.GetComponent<T>();
+      if (component != null)
+      {
+        return true;
+      }
+
+      Log.ErrorFormat(
+        "{0} could not retrieve requested component {1} from entity {2}",
+        GetType().Name, typeof(T).Name, Parent.Id);
+      return false;
+    }
 
     #region IDisposable Implementation
 

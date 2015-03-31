@@ -7,6 +7,7 @@ using FarseerPhysics;
 using GeneticTanks.Game;
 using GeneticTanks.UI;
 using log4net;
+using Microsoft.Xna.Framework;
 using SFML.Graphics;
 using SFML.Window;
 
@@ -32,6 +33,7 @@ namespace GeneticTanks
         (sender, args) => Log.Error(args.ExceptionObject);
 
       // farseer configuration
+      Settings.AllowSleep = true;
       Settings.UseFPECollisionCategories = true;
       Settings.VelocityIterations = 10;
       Settings.PositionIterations = 8;
@@ -51,6 +53,7 @@ namespace GeneticTanks
     private RenderManager m_renderManager;
     private InputManager m_inputManager;
     private ViewManager m_viewManager;
+    private PhysicsManager m_physicsManager;
     
     private TankFactory m_tankFactory;
     #endregion
@@ -79,15 +82,23 @@ namespace GeneticTanks
       m_renderManager = new RenderManager(m_eventManager);
       m_inputManager = new InputManager(m_renderWindow, m_eventManager);
       m_viewManager = new ViewManager(m_eventManager, m_renderWindow);
+      m_physicsManager = new PhysicsManager(m_eventManager);
 
-      m_tankFactory = new TankFactory(m_entityManager);
+      m_tankFactory = new TankFactory
+      {
+        EntityManager = m_entityManager,
+        EventManager = m_eventManager,
+        PhysicsManager = m_physicsManager
+      };
+      
+      m_physicsManager.CreateWorld();
+      m_tankFactory.CreateControlledTestTank(Vector2.Zero);
+      m_tankFactory.CreateTestTank(new Vector2(30, 0));
     }
 
     private void MainLoop()
     {
       Stopwatch frameTime = new Stopwatch();
-
-      m_tankFactory.NewTestTank();
       
       while (m_window.Visible)
       {
@@ -103,6 +114,7 @@ namespace GeneticTanks
         Application.DoEvents();
         m_inputManager.Update(lastFrameTime);
         m_entityManager.Update(lastFrameTime);
+        m_physicsManager.Update(lastFrameTime);
 
         var maxEventTime = MaxFrameTime - (float)frameTime.Elapsed.TotalSeconds;
         m_eventManager.Update(maxEventTime);

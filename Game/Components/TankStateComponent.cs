@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Security.Policy;
+using Microsoft.Xna.Framework;
 
 namespace GeneticTanks.Game.Components
 {
@@ -66,6 +67,16 @@ namespace GeneticTanks.Game.Components
     /// TODO: tie me to actual health values
     /// </summary>
     public float HealthPercent { get; set; }
+
+    /// <summary>
+    /// The maximum speed of the tank in m/s.
+    /// </summary>
+    public float MaxSpeed { get; set; }
+
+    /// <summary>
+    /// The maximum speed that the tank can rotate in degrees/s.
+    /// </summary>
+    public float MaxRotationRate { get; set; }
 
     #region Component Implementation
 

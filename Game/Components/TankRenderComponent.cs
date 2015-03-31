@@ -51,7 +51,7 @@ namespace GeneticTanks.Game.Components
     public TankRenderComponent(Entity parent) 
       : base(parent)
     {
-      NeedsUpdate = true; // TODO: Remove me
+      NeedsUpdate = false;
       ZDepth = 5;
       BodyColor = Color.Red;
     }
@@ -69,11 +69,8 @@ namespace GeneticTanks.Game.Components
       {
         return false;
       }
-
-      m_state = Parent.GetComponent<TankStateComponent>();
-      if (m_state == null)
+      if (!RetrieveSibling(out m_state))
       {
-        Log.Error("Initializing, could not find TankStateComponent in parent");
         return false;
       }
 
@@ -133,11 +130,6 @@ namespace GeneticTanks.Game.Components
 
     public override void Update(float deltaTime)
     {
-      // TODO: Remove me
-      var rotation = deltaTime * 20f;
-      Transform.Rotation += rotation;
-      m_state.TurretRotation += rotation / 2;
-      m_state.HealthPercent -= deltaTime / 20f;
     }
 
     public override void Draw(RenderTarget target)
