@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using GeneticTanks.Game.Components;
+using GeneticTanks.Game.Components.Tank;
 using GeneticTanks.Game.Events;
 using log4net;
 using Microsoft.Xna.Framework;

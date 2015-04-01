@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using FarseerPhysics.Dynamics;
@@ -10,7 +9,7 @@ using GeneticTanks.Game.Components.Messages;
 using log4net;
 using Microsoft.Xna.Framework;
 
-namespace GeneticTanks.Game.Components
+namespace GeneticTanks.Game.Components.Tank
 {
   /// <summary>
   /// Handles tank collision and movement physics, uses the physics object to

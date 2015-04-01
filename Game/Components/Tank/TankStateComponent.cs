@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace GeneticTanks.Game.Components
+namespace GeneticTanks.Game.Components.Tank
 {
   /// <summary>
   /// Is a data container for various information about the tank state.

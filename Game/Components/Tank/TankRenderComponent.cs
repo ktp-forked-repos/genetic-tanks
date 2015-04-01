@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 using SFML.Graphics;
 using SFML.Window;
 
-namespace GeneticTanks.Game.Components
+namespace GeneticTanks.Game.Components.Tank
 {
   /// <summary>
   /// Renders a tank at z depth 5.

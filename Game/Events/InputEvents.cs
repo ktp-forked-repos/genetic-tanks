@@ -1,5 +1,6 @@
 ﻿using System.Reflection.Emit;
 using GeneticTanks.Game.Components;
+using GeneticTanks.Game.Components.Tank;
 using Microsoft.Xna.Framework;
 using SFML.Window;
 

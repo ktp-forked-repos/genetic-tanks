@@ -71,10 +71,10 @@
     <Compile Include="Game\Components\Messages\SensorMessages.cs" />
     <Compile Include="Game\Components\PhysicsTransformComponent.cs" />
     <Compile Include="Game\Components\RenderComponent.cs" />
-    <Compile Include="Game\Components\TankKeyboardControlComponent.cs" />
-    <Compile Include="Game\Components\TankPhysicsTransformComponent.cs" />
-    <Compile Include="Game\Components\TankRenderComponent.cs" />
-    <Compile Include="Game\Components\TankStateComponent.cs" />
+    <Compile Include="Game\Components\Tank\TankKeyboardControlComponent.cs" />
+    <Compile Include="Game\Components\Tank\TankPhysicsTransformComponent.cs" />
+    <Compile Include="Game\Components\Tank\TankRenderComponent.cs" />
+    <Compile Include="Game\Components\Tank\TankStateComponent.cs" />
     <Compile Include="Game\Components\TransformComponent.cs" />
     <Compile Include="Game\Entity.cs" />
     <Compile Include="Game\EntityManager.cs" />

@@ -4,7 +4,7 @@ using GeneticTanks.Game.Components.Messages;
 using GeneticTanks.Game.Events;
 using log4net;
 
-namespace GeneticTanks.Game.Components
+namespace GeneticTanks.Game.Components.Tank
 {
   public enum MoveState
   {
