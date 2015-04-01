@@ -1,5 +1,4 @@
-﻿using System.Security.Policy;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 
 namespace GeneticTanks.Game.Components
 {
@@ -40,6 +39,11 @@ namespace GeneticTanks.Game.Components
     /// The length and width of the gun barrel, in meters.
     /// </summary>
     public Vector2 BarrelDimensions { get; set; }
+
+    /// <summary>
+    /// The radius of the tank's sensor, in meters.
+    /// </summary>
+    public float SensorRadius { get; set; }
 
     /// <summary>
     /// The rotation of the turret relative to the body.  0 degrees is facing 

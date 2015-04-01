@@ -30,7 +30,10 @@ namespace GeneticTanks.Game
         TrackWidth = 1,
         TurretWidth = 4,
         BarrelDimensions = new Vector2(4, 0.5f),
-        HealthPercent = 1
+        HealthPercent = 1,
+        MaxSpeed = 10,
+        MaxRotationRate = 90,
+        SensorRadius = 100
       };
       entity.AddComponent(state);
       entity.AddComponent(new TankRenderComponent(entity));
@@ -64,7 +67,10 @@ namespace GeneticTanks.Game
         TrackWidth = 1,
         TurretWidth = 4,
         BarrelDimensions = new Vector2(4, 0.5f),
-        HealthPercent = 1
+        HealthPercent = 1,
+        MaxSpeed = 10,
+        MaxRotationRate = 90,
+        SensorRadius = 100
       };
       entity.AddComponent(state);
       entity.AddComponent(new TankRenderComponent(entity));
