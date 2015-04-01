@@ -23,6 +23,7 @@ namespace GeneticTanks.Game
     public static readonly Category TerrainCategory = Category.Cat1;
     public static readonly Category TankCategory = Category.Cat2;
     public static readonly Category BulletCategory = Category.Cat3;
+    public static readonly Category SensorCategory = Category.Cat4;
     
     /// <summary>
     /// Handles the PostStep event.

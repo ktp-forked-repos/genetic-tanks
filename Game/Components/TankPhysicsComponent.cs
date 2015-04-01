@@ -92,15 +92,19 @@ namespace GeneticTanks.Game.Components
 
       m_body = BodyFactory.CreateBody(m_physicsManager.World,
         pos, rot, Parent.Id);
+      
       m_chassis = FixtureFactory.AttachRectangle(
         size.X, size.Y, 1, Vector2.Zero, m_body, Parent.Id);
+      m_chassis.CollisionCategories = PhysicsManager.TankCategory;
+      m_chassis.CollidesWith = Category.All;
+
       m_sensor = FixtureFactory.AttachCircle(
         m_state.SensorRadius, 0, m_body, Parent.Id);
-
+      m_sensor.CollisionCategories = PhysicsManager.SensorCategory;
+      m_sensor.CollidesWith = PhysicsManager.TankCategory;
       m_sensor.IsSensor = true;
+
       m_body.BodyType = BodyType.Dynamic;
-      m_body.CollisionCategories = PhysicsManager.TankCategory;
-      m_body.CollidesWith = Category.All;
 
       m_chassis.OnCollision += HandleChassisCollision;
       m_sensor.OnCollision += HandleSensorCollision;
@@ -133,7 +137,8 @@ namespace GeneticTanks.Game.Components
     {
       if ((fixtureB.CollisionCategories & PhysicsManager.TankCategory) > 0)
       {
-        m_sensorContacts.Add((int)fixtureB.UserData);
+        m_sensorContacts.Add(Convert.ToInt32(fixtureB.UserData));
+        Log.DebugFormat("{0} contacted {1}", fixtureA.UserData, fixtureB.UserData);
       }
 
       return true;
@@ -141,7 +146,7 @@ namespace GeneticTanks.Game.Components
 
     private void HandleSensorSeparation(Fixture fixtureA, Fixture fixtureB)
     {
-      m_sensorContacts.Remove((int)fixtureB.UserData);
+      m_sensorContacts.Remove(Convert.ToInt32(fixtureB.UserData));
     }
     
     // applies impulses to make the tank move and turn
