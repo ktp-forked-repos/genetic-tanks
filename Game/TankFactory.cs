@@ -17,12 +17,7 @@ namespace GeneticTanks.Game
 
     public Entity CreateControlledTestTank(Vector2 position)
     {
-      var id = EntityManager.NextId;
-      var name = string.Format("Tank {0}", id);
-      var entity = new Entity(id, name);
-
-      entity.AddComponent(
-        new TransformComponent(entity){ Position = position });
+      var entity = CreateTankBase(position);
 
       var state = new TankStateComponent(entity)
       {
@@ -36,30 +31,24 @@ namespace GeneticTanks.Game
         SensorRadius = 100
       };
       entity.AddComponent(state);
-      entity.AddComponent(new TankRenderComponent(entity));
-      entity.AddComponent(new TankPhysicsComponent(entity, PhysicsManager));
       entity.AddComponent(
         new TankKeyboardControlComponent(entity, EventManager));
 
       if (!entity.Initialize())
       {
-        Log.ErrorFormat("Could not initialize {0}, discarding", name);
+        Log.ErrorFormat("Could not initialize {0}, discarding", entity.Name);
         entity.Dispose();
         return null;
       }
 
+      entity.Transform.Position = position;
       EntityManager.AddEntity(entity);
       return entity;
     }
 
     public Entity CreateTestTank(Vector2 position)
     {
-      var id = EntityManager.NextId;
-      var name = string.Format("Tank {0}", id);
-      var entity = new Entity(id, name);
-
-      entity.AddComponent(
-        new TransformComponent(entity) { Position = position });
+      var entity = CreateTankBase(position);
 
       var state = new TankStateComponent(entity)
       {
@@ -73,18 +62,39 @@ namespace GeneticTanks.Game
         SensorRadius = 100
       };
       entity.AddComponent(state);
-      entity.AddComponent(new TankRenderComponent(entity));
-      entity.AddComponent(new TankPhysicsComponent(entity, PhysicsManager));
+      
 
       if (!entity.Initialize())
       {
-        Log.ErrorFormat("Could not initialize {0}, discarding", name);
+        Log.ErrorFormat("Could not initialize {0}, discarding", entity.Name);
         entity.Dispose();
         return null;
       }
 
+      entity.Transform.Position = position;
       EntityManager.AddEntity(entity);
       return entity;
     }
+
+    #region Private Methods
+
+    // Creates and returns a common tank object that includes 
+    // MessageComponent, TankRenderComponent, and TankPhysicsTransformComponent.  
+    // Entity is NOT initialized.
+    private Entity CreateTankBase(Vector2 position)
+    {
+      var id = EntityManager.NextId;
+      var name = string.Format("Tank {0}", id);
+      var entity = new Entity(id, name);
+
+      entity.AddComponent(new MessageComponent(entity));
+      entity.AddComponent(new TankRenderComponent(entity));
+      entity.AddComponent(
+        new TankPhysicsTransformComponent(entity, PhysicsManager));
+
+      return entity;
+    }
+
+    #endregion
   }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using GeneticTanks.Game.Components.Messages;
 using GeneticTanks.Game.Events;
 using log4net;
 
@@ -33,8 +34,7 @@ namespace GeneticTanks.Game.Components
 
     #region Private Fields
     private readonly EventManager m_eventManager;
-    private TankPhysicsComponent m_tankPhysics;
-    private TankStateComponent m_state;
+    private MessageComponent m_messenger;
     #endregion
 
     /// <summary>
@@ -58,11 +58,7 @@ namespace GeneticTanks.Game.Components
 
     public override bool Initialize()
     {
-      if (!RetrieveSibling(out m_tankPhysics))
-      {
-        return false;
-      }
-      if (!RetrieveSibling(out m_state))
+      if (!RetrieveSibling(out m_messenger))
       {
         return false;
       }
@@ -83,31 +79,38 @@ namespace GeneticTanks.Game.Components
     private void HandleUserMove(Event e)
     {
       var evt = (UserMoveEvent) e;
+      Move move = Move.AllStop;
 
-      var speed = m_state.MaxSpeed;
-      var rotation = m_state.MaxRotationRate;
-      
       switch (evt.Direction)
       {
         case MoveDirection.Forward:
-          m_tankPhysics.DesiredSpeed = 
-            evt.State == MoveState.Begin ? speed : 0;
+          move = evt.State == MoveState.Begin
+            ? Move.SpeedForwardFull
+            : Move.SpeedStop;
           break;
 
         case MoveDirection.Back:
-          m_tankPhysics.DesiredSpeed =
-            evt.State == MoveState.Begin ? -speed : 0;
+          move = evt.State == MoveState.Begin
+            ? Move.SpeedReverseFull
+            : Move.SpeedStop;
           break;
 
         case MoveDirection.Left:
-          m_tankPhysics.DesiredRotationRate =
-            evt.State == MoveState.Begin ? rotation : 0;
+          move = evt.State == MoveState.Begin
+            ? Move.TurnLeftFull
+            : Move.TurnStop;
           break;
 
         case MoveDirection.Right:
-          m_tankPhysics.DesiredRotationRate =
-            evt.State == MoveState.Begin ? -rotation : 0;
+          move = evt.State == MoveState.Begin
+            ? Move.TurnRightFull
+            : Move.TurnStop;
           break;
+      }
+
+      if (move != Move.AllStop)
+      {
+        m_messenger.QueueMessage(new MoveMessage(move));
       }
     }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Remoting.Messaging;
 using GeneticTanks.Game.Components;
 using log4net;
 
@@ -37,7 +38,7 @@ namespace GeneticTanks.Game
     /// <exception cref="ArgumentOutOfRangeException">
     /// id is invalid.
     /// </exception>
-    public Entity(uint id, string name = "")
+    public Entity(uint id, string name = "<unnamed>")
     {
       if (id == InvalidId)
       {
@@ -46,6 +47,7 @@ namespace GeneticTanks.Game
 
       Id = id;
       Name = name;
+      FullName = string.Format("Entity {0} ({1})", Id, Name);
       NeedsUpdate = false;
     }
 
@@ -61,11 +63,22 @@ namespace GeneticTanks.Game
     public string Name { get; private set; }
 
     /// <summary>
+    /// The full name of the entity combining its Id and Name.
+    /// </summary>
+    public string FullName { get; private set; }
+
+    /// <summary>
     /// Signifies that the entity has components that require logic updates.  
     /// Should only be considered valid after all components are added to the 
     /// entity.
     /// </summary>
     public bool NeedsUpdate { get; private set; }
+
+    /// <summary>
+    /// The object's transform, for easy access since most (all?) entities will 
+    /// have a transform.
+    /// </summary>
+    public TransformComponent Transform { get; private set; }
 
     /// <summary>
     /// Initializes all the components in the entity.
@@ -76,21 +89,35 @@ namespace GeneticTanks.Game
     /// </returns>
     public bool Initialize()
     {
-      var result = true;
+      var transforms = GetComponentsByBase<TransformComponent>();
+      switch (transforms.Count)
+      {
+        case 1:
+          Transform = transforms.First();
+          break;
+
+        case 0:
+          Log.WarnFormat("{0} initialized with no TransformComponent...",
+            FullName);
+          break;
+
+        default:
+          Log.ErrorFormat("{0} initialized with multiple TransformComponents",
+            FullName);
+          return false;
+      }
+
       foreach (var component in m_components.Values)
       {
         if (!component.Initialize())
         {
-          Log.ErrorFormat("Failed to initialize {0} in entity {1} ({2})",
-            component.GetType().Name, Id, 
-            string.IsNullOrEmpty(Name) ? "<none" : Name
-            );
-          result = false;
-          break;
+          Log.ErrorFormat("Failed to initialize {0} in {1}",
+            component.GetType().Name, FullName);
+          return false;
         }
       }
 
-      return result;
+      return true;
     }
 
     /// <summary>
@@ -106,6 +133,8 @@ namespace GeneticTanks.Game
         component.Update(deltaTime);
       }
     }
+
+    #region Component Access Methods
 
     /// <summary>
     /// Checks if the entity contains a particular component.
@@ -207,6 +236,7 @@ namespace GeneticTanks.Game
       return m_components.Values.OfType<T>().ToList();
     }
 
+    #endregion
     #region IDisposable Implementation
 
     private bool m_disposed = false;

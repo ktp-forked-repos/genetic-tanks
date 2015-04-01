@@ -8,51 +8,28 @@ namespace GeneticTanks.Game.Components
   /// <summary>
   /// Holds the transform information for an entity.
   /// </summary>
-  sealed class TransformComponent
+  abstract class TransformComponent
     : Component
   {
-    #region Private Field
-    // the rotation state
-    private float m_rotation;
-    #endregion
-
     /// <summary>
     /// Create the transform component.
     /// </summary>
     /// <param name="parent"></param>
-    public TransformComponent(Entity parent) 
+    protected TransformComponent(Entity parent) 
       : base(parent)
     {
-      NeedsUpdate = false;
-      Position = Vector2.Zero;
-      Initialized = true;
     }
 
     /// <summary>
     /// The object's position.
     /// </summary>
-    public Vector2 Position { get; set; }
+    public abstract Vector2 Position { get; set; }
 
     /// <summary>
     /// The object's rotation in degrees.  The value is always between 0 and
     /// 360 degrees.
     /// </summary>
-    public float Rotation
-    {
-      get { return m_rotation; }
-      set
-      {
-        m_rotation = value;
-        if (m_rotation >= 360f)
-        {
-          m_rotation -= 360f;
-        }
-        else if (m_rotation < 0f)
-        {
-          m_rotation += 360f;
-        }
-      }
-    }
+    public abstract float Rotation { get; set; }
 
     /// <summary>
     /// Uses the component to build a SFML transform.
@@ -102,18 +79,5 @@ namespace GeneticTanks.Game.Components
     {
       Rotation += deg;
     }
-
-    #region Component Implementation
-
-    public override bool Initialize()
-    {
-      return true;
-    }
-
-    public override void Update(float deltaTime)
-    {
-    }
-
-    #endregion
   }
 }

@@ -29,14 +29,7 @@ namespace GeneticTanks.Game.Components
     /// closer to the camera and larger numbers farther away.
     /// </summary>
     public int ZDepth { get; protected set; }
-
-    /// <summary>
-    /// Rendering always requires the entity's transform, so hold onto it here.
-    /// Reference is not valid until after initialization, and is never valid 
-    /// if initialization fails.
-    /// </summary>
-    protected TransformComponent Transform { get; private set; }
-
+    
     /// <summary>
     /// Draw the component onto the provided target.
     /// </summary>
@@ -52,14 +45,7 @@ namespace GeneticTanks.Game.Components
     /// </returns>
     public override bool Initialize()
     {
-      TransformComponent tc;
-      if (!RetrieveSibling(out tc))
-      {
-        return false;
-      }
-      
-      Transform = tc;
-      return true;
+      return Parent.Transform != null;
     }
 
     #endregion

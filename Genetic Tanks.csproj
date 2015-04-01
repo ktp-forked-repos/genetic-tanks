@@ -65,9 +65,14 @@
   <ItemGroup>
     <Compile Include="Extensions\Vector.cs" />
     <Compile Include="Game\Components\Component.cs" />
+    <Compile Include="Game\Components\MessageComponent.cs" />
+    <Compile Include="Game\Components\Messages\Message.cs" />
+    <Compile Include="Game\Components\Messages\MoveMessage.cs" />
+    <Compile Include="Game\Components\Messages\SensorMessages.cs" />
+    <Compile Include="Game\Components\PhysicsTransformComponent.cs" />
     <Compile Include="Game\Components\RenderComponent.cs" />
     <Compile Include="Game\Components\TankKeyboardControlComponent.cs" />
-    <Compile Include="Game\Components\TankPhysicsComponent.cs" />
+    <Compile Include="Game\Components\TankPhysicsTransformComponent.cs" />
     <Compile Include="Game\Components\TankRenderComponent.cs" />
     <Compile Include="Game\Components\TankStateComponent.cs" />
     <Compile Include="Game\Components\TransformComponent.cs" />

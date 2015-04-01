@@ -139,9 +139,7 @@ namespace GeneticTanks.Game.Components
         return;
       }
 
-      var transform = SFML.Graphics.Transform.Identity;
-      transform.Translate(Transform.Position.ToVector2f().InvertY());
-      transform.Rotate(-Transform.Rotation);
+      var transform = Parent.Transform.GraphicsTransform;
       
       m_renderStates.Transform = transform;
       target.Draw(m_trackShape, m_renderStates);

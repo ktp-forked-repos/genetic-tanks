@@ -27,10 +27,10 @@ namespace GeneticTanks.Game
 
     #region Private Fields
     private readonly Stopwatch m_eventTimer = new Stopwatch();
-    private readonly Dictionary<Type, EventListener> m_eventListeners = 
+    private readonly Dictionary<Type, EventListener> m_listeners = 
       new Dictionary<Type, EventListener>();
     // each list acts as a queue for unprocessed events
-    private readonly List<Event>[] m_pendingEvents = {
+    private readonly List<Event>[] m_queue = {
       new List<Event>(25),
       new List<Event>(25)
     };
@@ -50,8 +50,10 @@ namespace GeneticTanks.Game
       // queues are swapped so that any new events added in response to an 
       // event firing are processed in the next frame
       SwapQueues();
-      ProcessReadQueue(maxEventTime);
+      DispatchEvents(maxEventTime);
     }
+
+    #region Listener Access Methods
 
     /// <summary>
     /// Adds a listener for event type T.
@@ -70,13 +72,13 @@ namespace GeneticTanks.Game
       }
 
       var type = typeof (T);
-      if (!m_eventListeners.ContainsKey(type))
+      if (!m_listeners.ContainsKey(type))
       {
-        m_eventListeners[type] = listener;
+        m_listeners[type] = listener;
       }
       else
       {
-        m_eventListeners[type] += listener;
+        m_listeners[type] += listener;
       }
       Log.DebugFormat("Added listener for {0}", type.Name);
     }
@@ -98,13 +100,16 @@ namespace GeneticTanks.Game
       }
 
       var type = typeof (T);
-      if (m_eventListeners.ContainsKey(type))
+      if (m_listeners.ContainsKey(type))
       {
-        m_eventListeners[type] -= listener;
+        m_listeners[type] -= listener;
         Log.DebugFormat("Removed listener for {0}", type.Name);
       }
     }
 
+    #endregion
+    #region Event Access Methods
+    
     /// <summary>
     /// Immediately triggers an event, ignoring the queue.
     /// </summary>
@@ -121,10 +126,9 @@ namespace GeneticTanks.Game
 
       var type = evt.GetType();
       EventListener listener;
-      if (m_eventListeners.TryGetValue(type, out listener) && 
-          listener != null)
+      if (m_listeners.TryGetValue(type, out listener) && listener != null)
       {
-        Log.DebugFormat("Firing {0}", type.Name);
+        Log.DebugFormat("Dispatching {0}", type.Name);
         listener(evt);
       }
       else
@@ -147,12 +151,12 @@ namespace GeneticTanks.Game
         throw new ArgumentNullException("evt");
       }
 
-      m_pendingEvents[m_writeIndex].Add(evt);
+      m_queue[m_writeIndex].Add(evt);
       Log.DebugFormat("Queued {0}", evt.GetType().Name);
     }
 
     /// <summary>
-    /// Aborts the oldest event of type T.  Events cannot be aborted after 
+    /// Removes the oldest event of type T.  Events cannot be aborted after 
     /// Update() has been called and event processing begun.
     /// </summary>
     /// <typeparam name="T"></typeparam>
@@ -163,14 +167,13 @@ namespace GeneticTanks.Game
       where T : Event
     {
       var type = typeof (T);
-      var toRemove = m_pendingEvents[m_writeIndex]
-        .First(evt => evt.GetType() == type);
+      var toRemove = m_queue[m_writeIndex].First(e => e.GetType() == type);
       if (toRemove == null)
       {
         return false;
       }
 
-      m_pendingEvents[m_writeIndex].Remove(toRemove);
+      m_queue[m_writeIndex].Remove(toRemove);
       Log.DebugFormat("Aborted event {0}", type.Name);
       return true;
     }
@@ -187,9 +190,11 @@ namespace GeneticTanks.Game
       where T : Event
     {
       var type = typeof (T);
-      var result = m_pendingEvents[m_writeIndex]
-        .RemoveAll(evt => evt.GetType() == type);
-      Log.DebugFormat("Aborted {0} events of type {1}", result, type.Name);
+      var result = m_queue[m_writeIndex].RemoveAll(e => e.GetType() == type);
+      if (result > 0)
+      {
+        Log.DebugFormat("Aborted {0} events of type {1}", result, type.Name);
+      }
       return result;
     }
 
@@ -202,14 +207,19 @@ namespace GeneticTanks.Game
     /// </returns>
     public int AbortAllEvents()
     {
-      var result = m_pendingEvents.Count();
-      m_pendingEvents[m_writeIndex].Clear();
-      Log.DebugFormat("Cleared {0} events from queue", result);
+      var result = m_queue[m_writeIndex].Count;
+      m_queue[m_writeIndex].Clear();
+      if (result > 0)
+      {
+        Log.DebugFormat("Cleared {0} events from queue", result);
+      }
       return result;
     }
 
+    #endregion
     #region Private Methods
 
+    // swap the read and write queues
     private void SwapQueues()
     {
       // both queue indices are toggled between 0 and 1
@@ -217,27 +227,32 @@ namespace GeneticTanks.Game
       m_writeIndex = (m_writeIndex + 1) & 1;
     }
 
-    private void ProcessReadQueue(float maxEventTime)
+    // Attempts to dispatch all messages from the read queue.  Any events that 
+    // can't be processed are moved to the head of the write queue.
+    private void DispatchEvents(float maxEventTime)
     {
-      if (m_pendingEvents[m_readIndex].Count == 0)
+      if (m_queue[m_readIndex].Count == 0)
       {
         return;
       }
 
       var count = 0;
       m_eventTimer.Restart();
-      while (m_pendingEvents[m_readIndex].Count > 0)
+      while (m_queue[m_readIndex].Count > 0)
       {
         if (m_eventTimer.Elapsed.TotalSeconds >= maxEventTime)
         {
           Log.DebugFormat(
             "Queue processing aborted with {0} events in the queue",
-            m_pendingEvents[m_readIndex].Count);
+            m_queue[m_readIndex].Count);
+          
+          m_queue[m_writeIndex].InsertRange(0, m_queue[m_readIndex]);
+          m_queue[m_readIndex].Clear();
           break;
         }
 
-        var evt = m_pendingEvents[m_readIndex].First();
-        m_pendingEvents[m_readIndex].RemoveAt(0);
+        var evt = m_queue[m_readIndex].First();
+        m_queue[m_readIndex].RemoveAt(0);
         TriggerEvent(evt);
         count++;
       }
