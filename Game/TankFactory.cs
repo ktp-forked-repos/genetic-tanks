@@ -92,6 +92,7 @@ namespace GeneticTanks.Game
       entity.AddComponent(new TankRenderComponent(entity));
       entity.AddComponent(
         new TankPhysicsTransformComponent(entity, PhysicsManager));
+      entity.AddComponent(new SensorComponent(entity, PhysicsManager));
 
       return entity;
     }

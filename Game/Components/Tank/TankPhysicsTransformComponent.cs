@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using FarseerPhysics.Dynamics;
 using FarseerPhysics.Dynamics.Contacts;
@@ -29,13 +27,8 @@ namespace GeneticTanks.Game.Components.Tank
     private TankStateComponent m_state;
     private MessageComponent m_messenger;
 
-    private Fixture m_chassis;
-    private Fixture m_sensor;
-
     private float m_desiredRotationRate = 0f;
     private float m_desiredSpeed = 0f;
-
-    private readonly HashSet<int> m_sensorContacts = new HashSet<int>(); 
     #endregion
 
     /// <summary>
@@ -100,14 +93,6 @@ namespace GeneticTanks.Game.Components.Tank
       }
     }
 
-    /// <summary>
-    /// The list of tank contacts that the sensor has detected.
-    /// </summary>
-    public List<int> SensorContacts
-    {
-      get { return m_sensorContacts.ToList(); }
-    }
-
     #region TransformComponent Implementation
     
     public override bool Initialize()
@@ -128,25 +113,14 @@ namespace GeneticTanks.Game.Components.Tank
       var size = m_state.Dimensions;
       size.Y += m_state.TrackWidth * 2;
 
-      Body = BodyFactory.CreateBody(m_physicsManager.World,
-        Position, Rotation, Parent.Id);
-      
-      m_chassis = FixtureFactory.AttachRectangle(
-        size.X, size.Y, 1, Vector2.Zero, Body, Parent.Id);
-      m_chassis.CollisionCategories = PhysicsManager.TankCategory;
-      m_chassis.CollidesWith = Category.All;
-
-      m_sensor = FixtureFactory.AttachCircle(
-        m_state.SensorRadius, 0, Body, Parent.Id);
-      m_sensor.CollisionCategories = PhysicsManager.SensorCategory;
-      m_sensor.CollidesWith = PhysicsManager.TankCategory;
-      m_sensor.IsSensor = true;
-
+      Body = BodyFactory.CreateBody(m_physicsManager.World, Parent.Id);
+      FixtureFactory.AttachRectangle(size.X, size.Y, 1, Vector2.Zero, Body, 
+        Parent.Id);
       Body.BodyType = BodyType.Dynamic;
-
-      m_chassis.OnCollision += HandleChassisCollision;
-      m_sensor.OnCollision += HandleSensorCollision;
-      m_sensor.OnSeparation += HandleSensorSeparation;
+      Body.CollisionCategories = PhysicsManager.TankCategory;
+      Body.CollidesWith = Category.All;
+      
+      Body.OnCollision += HandleChassisCollision;
       m_physicsManager.PreStep += HandlePreStep;
 
       m_messenger.AddListener<MoveMessage>(HandleMoveMessage);
@@ -169,31 +143,6 @@ namespace GeneticTanks.Game.Components.Tank
     {
       // TODO: implement me
       return true;
-    }
-
-    private bool HandleSensorCollision(Fixture fixtureA, Fixture fixtureB,
-      Contact contact)
-    {
-      if ((fixtureB.CollisionCategories & PhysicsManager.TankCategory) > 0)
-      {
-        var id = Convert.ToInt32(fixtureB.UserData);
-        if (!m_sensorContacts.Contains(id))
-        {
-          m_sensorContacts.Add(id);
-          m_messenger.QueueMessage(new SensorNewContactMessage(id));
-        }
-      }
-
-      return true;
-    }
-
-    private void HandleSensorSeparation(Fixture fixtureA, Fixture fixtureB)
-    {
-      var id = Convert.ToInt32(fixtureB.UserData);
-      if (m_sensorContacts.Remove(id))
-      {
-        m_messenger.QueueMessage(new SensorLostContactMessage(id));
-      }
     }
     
     // applies impulses to make the tank move and turn
@@ -291,12 +240,8 @@ namespace GeneticTanks.Game.Components.Tank
       }
 
       m_physicsManager.PreStep -= HandlePreStep;
-      m_sensor.OnCollision -= HandleSensorCollision;
-      m_sensor.OnSeparation -= HandleSensorSeparation;
-      m_chassis.OnCollision -= HandleChassisCollision;
+      Body.OnCollision -= HandleChassisCollision;
 
-      m_chassis = null;
-      m_sensor = null;
       m_physicsManager.World.RemoveBody(Body);
       Body = null;
 

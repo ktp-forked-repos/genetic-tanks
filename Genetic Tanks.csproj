@@ -71,6 +71,7 @@
     <Compile Include="Game\Components\Messages\SensorMessages.cs" />
     <Compile Include="Game\Components\PhysicsTransformComponent.cs" />
     <Compile Include="Game\Components\RenderComponent.cs" />
+    <Compile Include="Game\Components\SensorComponent.cs" />
     <Compile Include="Game\Components\Tank\TankKeyboardControlComponent.cs" />
     <Compile Include="Game\Components\Tank\TankPhysicsTransformComponent.cs" />
     <Compile Include="Game\Components\Tank\TankRenderComponent.cs" />
