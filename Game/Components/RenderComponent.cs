@@ -15,6 +15,8 @@ namespace GeneticTanks.Game.Components
     private static readonly ILog Log = LogManager.GetLogger(
       MethodBase.GetCurrentMethod().DeclaringType);
 
+    protected RenderStates RenderStates;
+
     /// <summary>
     /// Create the component.
     /// </summary>
@@ -22,13 +24,18 @@ namespace GeneticTanks.Game.Components
     protected RenderComponent(Entity parent) 
       : base(parent)
     {
+      RenderStates = new RenderStates
+      {
+        BlendMode = BlendMode.Alpha,
+        Transform = Transform.Identity
+      };
     }
 
     /// <summary>
     /// The depth that this component renders at, with smaller numbers being 
     /// closer to the camera and larger numbers farther away.
     /// </summary>
-    public int ZDepth { get; protected set; }
+    public int ZDepth { get; set; }
     
     /// <summary>
     /// Draw the component onto the provided target.

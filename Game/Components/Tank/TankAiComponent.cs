@@ -14,7 +14,7 @@ namespace GeneticTanks.Game.Components.Tank
     private static readonly ILog Log = LogManager.GetLogger(
       MethodBase.GetCurrentMethod().DeclaringType);
 
-    private const float UpdateInterval = 1f / 10f;
+    private const float UpdateInterval = 1f / 5f;
 
     private const float RaycastDistance = 25f;
 
@@ -207,15 +207,15 @@ namespace GeneticTanks.Game.Components.Tank
     private void UpdateRaycasts()
     {
       m_leftObstacle = 
-        m_physics.RaycastFromBody(m_rayOrigin, LeftRay, RayCategories);
+        m_physics.RaycastDistance(m_rayOrigin, LeftRay, RayCategories);
       m_leftHalfObstacle =
-        m_physics.RaycastFromBody(m_rayOrigin, LeftHalfRay, RayCategories);
-      m_forwardObstacle = 
-        m_physics.RaycastFromBody(m_rayOrigin, ForwardRay, RayCategories);
+        m_physics.RaycastDistance(m_rayOrigin, LeftHalfRay, RayCategories);
+      m_forwardObstacle =
+        m_physics.RaycastDistance(m_rayOrigin, ForwardRay, RayCategories);
       m_rightHalfObstacle =
-        m_physics.RaycastFromBody(m_rayOrigin, RightHalfRay, RayCategories);
-      m_rightObstacle = 
-        m_physics.RaycastFromBody(m_rayOrigin, RightRay, RayCategories);
+        m_physics.RaycastDistance(m_rayOrigin, RightHalfRay, RayCategories);
+      m_rightObstacle =
+        m_physics.RaycastDistance(m_rayOrigin, RightRay, RayCategories);
     }
 
     private void SetState(AiState state)

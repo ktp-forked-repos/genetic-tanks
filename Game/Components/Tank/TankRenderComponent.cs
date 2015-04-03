@@ -36,12 +36,6 @@ namespace GeneticTanks.Game.Components.Tank
     // holds the offset of the body fill from the body itself
     private Transform m_bodyFillTransform = 
       SFML.Graphics.Transform.Identity;
-    // common rendering state for all of the body pieces
-    private RenderStates m_renderStates = new RenderStates
-    {
-      BlendMode = BlendMode.Alpha,
-      Transform = SFML.Graphics.Transform.Identity
-    };
     #endregion
 
     /// <summary>
@@ -141,21 +135,21 @@ namespace GeneticTanks.Game.Components.Tank
 
       var transform = Parent.Transform.GraphicsTransform;
       
-      m_renderStates.Transform = transform;
-      target.Draw(m_trackShape, m_renderStates);
-      target.Draw(m_bodyShape, m_renderStates);
+      RenderStates.Transform = transform;
+      target.Draw(m_trackShape, RenderStates);
+      target.Draw(m_bodyShape, RenderStates);
 
       m_bodyFillShape.Size = new Vector2f(
         m_state.Dimensions.X * m_state.HealthPercent,
         m_state.Dimensions.Y
         );
-      m_renderStates.Transform = transform * m_bodyFillTransform;
-      target.Draw(m_bodyFillShape, m_renderStates);
+      RenderStates.Transform = transform * m_bodyFillTransform;
+      target.Draw(m_bodyFillShape, RenderStates);
 
-      m_renderStates.Transform = transform; 
+      RenderStates.Transform = transform; 
       m_barrelShape.Rotation = -m_state.TurretRotation;
-      target.Draw(m_barrelShape, m_renderStates);
-      target.Draw(m_turretShape, m_renderStates);
+      target.Draw(m_barrelShape, RenderStates);
+      target.Draw(m_turretShape, RenderStates);
     }
 
     #endregion

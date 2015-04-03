@@ -20,7 +20,6 @@ namespace GeneticTanks.Game.Components.Tank
       MethodBase.GetCurrentMethod().DeclaringType);
     
     #region Private Fields
-    private readonly PhysicsManager m_physicsManager;
     private TankStateComponent m_state;
     private MessageComponent m_messenger;
 
@@ -34,14 +33,8 @@ namespace GeneticTanks.Game.Components.Tank
     /// <param name="parent"></param>
     /// <param name="pm"></param>
     public TankPhysicsTransformComponent(Entity parent, PhysicsManager pm) 
-      : base(parent)
+      : base(parent, pm)
     {
-      if (pm == null)
-      {
-        throw new ArgumentNullException("pm");
-      }
-
-      m_physicsManager = pm;
       NeedsUpdate = false;
     }
 
@@ -94,10 +87,6 @@ namespace GeneticTanks.Game.Components.Tank
     
     public override bool Initialize()
     {
-      if (Parent.Transform == null)
-      {
-        return false;
-      }
       if (!RetrieveSibling(out m_state))
       {
         return false;
@@ -106,8 +95,6 @@ namespace GeneticTanks.Game.Components.Tank
       {
         return false;
       }
-
-      World = m_physicsManager.World;
 
       var size = m_state.Dimensions;
       size.Y += m_state.TrackWidth * 2;
@@ -120,16 +107,12 @@ namespace GeneticTanks.Game.Components.Tank
       Body.CollidesWith = Category.All;
       
       Body.OnCollision += HandleChassisCollision;
-      m_physicsManager.PreStep += HandlePreStep;
+      PhysicsManager.PreStep += HandlePreStep;
 
       m_messenger.AddListener<MoveMessage>(HandleMoveMessage);
 
       Initialized = true;
       return true;
-    }
-    
-    public override void Update(float deltaTime)
-    {
     }
 
     #endregion
@@ -238,11 +221,8 @@ namespace GeneticTanks.Game.Components.Tank
         return;
       }
 
-      m_physicsManager.PreStep -= HandlePreStep;
+      PhysicsManager.PreStep -= HandlePreStep;
       Body.OnCollision -= HandleChassisCollision;
-
-      m_physicsManager.World.RemoveBody(Body);
-      Body = null;
 
       base.Dispose(disposing);
       m_disposed = true;

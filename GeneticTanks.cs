@@ -4,7 +4,11 @@ using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using FarseerPhysics;
+using FarseerPhysics.Dynamics;
+using FarseerPhysics.Factories;
+using GeneticTanks.Extensions;
 using GeneticTanks.Game;
+using GeneticTanks.Game.Components;
 using GeneticTanks.UI;
 using log4net;
 using Microsoft.Xna.Framework;
@@ -19,6 +23,8 @@ namespace GeneticTanks
       MethodBase.GetCurrentMethod().DeclaringType);
 
     private const float MaxFrameTime = 1f / 30f;
+    private static readonly Vector2 ArenaSize = 
+      new Vector2(500, 500);
 
     /// <summary>
     /// The main entry point for the application.
@@ -92,10 +98,15 @@ namespace GeneticTanks
       };
       
       m_physicsManager.CreateWorld();
+      CreateArena();
 
-      m_tankFactory.CreateControlledTestTank(Vector2.Zero);
-      //m_tankFactory.CreateTestTank(Vector2.Zero);
-      m_tankFactory.CreateTestTank(new Vector2(50, 0));
+      //m_tankFactory.CreateControlledTestTank(Vector2.Zero, 0);
+      m_tankFactory.CreateTestTank(new Vector2(100, 100), 75);
+      m_tankFactory.CreateTestTank(new Vector2(100, 0), 180);
+      m_tankFactory.CreateTestTank(new Vector2(0, 1), 240);
+      m_tankFactory.CreateTestTank(new Vector2(-100, 0), 90);
+      m_tankFactory.CreateTestTank(new Vector2(-100, -100), 135);
+      m_tankFactory.CreateTestTank(new Vector2(-200, 0), -90);
     }
 
     private void MainLoop()
@@ -126,6 +137,52 @@ namespace GeneticTanks
           Thread.Sleep(1);
         }
       }
+    }
+
+    private void CreateArena()
+    {
+      var halfWidth = ArenaSize.X / 2f;
+      var halfHeight = ArenaSize.Y / 2f;
+      var upperLeft = new Vector2(-halfWidth, halfHeight);
+      var lowerLeft = new Vector2(-halfWidth, -halfHeight);
+      var lowerRight = new Vector2(halfWidth, -halfHeight);
+      var upperRight = new Vector2(halfWidth, halfHeight);
+
+      var entity = new Entity(EntityManager.NextId, "wall");
+      entity.AddComponent(new StaticPhysicsTransformComponent(
+        entity, m_physicsManager, world =>
+        {
+          var body = BodyFactory.CreateBody(world, Vector2.Zero, entity.Id);
+          FixtureFactory.AttachEdge(upperLeft, lowerLeft, body, entity.Id);
+          FixtureFactory.AttachEdge(lowerLeft, lowerRight, body, entity.Id);
+          FixtureFactory.AttachEdge(lowerRight, upperRight, body, entity.Id);
+          FixtureFactory.AttachEdge(upperRight, upperLeft, body, entity.Id);          
+
+          body.BodyType = BodyType.Static;
+          body.Rotation = 0;
+          body.CollisionCategories = PhysicsManager.TerrainCategory;
+          body.CollidesWith = Category.All;
+
+          return body;
+        }));
+      var src = new SimpleRenderComponent(entity, 
+        () => new RectangleShape(ArenaSize.ToVector2f())
+        {
+          Origin = new Vector2f(halfWidth, halfHeight)
+        });
+      entity.AddComponent(src);
+
+      if (!entity.Initialize())
+      {
+        Log.Error("Failed to init walls");
+        return;
+      }
+
+      src.ZDepth = 100;
+      src.FillColor = Color.Transparent;
+      src.OutlineColor = Color.Black;
+      src.OutlineThickness = 1f;
+      m_entityManager.AddEntity(entity);
     }
 
     #endregion

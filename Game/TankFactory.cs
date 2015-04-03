@@ -16,7 +16,7 @@ namespace GeneticTanks.Game
     public PhysicsManager PhysicsManager { get; set; }
     public EventManager EventManager { get; set; }
 
-    public Entity CreateControlledTestTank(Vector2 position)
+    public Entity CreateControlledTestTank(Vector2 position, float rotation)
     {
       var entity = CreateTankBase();
 
@@ -27,7 +27,7 @@ namespace GeneticTanks.Game
         TurretWidth = 4,
         BarrelDimensions = new Vector2(4, 0.5f),
         HealthPercent = 1,
-        MaxSpeed = 15,
+        MaxSpeed = 30,
         MaxRotationRate = 90,
         SensorRadius = 100
       };
@@ -43,11 +43,12 @@ namespace GeneticTanks.Game
       }
 
       entity.Transform.Position = position;
+      entity.Transform.Rotation = rotation;
       EntityManager.AddEntity(entity);
       return entity;
     }
 
-    public Entity CreateTestTank(Vector2 position)
+    public Entity CreateTestTank(Vector2 position, float rotation)
     {
       var entity = CreateTankBase();
 
@@ -58,7 +59,7 @@ namespace GeneticTanks.Game
         TurretWidth = 4,
         BarrelDimensions = new Vector2(4, 0.5f),
         HealthPercent = 1,
-        MaxSpeed = 5,
+        MaxSpeed = 30,
         MaxRotationRate = 90,
         SensorRadius = 100
       };
@@ -75,7 +76,7 @@ namespace GeneticTanks.Game
       }
 
       entity.Transform.Position = position;
-      entity.Transform.Rotation = 180;
+      entity.Transform.Rotation = rotation;
       EntityManager.AddEntity(entity);
       return entity;
     }
