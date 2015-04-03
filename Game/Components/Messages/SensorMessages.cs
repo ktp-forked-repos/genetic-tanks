@@ -8,7 +8,7 @@ namespace GeneticTanks.Game.Components.Messages
   abstract class SensorMessage
     : Message
   {
-    protected SensorMessage(int id)
+    protected SensorMessage(uint id)
     {
       if (id == Entity.InvalidId)
       {
@@ -21,7 +21,7 @@ namespace GeneticTanks.Game.Components.Messages
     /// <summary>
     /// The id of the target entity involved in the message.
     /// </summary>
-    public int ContactId { get; private set; }
+    public uint ContactId { get; private set; }
   }
 
   /// <summary>
@@ -30,7 +30,7 @@ namespace GeneticTanks.Game.Components.Messages
   sealed class SensorNewContactMessage
     : SensorMessage
   {
-    public SensorNewContactMessage(int id) 
+    public SensorNewContactMessage(uint id) 
       : base(id)
     {
     }
@@ -42,7 +42,7 @@ namespace GeneticTanks.Game.Components.Messages
   sealed class SensorLostContactMessage
     : SensorMessage
   {
-    public SensorLostContactMessage(int id)
+    public SensorLostContactMessage(uint id)
       : base(id)
     {
     }

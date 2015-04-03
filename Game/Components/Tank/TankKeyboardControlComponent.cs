@@ -79,38 +79,38 @@ namespace GeneticTanks.Game.Components.Tank
     private void HandleUserMove(Event e)
     {
       var evt = (UserMoveEvent) e;
-      Move move = Move.AllStop;
+      MoveCommand moveCommand = MoveCommand.AllStop;
 
       switch (evt.Direction)
       {
         case MoveDirection.Forward:
-          move = evt.State == MoveState.Begin
-            ? Move.SpeedForwardFull
-            : Move.SpeedStop;
+          moveCommand = evt.State == MoveState.Begin
+            ? MoveCommand.SpeedForwardFull
+            : MoveCommand.SpeedStop;
           break;
 
         case MoveDirection.Back:
-          move = evt.State == MoveState.Begin
-            ? Move.SpeedReverseFull
-            : Move.SpeedStop;
+          moveCommand = evt.State == MoveState.Begin
+            ? MoveCommand.SpeedReverseFull
+            : MoveCommand.SpeedStop;
           break;
 
         case MoveDirection.Left:
-          move = evt.State == MoveState.Begin
-            ? Move.TurnLeftFull
-            : Move.TurnStop;
+          moveCommand = evt.State == MoveState.Begin
+            ? MoveCommand.TurnLeftFull
+            : MoveCommand.TurnStop;
           break;
 
         case MoveDirection.Right:
-          move = evt.State == MoveState.Begin
-            ? Move.TurnRightFull
-            : Move.TurnStop;
+          moveCommand = evt.State == MoveState.Begin
+            ? MoveCommand.TurnRightFull
+            : MoveCommand.TurnStop;
           break;
       }
 
-      if (move != Move.AllStop)
+      if (moveCommand != MoveCommand.AllStop)
       {
-        m_messenger.QueueMessage(new MoveMessage(move));
+        m_messenger.QueueMessage(new MoveMessage(moveCommand));
       }
     }
 

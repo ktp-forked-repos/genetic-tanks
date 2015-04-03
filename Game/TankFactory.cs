@@ -18,7 +18,7 @@ namespace GeneticTanks.Game
 
     public Entity CreateControlledTestTank(Vector2 position)
     {
-      var entity = CreateTankBase(position);
+      var entity = CreateTankBase();
 
       var state = new TankStateComponent(entity)
       {
@@ -27,7 +27,7 @@ namespace GeneticTanks.Game
         TurretWidth = 4,
         BarrelDimensions = new Vector2(4, 0.5f),
         HealthPercent = 1,
-        MaxSpeed = 10,
+        MaxSpeed = 15,
         MaxRotationRate = 90,
         SensorRadius = 100
       };
@@ -49,7 +49,7 @@ namespace GeneticTanks.Game
 
     public Entity CreateTestTank(Vector2 position)
     {
-      var entity = CreateTankBase(position);
+      var entity = CreateTankBase();
 
       var state = new TankStateComponent(entity)
       {
@@ -58,11 +58,13 @@ namespace GeneticTanks.Game
         TurretWidth = 4,
         BarrelDimensions = new Vector2(4, 0.5f),
         HealthPercent = 1,
-        MaxSpeed = 10,
+        MaxSpeed = 5,
         MaxRotationRate = 90,
         SensorRadius = 100
       };
       entity.AddComponent(state);
+      entity.AddComponent(new TankAiComponent(entity, EntityManager, 
+        EventManager));
       
 
       if (!entity.Initialize())
@@ -73,6 +75,7 @@ namespace GeneticTanks.Game
       }
 
       entity.Transform.Position = position;
+      entity.Transform.Rotation = 180;
       EntityManager.AddEntity(entity);
       return entity;
     }
@@ -82,7 +85,7 @@ namespace GeneticTanks.Game
     // Creates and returns a common tank object that includes 
     // MessageComponent, TankRenderComponent, and TankPhysicsTransformComponent.  
     // Entity is NOT initialized.
-    private Entity CreateTankBase(Vector2 position)
+    private Entity CreateTankBase()
     {
       var id = EntityManager.NextId;
       var name = string.Format("Tank {0}", id);

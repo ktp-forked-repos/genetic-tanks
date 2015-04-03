@@ -92,8 +92,10 @@ namespace GeneticTanks
       };
       
       m_physicsManager.CreateWorld();
+
       m_tankFactory.CreateControlledTestTank(Vector2.Zero);
-      m_tankFactory.CreateTestTank(new Vector2(30, 0));
+      //m_tankFactory.CreateTestTank(Vector2.Zero);
+      m_tankFactory.CreateTestTank(new Vector2(50, 0));
     }
 
     private void MainLoop()

@@ -44,7 +44,7 @@ namespace GeneticTanks.Game.Components
     
     private Body m_body;
     private bool m_sensorEnabled;
-    private readonly HashSet<int> m_contacts = new HashSet<int>(); 
+    private readonly HashSet<uint> m_contacts = new HashSet<uint>(); 
     #endregion
 
     /// <summary>
@@ -110,7 +110,7 @@ namespace GeneticTanks.Game.Components
     /// <summary>
     /// All the contacts the sensor is currently tracking.
     /// </summary>
-    public List<int> Contacts { get { return m_contacts.ToList(); } } 
+    public List<uint> Contacts { get { return m_contacts.ToList(); } } 
 
     #region RenderComponent Implementation
 
@@ -172,7 +172,7 @@ namespace GeneticTanks.Game.Components
     {
       if ((fixtureB.CollisionCategories & PhysicsManager.TankCategory) > 0)
       {
-        var id = Convert.ToInt32(fixtureB.UserData);
+        var id = Convert.ToUInt32(fixtureB.UserData);
         if (id != Parent.Id && !m_contacts.Contains(id))
         {
           m_contacts.Add(id);
@@ -185,7 +185,7 @@ namespace GeneticTanks.Game.Components
 
     private void HandleSensorSeparation(Fixture fixtureA, Fixture fixtureB)
     {
-      var id = Convert.ToInt32(fixtureB.UserData);
+      var id = Convert.ToUInt32(fixtureB.UserData);
       if (m_contacts.Remove(id))
       {
         m_messenger.QueueMessage(new SensorLostContactMessage(id));

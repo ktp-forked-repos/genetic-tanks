@@ -1,6 +1,6 @@
 ﻿namespace GeneticTanks.Game.Components.Messages
 {
-  enum Move
+  enum MoveCommand
   {
     // stop everything
     AllStop,
@@ -36,11 +36,11 @@
   sealed class MoveMessage
     : Message
   {
-    public MoveMessage(Move cmd)
+    public MoveMessage(MoveCommand cmd)
     {
-      Move = cmd;
+      MoveCommand = cmd;
     }
 
-    public Move Move { get; private set; }
+    public MoveCommand MoveCommand { get; private set; }
   }
 }

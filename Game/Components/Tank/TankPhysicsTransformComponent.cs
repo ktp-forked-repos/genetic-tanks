@@ -19,9 +19,6 @@ namespace GeneticTanks.Game.Components.Tank
     private static readonly ILog Log = LogManager.GetLogger(
       MethodBase.GetCurrentMethod().DeclaringType);
     
-    // the local vector pointing towards the front of the tank
-    private static readonly Vector2 ForwardVector = new Vector2(1, 0);
-
     #region Private Fields
     private readonly PhysicsManager m_physicsManager;
     private TankStateComponent m_state;
@@ -110,10 +107,12 @@ namespace GeneticTanks.Game.Components.Tank
         return false;
       }
 
+      World = m_physicsManager.World;
+
       var size = m_state.Dimensions;
       size.Y += m_state.TrackWidth * 2;
 
-      Body = BodyFactory.CreateBody(m_physicsManager.World, Parent.Id);
+      Body = BodyFactory.CreateBody(World, Parent.Id);
       FixtureFactory.AttachRectangle(size.X, size.Y, 1, Vector2.Zero, Body, 
         Parent.Id);
       Body.BodyType = BodyType.Dynamic;
@@ -164,64 +163,64 @@ namespace GeneticTanks.Game.Components.Tank
     {
       var msg = (MoveMessage) m;
 
-      switch (msg.Move)
+      switch (msg.MoveCommand)
       {
-        case Messages.Move.AllStop:
+        case Messages.MoveCommand.AllStop:
           DesiredRotationRate = 0;
           DesiredSpeed = 0;
           break;
-        case Messages.Move.SpeedForwardIncrease:
+        case Messages.MoveCommand.SpeedForwardIncrease:
           DesiredSpeed += m_state.MaxSpeed / 10f;
           break;
-        case Messages.Move.SpeedReverseIncrease:
+        case Messages.MoveCommand.SpeedReverseIncrease:
           DesiredSpeed -= m_state.MaxSpeed / 10f;
           break;
-        case Messages.Move.TurnLeftIncrease:
+        case Messages.MoveCommand.TurnLeftIncrease:
           DesiredRotationRate += m_state.MaxRotationRate / 10f;
           break;
-        case Messages.Move.TurnRightIncrease:
+        case Messages.MoveCommand.TurnRightIncrease:
           DesiredRotationRate -= m_state.MaxRotationRate / 10f;
           break;
-        case Messages.Move.SpeedForwardSlow:
+        case Messages.MoveCommand.SpeedForwardSlow:
           DesiredSpeed = m_state.MaxSpeed / 4f;
           break;
-        case Messages.Move.SpeedForwardHalf:
+        case Messages.MoveCommand.SpeedForwardHalf:
           DesiredSpeed = m_state.MaxSpeed / 2f;
           break;
-        case Messages.Move.SpeedForwardFull:
+        case Messages.MoveCommand.SpeedForwardFull:
           DesiredSpeed = m_state.MaxSpeed;
           break;
-        case Messages.Move.SpeedStop:
+        case Messages.MoveCommand.SpeedStop:
           DesiredSpeed = 0;
           break;
-        case Messages.Move.SpeedReverseSlow:
+        case Messages.MoveCommand.SpeedReverseSlow:
           DesiredSpeed = -(m_state.MaxSpeed / 4f);
           break;
-        case Messages.Move.SpeedReverseHalf:
+        case Messages.MoveCommand.SpeedReverseHalf:
           DesiredSpeed = -(m_state.MaxSpeed / 2f);
           break;
-        case Messages.Move.SpeedReverseFull:
+        case Messages.MoveCommand.SpeedReverseFull:
           DesiredSpeed = -m_state.MaxSpeed;
           break;
-        case Messages.Move.TurnLeftSlow:
+        case Messages.MoveCommand.TurnLeftSlow:
           DesiredRotationRate = m_state.MaxRotationRate / 4f;
           break;
-        case Messages.Move.TurnLeftHalf:
+        case Messages.MoveCommand.TurnLeftHalf:
           DesiredRotationRate = m_state.MaxRotationRate / 2f;
           break;
-        case Messages.Move.TurnLeftFull:
+        case Messages.MoveCommand.TurnLeftFull:
           DesiredRotationRate = m_state.MaxRotationRate;
           break;
-        case Messages.Move.TurnStop:
+        case Messages.MoveCommand.TurnStop:
           DesiredRotationRate = 0;
           break;
-        case Messages.Move.TurnRightSlow:
+        case Messages.MoveCommand.TurnRightSlow:
           DesiredRotationRate = -(m_state.MaxRotationRate / 4f);
           break;
-        case Messages.Move.TurnRightHalf:
+        case Messages.MoveCommand.TurnRightHalf:
           DesiredRotationRate = -(m_state.MaxRotationRate / 2f);
           break;
-        case Messages.Move.TurnRightFull:
+        case Messages.MoveCommand.TurnRightFull:
           DesiredRotationRate = -m_state.MaxRotationRate;
           break;
       }
