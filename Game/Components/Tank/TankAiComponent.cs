@@ -23,16 +23,16 @@ namespace GeneticTanks.Game.Components.Tank
       PhysicsTransformComponent.ForwardVector * RaycastDistance;
     private static readonly Vector2 LeftRay = 
       new Vector2(RaycastDistance,
-        -RaycastDistance * (float)Math.Tan(MathHelper.ToRadians(40f)));
+        RaycastDistance * (float)Math.Tan(MathHelper.ToRadians(40f)));
     private static readonly Vector2 LeftHalfRay =
       new Vector2(RaycastDistance,
-        -RaycastDistance * (float)Math.Tan(MathHelper.ToRadians(20f)));
+        RaycastDistance * (float)Math.Tan(MathHelper.ToRadians(20f)));
     private static readonly Vector2 RightRay =
       new Vector2(RaycastDistance,
-        RaycastDistance * (float)Math.Tan(MathHelper.ToRadians(40f)));
+        -RaycastDistance * (float)Math.Tan(MathHelper.ToRadians(40f)));
     private static readonly Vector2 RightHalfRay =
       new Vector2(RaycastDistance,
-        RaycastDistance * (float)Math.Tan(MathHelper.ToRadians(20f)));
+        -RaycastDistance * (float)Math.Tan(MathHelper.ToRadians(20f)));
 
     private static readonly Category RayCategories =
       PhysicsManager.TankCategory | PhysicsManager.TerrainCategory;
@@ -161,8 +161,8 @@ namespace GeneticTanks.Game.Components.Tank
       if (!center)
       {
         // in this case we don't care unless side obstacles are within 10m
-        left = left && (m_leftHalfObstacle < 10f || m_leftObstacle < 10f);
-        right = right && (m_rightHalfObstacle < 10f || m_rightObstacle < 10f);
+        left = left && (m_leftHalfObstacle < 15f || m_leftObstacle < 15f);
+        right = right && (m_rightHalfObstacle < 15f || m_rightObstacle < 15f);
 
         SelectTurnDirection(left, right);
       }
@@ -221,7 +221,6 @@ namespace GeneticTanks.Game.Components.Tank
     private void SetState(AiState state)
     {
       m_aiState = state;
-      Log.DebugFormat("{0} setting {1}", Parent.FullName, state);
 
       switch (m_aiState)
       {

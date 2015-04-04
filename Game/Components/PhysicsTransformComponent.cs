@@ -17,8 +17,8 @@ namespace GeneticTanks.Game.Components
 
     public static readonly Vector2 ForwardVector = new Vector2(1, 0);
     public static readonly Vector2 BackVector = new Vector2(-1, 0);
-    public static readonly Vector2 RightVector = new Vector2(0, 1);
-    public static readonly Vector2 LeftVector = new Vector2(0, -1);
+    public static readonly Vector2 RightVector = new Vector2(0, -1);
+    public static readonly Vector2 LeftVector = new Vector2(0, 1);
 
     protected PhysicsManager PhysicsManager { get; private set; }
 
