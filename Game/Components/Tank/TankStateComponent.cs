@@ -82,6 +82,11 @@ namespace GeneticTanks.Game.Components.Tank
     /// </summary>
     public float MaxRotationRate { get; set; }
 
+    /// <summary>
+    /// The maximum speed that the turret can rotate in degrees/s.
+    /// </summary>
+    public float MaxTurretRotationRate { get; set; }
+
     #region Component Implementation
 
     public override bool Initialize()

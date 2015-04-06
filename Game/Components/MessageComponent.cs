@@ -70,12 +70,7 @@ namespace GeneticTanks.Game.Components
       {
         return;
       }
-
-      // theres no point updating multiple times back to back
-      while (m_timeSinceLastUpdate >= UpdateInterval)
-      {
-        m_timeSinceLastUpdate -= UpdateInterval;
-      }
+      m_timeSinceLastUpdate = m_timeSinceLastUpdate % UpdateInterval;
 
       SwapQueues();
       DispatchMessages();

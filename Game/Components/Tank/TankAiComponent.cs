@@ -125,10 +125,7 @@ namespace GeneticTanks.Game.Components.Tank
       {
         return;
       }
-      while (m_timeSinceLastUpdate >= UpdateInterval)
-      {
-        m_timeSinceLastUpdate -= UpdateInterval;
-      }
+      m_timeSinceLastUpdate = m_timeSinceLastUpdate % UpdateInterval;
 
       UpdateRaycasts();
       switch (m_aiState)
@@ -233,13 +230,13 @@ namespace GeneticTanks.Game.Components.Tank
         case AiState.SearchTurnLeft:
           m_messenger.QueueMessage(new MoveMessage(MoveCommand.TurnLeftFull));
           m_messenger.QueueMessage(
-            new MoveMessage(MoveCommand.SpeedForwardSlow));
+            new MoveMessage(MoveCommand.SpeedStop));
           break;
 
         case AiState.SearchTurnRight:
           m_messenger.QueueMessage(new MoveMessage(MoveCommand.TurnRightFull));
           m_messenger.QueueMessage(
-            new MoveMessage(MoveCommand.SpeedForwardSlow));
+            new MoveMessage(MoveCommand.SpeedStop));
           break;
 
         case AiState.ApproachEnemy:
@@ -247,6 +244,12 @@ namespace GeneticTanks.Game.Components.Tank
         case AiState.Attack:
           break;
       }
+    }
+
+    private void SetTarget(Entity target)
+    {
+      m_target = target;
+      m_messenger.QueueMessage(new SetTargetMessage(m_target));
     }
 
     #endregion
@@ -261,6 +264,11 @@ namespace GeneticTanks.Game.Components.Tank
       {
         return;
       }
+
+      if (m_target == null)
+      {
+        SetTarget(entity);
+      }
     }
 
     private void HandleSensorLostContact(Message m)
@@ -271,6 +279,11 @@ namespace GeneticTanks.Game.Components.Tank
       if (entity == null)
       {
         return;
+      }
+
+      if (entity == m_target)
+      {
+        SetTarget(null);
       }
     }
     

@@ -60,7 +60,8 @@ namespace GeneticTanks.Game
         BarrelDimensions = new Vector2(4, 0.5f),
         HealthPercent = 1,
         MaxSpeed = 20,
-        MaxRotationRate = 90,
+        MaxRotationRate = 30,
+        MaxTurretRotationRate = 30,
         SensorRadius = 100
       };
       entity.AddComponent(state);
@@ -97,6 +98,7 @@ namespace GeneticTanks.Game
       entity.AddComponent(
         new TankPhysicsTransformComponent(entity, PhysicsManager));
       entity.AddComponent(new SensorComponent(entity, PhysicsManager));
+      entity.AddComponent(new TankTurretControllerComponent(entity));
 
       return entity;
     }

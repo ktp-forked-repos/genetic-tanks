@@ -69,6 +69,7 @@
     <Compile Include="Game\Components\Messages\Message.cs" />
     <Compile Include="Game\Components\Messages\MoveMessage.cs" />
     <Compile Include="Game\Components\Messages\SensorMessages.cs" />
+    <Compile Include="Game\Components\Messages\TargetMessages.cs" />
     <Compile Include="Game\Components\PhysicsTransformComponent.cs" />
     <Compile Include="Game\Components\RenderComponent.cs" />
     <Compile Include="Game\Components\SensorComponent.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="Game\Components\Tank\TankPhysicsTransformComponent.cs" />
     <Compile Include="Game\Components\Tank\TankRenderComponent.cs" />
     <Compile Include="Game\Components\Tank\TankStateComponent.cs" />
+    <Compile Include="Game\Components\Tank\TankTurretControllerComponent.cs" />
     <Compile Include="Game\Components\TransformComponent.cs" />
     <Compile Include="Game\Entity.cs" />
     <Compile Include="Game\EntityManager.cs" />

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using log4net;
 
@@ -91,6 +92,40 @@ namespace GeneticTanks.Game.Components
         "{0} could not retrieve requested component {1} from entity {2}",
         GetType().Name, typeof(T).Name, Parent.Id);
       return false;
+    }
+
+    /// <summary>
+    /// Searches the parent for a component of the requested base type.  Should 
+    /// only be used when parent is known to have only a single component with 
+    /// that base.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="component"></param>
+    /// <returns>
+    /// True if component was populated.
+    /// </returns>
+    protected bool RetrieveBaseSibling<T>(out T component)
+      where T : Component
+    {
+      component = null;
+      var result = Parent.GetComponentsByBase<T>();
+      if (result.Count == 0)
+      {
+        Log.ErrorFormat(
+          "{0} could not retrieve requested component {1} from entity {2}",
+          GetType().Name, typeof(T).Name, Parent.Id);
+        return false;
+      }
+      if (result.Count > 1)
+      {
+        Log.ErrorFormat(
+          "{0} requested base component {1} from {2} but multiple matches " +
+          "were found", GetType().Name, typeof(T).Name, Parent.FullName);
+        return false;
+      }
+
+      component = result.First();
+      return true;
     }
 
     #region IDisposable Implementation
