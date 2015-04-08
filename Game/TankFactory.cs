@@ -66,7 +66,7 @@ namespace GeneticTanks.Game
       };
       entity.AddComponent(state);
       entity.AddComponent(new TankAiComponent(entity, EntityManager, 
-        EventManager));
+        EventManager, PhysicsManager));
       
 
       if (!entity.Initialize())

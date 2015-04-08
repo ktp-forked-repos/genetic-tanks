@@ -14,8 +14,13 @@ namespace GeneticTanks.Game.Components.Tank
     private static readonly ILog Log = LogManager.GetLogger(
       MethodBase.GetCurrentMethod().DeclaringType);
 
-    private const float UpdateInterval = 1f / 5f;
+    #region Constants
+    // update rate for the main ai
+    private const float UpdateInterval = 1f / 4f;
+    // update rate for collision checks
+    private const float CollisionUpdateInterval = 1f / 5f;
 
+    // distance for collision ray casts
     private const float RaycastDistance = 25f;
 
     // 5 rays form a cone to sweep for obstacles in front of the tank
@@ -34,45 +39,63 @@ namespace GeneticTanks.Game.Components.Tank
       new Vector2(RaycastDistance,
         -RaycastDistance * (float)Math.Tan(MathHelper.ToRadians(20f)));
 
+    // collision categories used in ray casting
     private static readonly Category RayCategories =
       PhysicsManager.TankCategory | PhysicsManager.TerrainCategory;
+    #endregion
 
     private static readonly Random Random = new Random();
 
     enum AiState
     {
-      SearchForward,
-      SearchTurnLeft,
-      SearchTurnRight,
+      Search,
       ApproachEnemy,
       Attack
+    }
+
+    enum MoveState
+    {
+      Stopped,
+      Forward,
+      TurnLeft,
+      TurnRight,
+      TurnLeftCollision,
+      TurnRightCollision
     }
 
     #region Private Fields
     private readonly EntityManager m_entityManager;
     private readonly EventManager m_eventManager;
+    private readonly PhysicsManager m_physicsManager;
 
     private MessageComponent m_messenger;
     private TankPhysicsTransformComponent m_physics;
     private TankStateComponent m_state;
 
     private float m_timeSinceLastUpdate = 0f;
+    private float m_collisionTime = 0f;
 
     private AiState m_aiState;
+    private MoveState m_moveState;
 
     private Vector2 m_rayOrigin;
-    private float m_forwardObstacle;
-    private float m_leftObstacle;
-    private float m_leftHalfObstacle;
-    private float m_rightObstacle;
-    private float m_rightHalfObstacle;
+    private bool m_centerObstacle;
+    private bool m_leftObstacle;
+    private bool m_rightObstacle;
     
     private readonly List<Entity> m_contacts = new List<Entity>();
     private Entity m_target = null;
     #endregion
 
+    /// <summary>
+    /// Create the component.
+    /// </summary>
+    /// <param name="parent"></param>
+    /// <param name="entityManager"></param>
+    /// <param name="eventManager"></param>
+    /// <param name="physicsManager"></param>
     public TankAiComponent(Entity parent, EntityManager entityManager, 
-      EventManager eventManager)
+      EventManager eventManager, PhysicsManager physicsManager)
       : base(parent)
     {
       if (entityManager == null)
@@ -83,9 +106,14 @@ namespace GeneticTanks.Game.Components.Tank
       {
         throw new ArgumentNullException("eventManager");
       }
+      if (physicsManager == null)
+      {
+        throw new ArgumentNullException("physicsManager");
+      }
 
       m_entityManager = entityManager;
       m_eventManager = eventManager;
+      m_physicsManager = physicsManager;
 
       NeedsUpdate = true;
     }
@@ -113,8 +141,9 @@ namespace GeneticTanks.Game.Components.Tank
       m_messenger.AddListener<SensorLostContactMessage>(
         HandleSensorLostContact);
 
-      SetState(AiState.SearchForward);
+      m_physicsManager.PostStep += HandlePostStep;
 
+      SetState(AiState.Search);
       return true;
     }
     
@@ -125,18 +154,14 @@ namespace GeneticTanks.Game.Components.Tank
       {
         return;
       }
-      m_timeSinceLastUpdate = m_timeSinceLastUpdate % UpdateInterval;
+      m_timeSinceLastUpdate %= UpdateInterval;
 
-      UpdateRaycasts();
       switch (m_aiState)
       {
-        case AiState.SearchForward:
-          UpdateSearchForward();
+        case AiState.ApproachEnemy:
           break;
 
-        case AiState.SearchTurnLeft:
-        case AiState.SearchTurnRight:
-          UpdateSearchTurn();
+        case AiState.Attack:
           break;
       }
     }
@@ -144,75 +169,108 @@ namespace GeneticTanks.Game.Components.Tank
     #endregion
     #region Private Methods
 
-    private void UpdateSearchForward()
+    private void UpdateMovement()
     {
-      var left = m_leftHalfObstacle > 0f || m_leftObstacle > 0f;
-      var center = m_forwardObstacle > 0;
-      var right = m_rightHalfObstacle > 0f || m_rightObstacle > 0f;
+      switch (m_moveState)
+      {
+        case MoveState.Forward:
+          UpdateMoveForward();
+          break;
 
-      if (!(center || left || right))
+        case MoveState.TurnLeftCollision:
+        case MoveState.TurnRightCollision:
+          UpdateMoveTurn();
+          break;
+      }
+    }
+
+    private void UpdateMoveForward()
+    {
+      if (!(m_leftObstacle || m_centerObstacle || m_rightObstacle))
       {
         return;
       }
 
-      if (!center)
-      {
-        // in this case we don't care unless side obstacles are within 10m
-        left = left && (m_leftHalfObstacle < 15f || m_leftObstacle < 15f);
-        right = right && (m_rightHalfObstacle < 15f || m_rightObstacle < 15f);
-
-        SelectTurnDirection(left, right);
-      }
-      else
-      {
-        SelectTurnDirection(left, right);
-      }
+      SelectTurnDirection();
     }
 
-    private void UpdateSearchTurn()
+    private void UpdateMoveTurn()
     {
-      var left = m_leftHalfObstacle > 0f || m_leftObstacle > 0f;
-      var center = m_forwardObstacle > 0;
-      var right = m_rightHalfObstacle > 0f || m_rightObstacle > 0f;
-
-      if (!left && !center && !right)
+      if (!m_leftObstacle && !m_centerObstacle && !m_rightObstacle)
       {
-        SetState(AiState.SearchForward);
+        SetMoveState(MoveState.Forward);
       }
     }
 
-    private void SelectTurnDirection(bool leftObstacle, bool rightObstacle)
+    private void SelectTurnDirection()
     {
       // obstacle on either side, or neither side, random direction
-      if ((leftObstacle && rightObstacle) || (!leftObstacle && !rightObstacle))
+      if ((m_leftObstacle && m_rightObstacle) || 
+          (!m_leftObstacle && !m_rightObstacle))
       {
         var state = Random.NextDouble() < 0.5
-          ? AiState.SearchTurnLeft
-          : AiState.SearchTurnRight;
-        SetState(state);
+          ? MoveState.TurnLeftCollision
+          : MoveState.TurnRightCollision;
+        SetMoveState(state);
       }
-      else if (leftObstacle)
+      else if (m_leftObstacle)
       {
-        SetState(AiState.SearchTurnRight);
+        SetMoveState(MoveState.TurnRightCollision);
       }
       else
       {
-        SetState(AiState.SearchTurnLeft);
+        SetMoveState(MoveState.TurnLeftCollision);
       }
     }
     
-    private void UpdateRaycasts()
+    private void DoRaycasts()
     {
-      m_leftObstacle = 
+      var left = 
         m_physics.RaycastDistance(m_rayOrigin, LeftRay, RayCategories);
-      m_leftHalfObstacle =
+      var leftHalf =
         m_physics.RaycastDistance(m_rayOrigin, LeftHalfRay, RayCategories);
-      m_forwardObstacle =
+      var center =
         m_physics.RaycastDistance(m_rayOrigin, ForwardRay, RayCategories);
-      m_rightHalfObstacle =
+      var rightHalf =
         m_physics.RaycastDistance(m_rayOrigin, RightHalfRay, RayCategories);
-      m_rightObstacle =
+      var right =
         m_physics.RaycastDistance(m_rayOrigin, RightRay, RayCategories);
+
+      m_leftObstacle = left > 0f || leftHalf > 0f;
+      m_centerObstacle = center > 0f;
+      m_rightObstacle = right > 0f || rightHalf > 0f;
+    }
+
+    private void SetMoveState(MoveState state)
+    {
+      m_moveState = state;
+
+      switch (m_moveState)
+      {
+        case MoveState.Stopped:
+          m_messenger.QueueMessage(new MoveMessage(MoveCommand.AllStop));
+          break;
+
+        case MoveState.Forward:
+          m_messenger.QueueMessage(new MoveMessage(MoveCommand.TurnStop));
+          m_messenger.QueueMessage(
+            new MoveMessage(MoveCommand.SpeedForwardFull));
+          break;
+
+        case MoveState.TurnLeft:
+        case MoveState.TurnLeftCollision:
+          m_messenger.QueueMessage(new MoveMessage(MoveCommand.TurnLeftFull));
+          m_messenger.QueueMessage(
+            new MoveMessage(MoveCommand.SpeedStop));
+          break;
+
+        case MoveState.TurnRight:
+        case MoveState.TurnRightCollision:
+          m_messenger.QueueMessage(new MoveMessage(MoveCommand.TurnRightFull));
+          m_messenger.QueueMessage(
+            new MoveMessage(MoveCommand.SpeedStop));
+          break;
+      }
     }
 
     private void SetState(AiState state)
@@ -221,27 +279,15 @@ namespace GeneticTanks.Game.Components.Tank
 
       switch (m_aiState)
       {
-        case AiState.SearchForward:
-          m_messenger.QueueMessage(new MoveMessage(MoveCommand.TurnStop));
-          m_messenger.QueueMessage(
-            new MoveMessage(MoveCommand.SpeedForwardFull));
-          break;
-
-        case AiState.SearchTurnLeft:
-          m_messenger.QueueMessage(new MoveMessage(MoveCommand.TurnLeftFull));
-          m_messenger.QueueMessage(
-            new MoveMessage(MoveCommand.SpeedStop));
-          break;
-
-        case AiState.SearchTurnRight:
-          m_messenger.QueueMessage(new MoveMessage(MoveCommand.TurnRightFull));
-          m_messenger.QueueMessage(
-            new MoveMessage(MoveCommand.SpeedStop));
+        case AiState.Search:
+          SetMoveState(MoveState.Forward);
           break;
 
         case AiState.ApproachEnemy:
           break;
+
         case AiState.Attack:
+          SetMoveState(MoveState.Stopped);
           break;
       }
     }
@@ -286,6 +332,23 @@ namespace GeneticTanks.Game.Components.Tank
         SetTarget(null);
       }
     }
+
+    private void HandlePostStep(float deltaTime)
+    {
+      m_collisionTime += deltaTime;
+      if (m_collisionTime < CollisionUpdateInterval)
+      {
+        return;
+      }
+
+      m_collisionTime %= CollisionUpdateInterval;
+
+      if (m_moveState != MoveState.Stopped)
+      {
+        DoRaycasts();
+        UpdateMovement();
+      }
+    }
     
     #endregion
     #region IDisposable
@@ -308,6 +371,8 @@ namespace GeneticTanks.Game.Components.Tank
         HandleSensorNewContact);
       m_messenger.RemoveListener<SensorNewContactMessage>(
         HandleSensorLostContact);
+
+      m_physicsManager.PostStep -= HandlePostStep;
 
       base.Dispose(disposing);
       m_disposed = true;
