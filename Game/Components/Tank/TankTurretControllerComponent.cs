@@ -132,13 +132,11 @@ namespace GeneticTanks.Game.Components.Tank
       m_target = msg.Target;
       if (m_target == null)
       {
-        Log.DebugFormat("{0} cleared target", Parent.FullName);
         m_rotationTarget = 0f;
       }
       else
       {
         m_enabled = true;
-        Log.DebugFormat("{0} set target {1}", Parent.FullName, m_target.FullName);
       }
     }
 

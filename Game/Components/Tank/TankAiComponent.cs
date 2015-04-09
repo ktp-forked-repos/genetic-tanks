@@ -15,10 +15,8 @@ namespace GeneticTanks.Game.Components.Tank
       MethodBase.GetCurrentMethod().DeclaringType);
 
     #region Constants
-    // update rate for the main ai
-    private const float UpdateInterval = 1f / 4f;
     // update rate for collision checks
-    private const float CollisionUpdateInterval = 1f / 5f;
+    private const float UpdateInterval = 1f / 5f;
 
     // distance for collision ray casts
     private const float RaycastDistance = 25f;
@@ -59,6 +57,7 @@ namespace GeneticTanks.Game.Components.Tank
       Forward,
       TurnLeft,
       TurnRight,
+      ForwardCollision,
       TurnLeftCollision,
       TurnRightCollision
     }
@@ -72,8 +71,8 @@ namespace GeneticTanks.Game.Components.Tank
     private TankPhysicsTransformComponent m_physics;
     private TankStateComponent m_state;
 
-    private float m_timeSinceLastUpdate = 0f;
-    private float m_collisionTime = 0f;
+    private float m_updateTime = 0f;
+    private float m_collisionUpdateTime = 0f;
 
     private AiState m_aiState;
     private MoveState m_moveState;
@@ -84,7 +83,10 @@ namespace GeneticTanks.Game.Components.Tank
     private bool m_rightObstacle;
     
     private readonly List<Entity> m_contacts = new List<Entity>();
+
     private Entity m_target = null;
+    private float m_targetRange = 0f;
+    private float m_targetHeading = 0f;
     #endregion
 
     /// <summary>
@@ -149,60 +151,64 @@ namespace GeneticTanks.Game.Components.Tank
     
     public override void Update(float deltaTime)
     {
-      m_timeSinceLastUpdate += deltaTime;
-      if (m_timeSinceLastUpdate < UpdateInterval)
+      m_updateTime += deltaTime;
+      if (m_updateTime < UpdateInterval)
       {
         return;
       }
-      m_timeSinceLastUpdate %= UpdateInterval;
+
+      m_updateTime %= UpdateInterval;
 
       switch (m_aiState)
       {
         case AiState.ApproachEnemy:
+          UpdateApproach();
           break;
 
         case AiState.Attack:
+          UpdateAttack();
           break;
       }
     }
 
     #endregion
     #region Private Methods
+    #region Movement Control Methods
 
     private void UpdateMovement()
     {
       switch (m_moveState)
       {
-        case MoveState.Forward:
-          UpdateMoveForward();
+        case MoveState.ForwardCollision:
+          UpdateForwardCollision();
           break;
 
         case MoveState.TurnLeftCollision:
         case MoveState.TurnRightCollision:
-          UpdateMoveTurn();
+          UpdateTurnCollision();
           break;
       }
     }
 
-    private void UpdateMoveForward()
+    private void UpdateForwardCollision()
     {
       if (!(m_leftObstacle || m_centerObstacle || m_rightObstacle))
       {
         return;
       }
 
-      SelectTurnDirection();
+      SelectCollisionTurnDirection();
     }
 
-    private void UpdateMoveTurn()
+    private void UpdateTurnCollision()
     {
       if (!m_leftObstacle && !m_centerObstacle && !m_rightObstacle)
       {
-        SetMoveState(MoveState.Forward);
+        SetMoveState(MoveState.ForwardCollision);
       }
     }
 
-    private void SelectTurnDirection()
+    private void SelectCollisionTurnDirection()
     {
       // obstacle on either side, or neither side, random direction
       if ((m_leftObstacle && m_rightObstacle) || 
@@ -223,7 +229,7 @@ namespace GeneticTanks.Game.Components.Tank
       }
     }
     
-    private void DoRaycasts()
+    private void DoCollisionRaycasts()
     {
       var left = 
         m_physics.RaycastDistance(m_rayOrigin, LeftRay, RayCategories);
@@ -248,10 +254,13 @@ namespace GeneticTanks.Game.Components.Tank
       switch (m_moveState)
       {
         case MoveState.Stopped:
+          Log.DebugFormat("{0} stopping", Parent.FullName);
           m_messenger.QueueMessage(new MoveMessage(MoveCommand.AllStop));
           break;
 
         case MoveState.Forward:
+        case MoveState.ForwardCollision:
+          Log.DebugFormat("{0} moving forward", Parent.FullName);
           m_messenger.QueueMessage(new MoveMessage(MoveCommand.TurnStop));
           m_messenger.QueueMessage(
             new MoveMessage(MoveCommand.SpeedForwardFull));
@@ -259,6 +268,7 @@ namespace GeneticTanks.Game.Components.Tank
 
         case MoveState.TurnLeft:
         case MoveState.TurnLeftCollision:
+          Log.DebugFormat("{0} turning left", Parent.FullName);
           m_messenger.QueueMessage(new MoveMessage(MoveCommand.TurnLeftFull));
           m_messenger.QueueMessage(
             new MoveMessage(MoveCommand.SpeedStop));
@@ -266,12 +276,15 @@ namespace GeneticTanks.Game.Components.Tank
 
         case MoveState.TurnRight:
         case MoveState.TurnRightCollision:
+          Log.DebugFormat("{0} turning right", Parent.FullName);
           m_messenger.QueueMessage(new MoveMessage(MoveCommand.TurnRightFull));
           m_messenger.QueueMessage(
             new MoveMessage(MoveCommand.SpeedStop));
           break;
       }
     }
+
+    #endregion
 
     private void SetState(AiState state)
     {
@@ -280,10 +293,11 @@ namespace GeneticTanks.Game.Components.Tank
       switch (m_aiState)
       {
         case AiState.Search:
-          SetMoveState(MoveState.Forward);
+          SetMoveState(MoveState.ForwardCollision);
           break;
 
         case AiState.ApproachEnemy:
+          SetMoveState(MoveState.Stopped);
           break;
 
         case AiState.Attack:
@@ -292,10 +306,94 @@ namespace GeneticTanks.Game.Components.Tank
       }
     }
 
-    private void SetTarget(Entity target)
+    private void UpdateApproach()
     {
-      m_target = target;
+      UpdateTargetInfo();
+
+      var angleDiff = m_targetHeading - Parent.Transform.Rotation;
+      if (angleDiff <= -180f)
+      {
+        angleDiff += 360f;
+      }
+      else if (angleDiff >= 180f)
+      {
+        angleDiff -= 360f;
+      }
+
+      var desiredRange = m_state.GunRange - (m_state.GunRange / 10f);
+
+      // align to the target heading
+      if (Math.Abs(angleDiff) > 10f)
+      {
+        if (angleDiff < 0f && m_moveState != MoveState.TurnRight)
+        {
+          SetMoveState(MoveState.TurnRight);
+        }
+        else if (angleDiff > 0f && m_moveState != MoveState.TurnLeft)
+        {
+          SetMoveState(MoveState.TurnLeft);
+        }
+      }
+      // move within range
+      else if (m_targetRange > desiredRange)
+      {
+        if (m_moveState != MoveState.Forward)
+        {
+          SetMoveState(MoveState.Forward);
+        }
+      }
+      else
+      {
+        SetState(AiState.Attack);
+      }
+    }
+
+    private void UpdateTargetInfo()
+    {
+      var targetDirection =
+        m_target.Transform.Position - Parent.Transform.Position;
+      var angle = Math.Atan2(targetDirection.Y, targetDirection.X) -
+                  Math.Atan2(Vector2.UnitX.Y, Vector2.UnitX.X);
+
+      m_targetRange = targetDirection.Length();
+      m_targetHeading = MathHelper.ToDegrees((float)angle);
+    }
+
+    private void UpdateAttack()
+    {
+      
+    }
+
+    private void SelectTarget()
+    {
+      Entity closest = null;
+      float minDistance = float.MaxValue;
+
+      foreach (var contact in m_contacts)
+      {
+        var distVec = contact.Transform.Position - Parent.Transform.Position;
+        var distance = distVec.LengthSquared();
+        if (distance < minDistance)
+        {
+          minDistance = distance;
+          closest = contact;
+        }
+      }
+
+      m_target = closest;
       m_messenger.QueueMessage(new SetTargetMessage(m_target));
+
+      if (m_target == null)
+      {
+        Log.DebugFormat("{0} cleared target", Parent.FullName);
+        SetState(AiState.Search);
+      }
+      else
+      {
+        Log.DebugFormat("{0} set target {1}", Parent.FullName, 
+          m_target.FullName);
+        SetState(AiState.ApproachEnemy);
+      }
     }
 
     #endregion
@@ -305,15 +403,15 @@ namespace GeneticTanks.Game.Components.Tank
     {
       var msg = (SensorNewContactMessage) m;
       var entity = m_entityManager.GetEntity(msg.ContactId);
-
       if (entity == null)
       {
         return;
       }
 
+      m_contacts.Add(entity);
       if (m_target == null)
       {
-        SetTarget(entity);
+        SelectTarget();
       }
     }
 
@@ -321,31 +419,31 @@ namespace GeneticTanks.Game.Components.Tank
     {
       var msg = (SensorLostContactMessage)m;
       var entity = m_entityManager.GetEntity(msg.ContactId);
-
       if (entity == null)
       {
         return;
       }
 
-      if (entity == m_target)
+      m_contacts.Remove(entity);
+      if (entity.Id == m_target.Id)
       {
-        SetTarget(null);
+        SelectTarget();
       }
     }
 
     private void HandlePostStep(float deltaTime)
     {
-      m_collisionTime += deltaTime;
-      if (m_collisionTime < CollisionUpdateInterval)
+      m_collisionUpdateTime += deltaTime;
+      if (m_collisionUpdateTime < UpdateInterval)
       {
         return;
       }
 
-      m_collisionTime %= CollisionUpdateInterval;
+      m_collisionUpdateTime %= UpdateInterval;
 
       if (m_moveState != MoveState.Stopped)
       {
-        DoRaycasts();
+        DoCollisionRaycasts();
         UpdateMovement();
       }
     }

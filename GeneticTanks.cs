@@ -60,8 +60,6 @@ namespace GeneticTanks
     private InputManager m_inputManager;
     private ViewManager m_viewManager;
     private PhysicsManager m_physicsManager;
-    
-    private TankFactory m_tankFactory;
     #endregion
 
     public void Run()
@@ -90,23 +88,21 @@ namespace GeneticTanks
       m_viewManager = new ViewManager(m_eventManager, m_renderWindow);
       m_physicsManager = new PhysicsManager(m_eventManager);
 
-      m_tankFactory = new TankFactory
-      {
-        EntityManager = m_entityManager,
-        EventManager = m_eventManager,
-        PhysicsManager = m_physicsManager
-      };
-      
+
+      TankFactory.EntityManager = m_entityManager;
+      TankFactory.EventManager = m_eventManager;
+      TankFactory.PhysicsManager = m_physicsManager;
+
       m_physicsManager.CreateWorld();
       CreateArena();
 
-      //m_tankFactory.CreateControlledTestTank(Vector2.Zero, 0);
-      m_tankFactory.CreateTestTank(new Vector2(0, 10), 75);
-      m_tankFactory.CreateTestTank(new Vector2(-10, 0), 180);
-      m_tankFactory.CreateTestTank(new Vector2(0, 100), 240);
-      m_tankFactory.CreateTestTank(new Vector2(-100, 0), 90);
-      m_tankFactory.CreateTestTank(new Vector2(-100, -100), 135);
-      m_tankFactory.CreateTestTank(new Vector2(-200, 0), -90);
+      //TankFactory.CreateControlledTestTank(Vector2.Zero, 0);
+      TankFactory.CreateTestTank(new Vector2(-200, -200), 45);
+      TankFactory.CreateTestTank(new Vector2(200, -200), 125);
+      TankFactory.CreateTestTank(new Vector2(0, 100), 240);
+      TankFactory.CreateTestTank(new Vector2(-100, 0), 90);
+      TankFactory.CreateTestTank(new Vector2(-100, -100), 135);
+      TankFactory.CreateTestTank(new Vector2(-200, 0), -90);
     }
 
     private void MainLoop()

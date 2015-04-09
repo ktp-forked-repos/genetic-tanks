@@ -7,16 +7,17 @@ using Microsoft.Xna.Framework;
 
 namespace GeneticTanks.Game
 {
-  class TankFactory
+  static class TankFactory
   {
     private static readonly ILog Log = LogManager.GetLogger(
       MethodBase.GetCurrentMethod().DeclaringType);
 
-    public EntityManager EntityManager { get; set; }
-    public PhysicsManager PhysicsManager { get; set; }
-    public EventManager EventManager { get; set; }
+    public static EntityManager EntityManager { get; set; }
+    public static PhysicsManager PhysicsManager { get; set; }
+    public static EventManager EventManager { get; set; }
 
-    public Entity CreateControlledTestTank(Vector2 position, float rotation)
+    public static Entity CreateControlledTestTank(Vector2 position, 
+      float rotation)
     {
       var entity = CreateTankBase();
 
@@ -26,9 +27,9 @@ namespace GeneticTanks.Game
         TrackWidth = 1,
         TurretWidth = 4,
         BarrelDimensions = new Vector2(4, 0.5f),
-        HealthPercent = 1,
+        MaxHealth = 1,
         MaxSpeed = 30,
-        MaxRotationRate = 90,
+        MaxTurnSpeed = 90,
         SensorRadius = 100
       };
       entity.AddComponent(state);
@@ -48,7 +49,7 @@ namespace GeneticTanks.Game
       return entity;
     }
 
-    public Entity CreateTestTank(Vector2 position, float rotation)
+    public static Entity CreateTestTank(Vector2 position, float rotation)
     {
       var entity = CreateTankBase();
 
@@ -58,11 +59,13 @@ namespace GeneticTanks.Game
         TrackWidth = 1,
         TurretWidth = 4,
         BarrelDimensions = new Vector2(4, 0.5f),
-        HealthPercent = 1,
+        MaxHealth = 100,
         MaxSpeed = 20,
-        MaxRotationRate = 30,
+        MaxTurnSpeed = 30,
         MaxTurretRotationRate = 30,
-        SensorRadius = 100
+        TurretRangeOfMotion = 180,
+        SensorRadius = 100,
+        GunRange = 75
       };
       entity.AddComponent(state);
       entity.AddComponent(new TankAiComponent(entity, EntityManager, 
@@ -87,7 +90,7 @@ namespace GeneticTanks.Game
     // Creates and returns a common tank object that includes 
     // MessageComponent, TankRenderComponent, and TankPhysicsTransformComponent.  
     // Entity is NOT initialized.
-    private Entity CreateTankBase()
+    private static Entity CreateTankBase()
     {
       var id = EntityManager.NextId;
       var name = string.Format("Tank {0}", id);
