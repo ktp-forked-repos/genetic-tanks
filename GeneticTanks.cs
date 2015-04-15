@@ -93,6 +93,10 @@ namespace GeneticTanks
       TankFactory.EventManager = m_eventManager;
       TankFactory.PhysicsManager = m_physicsManager;
 
+      BulletFactory.EntityManager = m_entityManager;
+      BulletFactory.EventManager = m_eventManager;
+      BulletFactory.PhysicsManager = m_physicsManager;
+
       m_physicsManager.CreateWorld();
       CreateArena();
 

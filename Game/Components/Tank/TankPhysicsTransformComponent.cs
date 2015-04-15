@@ -106,7 +106,6 @@ namespace GeneticTanks.Game.Components.Tank
       Body.CollisionCategories = PhysicsManager.TankCategory;
       Body.CollidesWith = Category.All;
       
-      Body.OnCollision += HandleChassisCollision;
       PhysicsManager.PreStep += HandlePreStep;
 
       m_messenger.AddListener<MoveMessage>(HandleMoveMessage);
@@ -117,15 +116,6 @@ namespace GeneticTanks.Game.Components.Tank
 
     #endregion
     #region Callbacks
-
-    // detect when a bullet hits this tank, and prevent this tank's bullets
-    // from hitting itself
-    private bool HandleChassisCollision(Fixture fixtureA, Fixture fixtureB, 
-      Contact contact)
-    {
-      // TODO: implement me
-      return true;
-    }
     
     // applies impulses to make the tank move and turn
     private void HandlePreStep(float deltaTime)
@@ -222,7 +212,6 @@ namespace GeneticTanks.Game.Components.Tank
       }
 
       PhysicsManager.PreStep -= HandlePreStep;
-      Body.OnCollision -= HandleChassisCollision;
 
       base.Dispose(disposing);
       m_disposed = true;

@@ -64,11 +64,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\Vector.cs" />
+    <Compile Include="Game\BulletFactory.cs" />
+    <Compile Include="Game\Components\Bullet\BulletDataComponent.cs" />
+    <Compile Include="Game\Components\Bullet\BulletPhysicsTransformComponent.cs" />
+    <Compile Include="Game\Components\Bullet\BulletRenderComponent.cs" />
     <Compile Include="Game\Components\Component.cs" />
     <Compile Include="Game\Components\MessageComponent.cs" />
     <Compile Include="Game\Components\Messages\Message.cs" />
     <Compile Include="Game\Components\Messages\MoveMessage.cs" />
     <Compile Include="Game\Components\Messages\SensorMessages.cs" />
+    <Compile Include="Game\Components\Messages\ShootingMessages.cs" />
     <Compile Include="Game\Components\Messages\TargetMessages.cs" />
     <Compile Include="Game\Components\PhysicsTransformComponent.cs" />
     <Compile Include="Game\Components\RenderComponent.cs" />

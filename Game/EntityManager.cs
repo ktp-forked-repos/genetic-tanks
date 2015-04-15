@@ -105,7 +105,7 @@ namespace GeneticTanks.Game
         m_updateEntities.Add(e);
       }
       m_eventManager.QueueEvent(new EntityAddedEvent(e));
-      Log.DebugFormat("Added entity {0}", e.Id);
+      Log.DebugFormat("Added entity {0}", e.FullName);
     }
 
     /// <summary>
@@ -154,10 +154,11 @@ namespace GeneticTanks.Game
       }
 
       var id = e.Id;
+      var name = e.FullName;
       m_updateEntities.Remove(e);
       m_entities.Remove(e.Id);
       e.Dispose();
-      Log.DebugFormat("Removed entity {0}", id);
+      Log.DebugFormat("Removed entity {0}", name);
     }
 
     #endregion

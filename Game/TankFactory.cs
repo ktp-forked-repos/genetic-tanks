@@ -16,38 +16,38 @@ namespace GeneticTanks.Game
     public static PhysicsManager PhysicsManager { get; set; }
     public static EventManager EventManager { get; set; }
 
-    public static Entity CreateControlledTestTank(Vector2 position, 
-      float rotation)
-    {
-      var entity = CreateTankBase();
-
-      var state = new TankStateComponent(entity)
-      {
-        Dimensions = new Vector2(10, 6),
-        TrackWidth = 1,
-        TurretWidth = 4,
-        BarrelDimensions = new Vector2(4, 0.5f),
-        MaxHealth = 1,
-        MaxSpeed = 30,
-        MaxTurnSpeed = 90,
-        SensorRadius = 100
-      };
-      entity.AddComponent(state);
-      entity.AddComponent(
-        new TankKeyboardControlComponent(entity, EventManager));
-
-      if (!entity.Initialize())
-      {
-        Log.ErrorFormat("Could not initialize {0}, discarding", entity.Name);
-        entity.Dispose();
-        return null;
-      }
-
-      entity.Transform.Position = position;
-      entity.Transform.Rotation = rotation;
-      EntityManager.AddEntity(entity);
-      return entity;
-    }
+//     public static Entity CreateControlledTestTank(Vector2 position, 
+//       float rotation)
+//     {
+//       var entity = CreateTankBase();
+// 
+//       var state = new TankStateComponent(entity)
+//       {
+//         Dimensions = new Vector2(10, 6),
+//         TrackWidth = 1,
+//         TurretWidth = 4,
+//         BarrelDimensions = new Vector2(4, 0.5f),
+//         MaxHealth = 1,
+//         MaxSpeed = 30,
+//         MaxTurnSpeed = 90,
+//         SensorRadius = 100
+//       };
+//       entity.AddComponent(state);
+//       entity.AddComponent(
+//         new TankKeyboardControlComponent(entity, EventManager));
+// 
+//       if (!entity.Initialize())
+//       {
+//         Log.ErrorFormat("Could not initialize {0}, discarding", entity.Name);
+//         entity.Dispose();
+//         return null;
+//       }
+// 
+//       entity.Transform.Position = position;
+//       entity.Transform.Rotation = rotation;
+//       EntityManager.AddEntity(entity);
+//       return entity;
+//     }
 
     public static Entity CreateTestTank(Vector2 position, float rotation)
     {
@@ -59,13 +59,18 @@ namespace GeneticTanks.Game
         TrackWidth = 1,
         TurretWidth = 4,
         BarrelDimensions = new Vector2(4, 0.5f),
+        TurretRangeOfMotion = 180,
+
+        SensorRadius = 100,
+        GunRange = 75,
+        GunSpeed = 5,
+        GunDamage = 1,
+        ReloadTime = 5,
+
         MaxHealth = 100,
         MaxSpeed = 20,
         MaxTurnSpeed = 30,
-        MaxTurretRotationRate = 30,
-        TurretRangeOfMotion = 180,
-        SensorRadius = 100,
-        GunRange = 75
+        MaxTurretRotationRate = 30
       };
       entity.AddComponent(state);
       entity.AddComponent(new TankAiComponent(entity, EntityManager, 

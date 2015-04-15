@@ -164,10 +164,6 @@ namespace GeneticTanks.Game.Components.Tank
         case AiState.ApproachEnemy:
           UpdateApproach();
           break;
-
-        case AiState.Attack:
-          UpdateAttack();
-          break;
       }
     }
 
@@ -289,6 +285,7 @@ namespace GeneticTanks.Game.Components.Tank
     private void SetState(AiState state)
     {
       m_aiState = state;
+      Log.DebugFormat("{0} new state {1}", Parent.FullName, m_aiState);
 
       switch (m_aiState)
       {
@@ -302,6 +299,7 @@ namespace GeneticTanks.Game.Components.Tank
 
         case AiState.Attack:
           SetMoveState(MoveState.Stopped);
+          m_messenger.QueueMessage(new ShootingStateMessage(true));
           break;
       }
     }
@@ -357,11 +355,6 @@ namespace GeneticTanks.Game.Components.Tank
 
       m_targetRange = targetDirection.Length();
       m_targetHeading = MathHelper.ToDegrees((float)angle);
-    }
-
-    private void UpdateAttack()
-    {
-      
     }
 
     private void SelectTarget()

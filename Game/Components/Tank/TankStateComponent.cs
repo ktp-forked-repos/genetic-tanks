@@ -71,7 +71,7 @@ namespace GeneticTanks.Game.Components.Tank
     /// <summary>
     /// The velocity of shells in m/s.
     /// </summary>
-    public float GunVelocity { get; set; }
+    public float GunSpeed { get; set; }
 
     /// <summary>
     /// The gun's damage per shot.
