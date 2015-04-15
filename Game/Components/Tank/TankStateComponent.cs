@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Reflection;
+using GeneticTanks.Game.Components.Messages;
+using GeneticTanks.Game.Events;
 using log4net;
 using log4net.Repository.Hierarchy;
 using Microsoft.Xna.Framework;
@@ -16,17 +18,25 @@ namespace GeneticTanks.Game.Components.Tank
       MethodBase.GetCurrentMethod().DeclaringType);
 
     #region Private Fields
+    private readonly EventManager m_eventManager;
+    private MessageComponent m_messenger;
+
     private float m_turretRotation = 0f;
     private float m_leftTurretLimit = 0f;
     private float m_rightTurretLimit = 360f;
     private float m_health;
     #endregion
 
-    public TankStateComponent(Entity parent) 
+    public TankStateComponent(Entity parent, EventManager eventManager) 
       : base(parent)
     {
+      if (eventManager == null)
+      {
+        throw new ArgumentNullException("eventManager");
+      }
+      m_eventManager = eventManager;
+
       NeedsUpdate = false;
-      Initialized = true;
     }
 
     // stuff that doesn't change
@@ -105,6 +115,7 @@ namespace GeneticTanks.Game.Components.Tank
 
     #endregion
 
+    #region Dynamic State
     /// <summary>
     /// The rotation of the turret relative to the body.  0 degrees is facing 
     /// forward, positive rotation is counter clockwise.
@@ -154,12 +165,20 @@ namespace GeneticTanks.Game.Components.Tank
     {
       get { return Health / MaxHealth; }
     }
-    
+
+    #endregion
 
     #region Component Implementation
 
     public override bool Initialize()
     {
+      if (!RetrieveSibling(out m_messenger))
+      {
+        return false;
+      }
+
+      m_eventManager.AddListener<TankHitEvent>(HandleTankHit);
+
       Health = MaxHealth;
 
       if (TurretRangeOfMotion < 360f)
@@ -168,14 +187,55 @@ namespace GeneticTanks.Game.Components.Tank
         m_rightTurretLimit = 360f - m_leftTurretLimit;
       }
 
-      Log.DebugFormat("left limit {0}", m_leftTurretLimit);
-      Log.DebugFormat("right limit {0}", m_rightTurretLimit);
-
+      Initialized = true;
       return true;
     }
-
+    
     public override void Update(float deltaTime)
     {
+    }
+
+    #endregion
+
+    #region Callbacks
+
+    private void HandleTankHit(Event e)
+    {
+      var evt = (TankHitEvent) e;
+      if (evt.Target != Parent.Id)
+      {
+        return;
+      }
+
+      m_messenger.QueueMessage(new TankHitMessage(evt.Shooter, evt.Damage));
+      m_health -= evt.Damage;
+      m_health = Math.Max(m_health, 0f);
+
+      if (HealthPercent <= 0f)
+      {
+        m_messenger.QueueMessage(new TankKilledMessage(evt.Shooter));
+        m_eventManager.QueueEvent(new TankKilledEvent(Parent.Id, evt.Shooter));
+        m_eventManager.QueueEvent(new RequestEntityRemovalEvent(Parent.Id));
+      }
+    }
+
+    #endregion
+
+    #region IDisposable Implementation
+
+    private bool m_disposed = false;
+
+    protected override void Dispose(bool disposing)
+    {
+      if (!Initialized || m_disposed)
+      {
+        return;
+      }
+
+      m_eventManager.RemoveListener<TankHitEvent>(HandleTankHit);
+
+      base.Dispose(disposing);
+      m_disposed = true;
     }
 
     #endregion

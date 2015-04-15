@@ -143,6 +143,7 @@ namespace GeneticTanks.Game.Components
 
       m_body.OnCollision += HandleSensorCollision;
       m_body.OnSeparation += HandleSensorSeparation;
+      m_physicsManager.PreStep += HandlePreStep;
       m_physicsManager.PostStep += HandlePostStep;
       
       Initialized = true;
@@ -190,6 +191,14 @@ namespace GeneticTanks.Game.Components
       {
         m_messenger.QueueMessage(new SensorLostContactMessage(id));
       }
+    }
+
+    // necessary to sync the position to the parent object before the first
+    // physics update
+    private void HandlePreStep(float deltaTime)
+    {
+      m_body.Position = Parent.Transform.Position;
+      m_physicsManager.PreStep -= HandlePreStep;
     }
 
     private void HandlePostStep(float deltaTime)

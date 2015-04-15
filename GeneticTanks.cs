@@ -101,10 +101,10 @@ namespace GeneticTanks
       CreateArena();
 
       //TankFactory.CreateControlledTestTank(Vector2.Zero, 0);
-      TankFactory.CreateTestTank(new Vector2(-200, -200), 45);
-      TankFactory.CreateTestTank(new Vector2(200, -200), 125);
-      TankFactory.CreateTestTank(new Vector2(0, 100), 240);
-      TankFactory.CreateTestTank(new Vector2(-100, 0), 90);
+      TankFactory.CreateTestTank(new Vector2(-200, -200), 90);
+      TankFactory.CreateTestTank(new Vector2(200, -200), 180);
+      TankFactory.CreateTestTank(new Vector2(0, 100), 90);
+      TankFactory.CreateTestTank(new Vector2(-100, 200), 0);
       TankFactory.CreateTestTank(new Vector2(-100, -100), 135);
       TankFactory.CreateTestTank(new Vector2(-200, 0), -90);
     }

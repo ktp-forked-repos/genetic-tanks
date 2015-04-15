@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using FarseerPhysics.Dynamics;
 using GeneticTanks.Game.Components.Messages;
+using GeneticTanks.Game.Events;
 using log4net;
 using Microsoft.Xna.Framework;
 
@@ -142,13 +143,15 @@ namespace GeneticTanks.Game.Components.Tank
       m_messenger.AddListener<SensorNewContactMessage>(HandleSensorNewContact);
       m_messenger.AddListener<SensorLostContactMessage>(
         HandleSensorLostContact);
-
+      m_eventManager.AddListener<TankKilledEvent>(HandleTankKilled);
       m_physicsManager.PostStep += HandlePostStep;
 
       SetState(AiState.Search);
+
+      Initialized = true;
       return true;
     }
-    
+
     public override void Update(float deltaTime)
     {
       m_updateTime += deltaTime;
@@ -374,7 +377,10 @@ namespace GeneticTanks.Game.Components.Tank
       }
 
       m_target = closest;
-      m_messenger.QueueMessage(new SetTargetMessage(m_target));
+      // Must be trigger so that components holding a reference to the target
+      // can immediately update.  Otherwise causes crashes when the target
+      // was destroyed
+      m_messenger.TriggerMessage(new SetTargetMessage(m_target));
 
       if (m_target == null)
       {
@@ -424,6 +430,18 @@ namespace GeneticTanks.Game.Components.Tank
       }
     }
 
+    private void HandleTankKilled(Event e)
+    {
+      var evt = (TankKilledEvent) e;
+
+      m_contacts.RemoveAll(entity => entity.Id == evt.Id);
+      if (m_target != null && evt.Id == m_target.Id)
+      {
+        m_target = null;
+        SelectTarget();
+      }
+    }
+
     private void HandlePostStep(float deltaTime)
     {
       m_collisionUpdateTime += deltaTime;
@@ -453,16 +471,11 @@ namespace GeneticTanks.Game.Components.Tank
         return;
       }
 
-      if (disposing)
-      {
-        
-      }
-
       m_messenger.RemoveListener<SensorNewContactMessage>(
         HandleSensorNewContact);
       m_messenger.RemoveListener<SensorNewContactMessage>(
         HandleSensorLostContact);
-
+      m_eventManager.RemoveListener<TankKilledEvent>(HandleTankKilled);
       m_physicsManager.PostStep -= HandlePostStep;
 
       base.Dispose(disposing);

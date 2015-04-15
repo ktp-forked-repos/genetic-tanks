@@ -265,12 +265,23 @@ namespace GeneticTanks.Game
 
       if (disposing)
       {
-        foreach (var component in m_components.Values)
+        // HACK: Components can't remove listeners from MessageComponent after 
+        // it has been disposed
+        var messenger = GetComponent<MessageComponent>();
+        var nonMessenger = m_components.Values
+          .Where(c => c.GetType() != typeof (MessageComponent));
+        foreach (var component in nonMessenger)
         {
           component.Dispose();
         }
+
+        if (messenger != null)
+        {
+          messenger.Dispose();
+        }
       }
 
+      Transform = null;
       m_components.Clear();
       m_updateComponents.Clear();
 

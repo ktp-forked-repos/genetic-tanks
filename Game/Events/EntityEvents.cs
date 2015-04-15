@@ -100,4 +100,16 @@ namespace GeneticTanks.Game.Events
     {
     }
   }
+
+  sealed class TankKilledEvent
+      : EntityIdEvent
+  {
+    public TankKilledEvent(uint id, uint killer)
+      : base(id)
+    {
+      Killer = killer;
+    }
+
+    public uint Killer { get; private set; }
+  }
 }

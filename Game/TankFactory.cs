@@ -53,7 +53,7 @@ namespace GeneticTanks.Game
     {
       var entity = CreateTankBase();
 
-      var state = new TankStateComponent(entity)
+      var state = new TankStateComponent(entity, EventManager)
       {
         Dimensions = new Vector2(10, 6),
         TrackWidth = 1,
@@ -63,11 +63,11 @@ namespace GeneticTanks.Game
 
         SensorRadius = 100,
         GunRange = 75,
-        GunSpeed = 5,
+        GunSpeed = 100,
         GunDamage = 1,
-        ReloadTime = 5,
+        ReloadTime = 2,
 
-        MaxHealth = 100,
+        MaxHealth = 20,
         MaxSpeed = 20,
         MaxTurnSpeed = 30,
         MaxTurretRotationRate = 30
