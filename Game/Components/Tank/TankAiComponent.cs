@@ -74,6 +74,7 @@ namespace GeneticTanks.Game.Components.Tank
     private TankPhysicsTransformComponent m_physics;
     private TankStateComponent m_state;
 
+    private bool m_enabled = true;
     private float m_updateTime = 0f;
     private float m_collisionUpdateTime = 0f;
 
@@ -145,7 +146,8 @@ namespace GeneticTanks.Game.Components.Tank
       m_messenger.AddListener<SensorNewContactMessage>(HandleSensorNewContact);
       m_messenger.AddListener<SensorLostContactMessage>(
         HandleSensorLostContact);
-      m_eventManager.AddListener<TankKilledEvent>(HandleTankKilled);
+      m_messenger.AddListener<TankKilledMessage>(HandleTankKilledMessage);
+      m_eventManager.AddListener<TankKilledEvent>(HandleTankKilledEvent);
       m_physicsManager.PostStep += HandlePostStep;
 
       SetState(AiState.Search);
@@ -156,6 +158,11 @@ namespace GeneticTanks.Game.Components.Tank
 
     public override void Update(float deltaTime)
     {
+      if (!m_enabled)
+      {
+        return;
+      }
+
       m_updateTime += deltaTime;
       if (m_updateTime < UpdateInterval)
       {
@@ -431,7 +438,14 @@ namespace GeneticTanks.Game.Components.Tank
       }
     }
 
-    private void HandleTankKilled(Event e)
+    private void HandleTankKilledMessage(Message msg)
+    {
+      m_enabled = false;
+      m_physicsManager.PostStep -= HandlePostStep;
+      m_eventManager.RemoveListener<TankKilledEvent>(HandleTankKilledEvent);
+    }
+
+    private void HandleTankKilledEvent(Event e)
     {
       var evt = (TankKilledEvent) e;
 
@@ -476,7 +490,7 @@ namespace GeneticTanks.Game.Components.Tank
         HandleSensorNewContact);
       m_messenger.RemoveListener<SensorNewContactMessage>(
         HandleSensorLostContact);
-      m_eventManager.RemoveListener<TankKilledEvent>(HandleTankKilled);
+      m_eventManager.RemoveListener<TankKilledEvent>(HandleTankKilledEvent);
       m_physicsManager.PostStep -= HandlePostStep;
 
       base.Dispose(disposing);

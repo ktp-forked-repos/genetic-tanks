@@ -8,8 +8,6 @@ using FarseerPhysics.Factories;
 using GeneticTanks.Game.Components.Messages;
 using GeneticTanks.Game.Managers;
 using log4net;
-using SFML.Graphics;
-using SFML.Window;
 
 namespace GeneticTanks.Game.Components.Tank
 {
@@ -111,12 +109,14 @@ namespace GeneticTanks.Game.Components.Tank
       m_body.OnSeparation += HandleSensorSeparation;
       m_physicsManager.PreStep += HandlePreStep;
       m_physicsManager.PostStep += HandlePostStep;
+
+      m_messenger.AddListener<TankKilledMessage>(HandleTankKilled);
       
       Initialized = true;
       Enabled = true;
       return true;
     }
-    
+
     public override void Update(float deltaTime)
     {
     }
@@ -162,6 +162,14 @@ namespace GeneticTanks.Game.Components.Tank
       m_body.Position = Parent.Transform.Position;
     }
 
+    private void HandleTankKilled(Message msg)
+    {
+      Enabled = false;
+      m_physicsManager.PostStep -= HandlePostStep;
+      m_body.Enabled = false;
+    }
+
+
     #endregion
     #region IDisposable Implementation
 
@@ -180,6 +188,8 @@ namespace GeneticTanks.Game.Components.Tank
 
       m_physicsManager.World.RemoveBody(m_body);
       m_body = null;
+
+      m_messenger.RemoveListener<TankKilledMessage>(HandleTankKilled);
 
       base.Dispose(disposing);
       m_disposed = true;

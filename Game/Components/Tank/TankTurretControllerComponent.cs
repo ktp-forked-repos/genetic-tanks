@@ -65,6 +65,7 @@ namespace GeneticTanks.Game.Components.Tank
 
       m_messenger.AddListener<SetTargetMessage>(HandleSetTarget);
       m_messenger.AddListener<ShootingStateMessage>(HandleShootingStateChange);
+      m_messenger.AddListener<TankKilledMessage>(HandleTankKilled);
 
       Initialized = true;
       return true;
@@ -194,6 +195,12 @@ namespace GeneticTanks.Game.Components.Tank
     {
       var msg = (ShootingStateMessage) m;
       m_firing = msg.Shooting;
+    }
+
+    private void HandleTankKilled(Message msg)
+    {
+      m_target = null;
+      m_enabled = false;
     }
     
     #endregion
