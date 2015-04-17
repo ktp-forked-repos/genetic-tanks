@@ -1,11 +1,14 @@
 ﻿using System;
 using GeneticTanks.Game.Managers;
+using Microsoft.Xna.Framework;
 using SFML.Graphics;
 
 namespace GeneticTanks.Game
 {
   static class Globals
   {
+    public static bool Initialized { get; private set; }
+
     public static EntityManager EntityManager { get; private set; }
     public static EventManager EventManager { get; private set; }
     public static InputManager InputManager { get; private set; }
@@ -13,7 +16,9 @@ namespace GeneticTanks.Game
     public static RenderManager RenderManager { get; private set; }
     public static ViewManager ViewManager { get; private set; }
 
-    public static void Initialize(RenderWindow window)
+    public static Arena Arena { get; private set; }
+
+    public static bool Initialize(RenderWindow window)
     {
       if (window == null)
       {
@@ -26,6 +31,32 @@ namespace GeneticTanks.Game
       InputManager = new InputManager(window, EventManager);
       ViewManager = new ViewManager(EventManager, window);
       PhysicsManager = new PhysicsManager(EventManager);
+
+      PhysicsManager.CreateWorld();
+
+      var dimensions = new Vector2(
+        Properties.Settings.Default.ArenaWidth,
+        Properties.Settings.Default.ArenaHeight
+        );
+      Arena = new Arena(dimensions);
+      if (!Arena.Initialize())
+      {
+        return false;
+      }
+
+      Initialized = true;
+      return true;
+    }
+
+    public static void Dispose()
+    {
+      Arena.Dispose();
+
+      EntityManager.Dispose();
+      InputManager.Dispose();
+      ViewManager.Dispose();
+      RenderManager.Dispose();
+      PhysicsManager.Dispose();
     }
   }
 }

@@ -65,6 +65,7 @@
   <ItemGroup>
     <Compile Include="Extensions\LogExtensions.cs" />
     <Compile Include="Extensions\Vector.cs" />
+    <Compile Include="Game\Arena.cs" />
     <Compile Include="Game\BulletFactory.cs" />
     <Compile Include="Game\Components\Bullet\BulletDataComponent.cs" />
     <Compile Include="Game\Components\Bullet\BulletPhysicsTransformComponent.cs" />

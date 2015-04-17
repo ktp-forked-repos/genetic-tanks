@@ -22,5 +22,29 @@ namespace GeneticTanks.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("500")]
+        public int ArenaWidth {
+            get {
+                return ((int)(this["ArenaWidth"]));
+            }
+            set {
+                this["ArenaWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("500")]
+        public int ArenaHeight {
+            get {
+                return ((int)(this["ArenaHeight"]));
+            }
+            set {
+                this["ArenaHeight"] = value;
+            }
+        }
     }
 }

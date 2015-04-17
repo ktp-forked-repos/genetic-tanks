@@ -110,10 +110,28 @@ namespace GeneticTanks.Game.Managers
     }
 
     /// <summary>
-    /// Queues an entity to be removed during the next frame.
+    /// Immediately removes an entity, bypassing the normal removal queue.  
+    /// Use with caution.
     /// </summary>
     /// <param name="id"></param>
     public void RemoveEntity(uint id)
+    {
+      var entity = GetEntity(id);
+      if (entity == null)
+      {
+        Log.WarnFmt("Request to remove non existing entity {0}", id);
+        return;
+      }
+
+      m_eventManager.TriggerEvent(new EntityRemovedEvent(entity));
+      RemoveEntity(entity);
+    }
+
+    /// <summary>
+    /// Queues an entity to be removed during the next frame.
+    /// </summary>
+    /// <param name="id"></param>
+    public void QueueForRemoval(uint id)
     {
       var e = GetEntity(id);
       if (e == null)
@@ -154,7 +172,6 @@ namespace GeneticTanks.Game.Managers
         return;
       }
 
-      var id = e.Id;
       var name = e.FullName;
       m_updateEntities.Remove(e);
       m_entities.Remove(e.Id);
