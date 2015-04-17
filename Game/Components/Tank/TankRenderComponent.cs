@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using GeneticTanks.Extensions;
+using GeneticTanks.Game.Managers;
 using log4net;
 using Microsoft.Xna.Framework;
 using SFML.Graphics;
@@ -8,7 +9,7 @@ using SFML.Window;
 namespace GeneticTanks.Game.Components.Tank
 {
   /// <summary>
-  /// Renders a tank at z depth 5.
+  /// Renders a tank.
   /// </summary>
   sealed class TankRenderComponent
     : RenderComponent
@@ -46,7 +47,7 @@ namespace GeneticTanks.Game.Components.Tank
       : base(parent)
     {
       NeedsUpdate = false;
-      ZDepth = 5;
+      ZDepth = RenderDepth.Tank;
       BodyColor = Color.Red;
     }
 

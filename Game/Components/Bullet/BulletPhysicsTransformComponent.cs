@@ -3,12 +3,18 @@ using System.Reflection;
 using FarseerPhysics.Dynamics;
 using FarseerPhysics.Dynamics.Contacts;
 using FarseerPhysics.Factories;
+using GeneticTanks.Extensions;
 using GeneticTanks.Game.Events;
 using GeneticTanks.Game.Managers;
 using log4net;
 
 namespace GeneticTanks.Game.Components.Bullet
 {
+  /// <summary>
+  /// Handles bullet collision physics.  Triggers a TankHitEvent when then 
+  /// bullet impacts a tank, and requests the bullet's removal when it hits a 
+  /// tank or piece of terrain.
+  /// </summary>
   sealed class BulletPhysicsTransformComponent
     : PhysicsTransformComponent
   {
@@ -85,7 +91,7 @@ namespace GeneticTanks.Game.Components.Bullet
       }
       else
       {
-        Log.WarnFormat(
+        Log.WarnFmt(
         "{0} collided with something it probably shouldn't? Categories {1:X} " +
         "id {2}", Parent.FullName, fixtureB.CollisionCategories,
         Convert.ToUInt32(fixtureB.UserData));

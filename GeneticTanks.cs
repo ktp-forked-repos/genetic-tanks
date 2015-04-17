@@ -33,7 +33,7 @@ namespace GeneticTanks
     [STAThread]
     static void Main()
     {
-      Log.InfoFormat("PID {0}", Process.GetCurrentProcess().Id);
+      Log.InfoFmt("PID {0}", Process.GetCurrentProcess().Id);
 
       // ensure all unhandled exceptions are logged
       AppDomain.CurrentDomain.UnhandledException +=
@@ -144,7 +144,7 @@ namespace GeneticTanks
 
           return body;
         }));
-      var src = new SimpleRenderComponent(entity, 
+      var src = new SimpleRenderComponent(entity, RenderDepth.Terrain,
         () => new RectangleShape(ArenaSize.ToVector2f())
         {
           Origin = new Vector2f(halfWidth, halfHeight)
@@ -157,7 +157,6 @@ namespace GeneticTanks
         return;
       }
 
-      src.ZDepth = 100;
       src.FillColor = Color.Transparent;
       src.OutlineColor = Color.Black;
       src.OutlineThickness = 1f;

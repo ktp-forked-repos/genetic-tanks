@@ -101,6 +101,9 @@ namespace GeneticTanks.Game.Events
     }
   }
 
+  /// <summary>
+  /// Signals that a tank was killed.
+  /// </summary>
   sealed class TankKilledEvent
       : EntityIdEvent
   {

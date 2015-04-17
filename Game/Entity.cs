@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting.Messaging;
+using GeneticTanks.Extensions;
 using GeneticTanks.Game.Components;
 using log4net;
 
@@ -47,7 +48,8 @@ namespace GeneticTanks.Game
 
       Id = id;
       Name = name;
-      FullName = string.Format("Entity {0} ({1})", Id, Name);
+      FullName = string.Format("{0} ({1})", 
+        string.IsNullOrEmpty(name) ? "<unnamed>" : name, Id);
       NeedsUpdate = false;
     }
 
@@ -97,12 +99,12 @@ namespace GeneticTanks.Game
           break;
 
         case 0:
-          Log.WarnFormat("{0} initialized with no TransformComponent...",
+          Log.WarnFmt("{0} initialized with no TransformComponent...",
             FullName);
           break;
 
         default:
-          Log.ErrorFormat("{0} initialized with multiple TransformComponents",
+          Log.ErrorFmt("{0} initialized with multiple TransformComponents",
             FullName);
           return false;
       }
@@ -111,12 +113,14 @@ namespace GeneticTanks.Game
       {
         if (!component.Initialize())
         {
-          Log.ErrorFormat("Failed to initialize {0} in {1}",
+          Log.ErrorFmt("Failed to initialize {0} in {1}",
             component.GetType().Name, FullName);
           return false;
         }
       }
 
+      Log.VerboseFmt("{0} initialized {1} components", FullName, 
+        m_components.Count);
       return true;
     }
 
@@ -180,6 +184,8 @@ namespace GeneticTanks.Game
       }
 
       m_components.Add(component.GetType(), component);
+      Log.VerboseFmt("{0} added component {1}", FullName, 
+        component.GetType().Name);
     }
 
     /// <summary>
@@ -218,6 +224,8 @@ namespace GeneticTanks.Game
         return (T) c;
       }
 
+      Log.DebugFmt("GetComponent<T>: {0} does not have requested component {1}",
+        FullName, type.Name);
       return null;
     }
 
@@ -262,6 +270,8 @@ namespace GeneticTanks.Game
       {
         return;
       }
+
+      Log.VerboseFmt("{0} disposing", FullName);
 
       if (disposing)
       {

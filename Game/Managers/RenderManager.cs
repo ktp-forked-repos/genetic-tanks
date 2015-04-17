@@ -9,10 +9,24 @@ using Event = GeneticTanks.Game.Events.Event;
 
 namespace GeneticTanks.Game.Managers
 {
+  
+  enum RenderDepth
+  {
+    Default = int.MinValue,
+
+    Gui = -100,
+    DebugOverlay = -5,
+
+    Terrain = 0,
+    Tank = 10,
+    Bullet = 50
+  }
+
   /// <summary>
   /// Manages the rendering of all graphical components.
   /// </summary>
   sealed class RenderManager
+    : IDisposable
   {
     private static readonly ILog Log = LogManager.GetLogger(
       MethodBase.GetCurrentMethod().DeclaringType);
@@ -134,10 +148,30 @@ namespace GeneticTanks.Game.Managers
     
     #endregion
 
-    ~RenderManager()
+    private bool m_disposed = false;
+
+    public void Dispose()
     {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    void Dispose(bool disposing)
+    {
+      if (m_disposed)
+      {
+        return;
+      }
+
       m_eventManager.RemoveListener<EntityAddedEvent>(HandleEntityAdded);
       m_eventManager.RemoveListener<EntityRemovedEvent>(HandleEntityRemoved);
+
+      m_disposed = true;
+    }
+
+    ~RenderManager()
+    {
+      Dispose(false);
     }
   }
 }

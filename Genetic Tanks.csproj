@@ -63,6 +63,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions\LogExtensions.cs" />
     <Compile Include="Extensions\Vector.cs" />
     <Compile Include="Game\BulletFactory.cs" />
     <Compile Include="Game\Components\Bullet\BulletDataComponent.cs" />
@@ -77,7 +78,7 @@
     <Compile Include="Game\Components\Messages\TargetMessages.cs" />
     <Compile Include="Game\Components\PhysicsTransformComponent.cs" />
     <Compile Include="Game\Components\RenderComponent.cs" />
-    <Compile Include="Game\Components\SensorComponent.cs" />
+    <Compile Include="Game\Components\Tank\TankSensorComponent.cs" />
     <Compile Include="Game\Components\SimpleRenderComponent.cs" />
     <Compile Include="Game\Components\StaticPhysicsTransformComponent.cs" />
     <Compile Include="Game\Components\Tank\TankAiComponent.cs" />

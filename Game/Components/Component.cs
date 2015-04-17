@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using GeneticTanks.Extensions;
 using log4net;
 
 namespace GeneticTanks.Game.Components
@@ -88,9 +89,9 @@ namespace GeneticTanks.Game.Components
         return true;
       }
 
-      Log.ErrorFormat(
-        "{0} could not retrieve requested component {1} from entity {2}",
-        GetType().Name, typeof(T).Name, Parent.Id);
+      Log.ErrorFmt(
+        "{0} could not retrieve requested component {1} from {2}",
+        GetType().Name, typeof(T).Name, Parent.FullName);
       return false;
     }
 
@@ -111,14 +112,14 @@ namespace GeneticTanks.Game.Components
       var result = Parent.GetComponentsByBase<T>();
       if (result.Count == 0)
       {
-        Log.ErrorFormat(
-          "{0} could not retrieve requested component {1} from entity {2}",
-          GetType().Name, typeof(T).Name, Parent.Id);
+        Log.ErrorFmt(
+          "{0} could not retrieve requested component {1} from {2}",
+          GetType().Name, typeof(T).Name, Parent.FullName);
         return false;
       }
       if (result.Count > 1)
       {
-        Log.ErrorFormat(
+        Log.ErrorFmt(
           "{0} requested base component {1} from {2} but multiple matches " +
           "were found", GetType().Name, typeof(T).Name, Parent.FullName);
         return false;
@@ -154,6 +155,8 @@ namespace GeneticTanks.Game.Components
       {
         return;
       }
+
+      Log.VerboseFmt("{0} {1} disposing", Parent.FullName, GetType().Name);
 
       Parent = null;
       m_disposed = true;

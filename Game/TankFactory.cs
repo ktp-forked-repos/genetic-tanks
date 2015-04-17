@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using GeneticTanks.Extensions;
 using GeneticTanks.Game.Components;
 using GeneticTanks.Game.Components.Tank;
 using GeneticTanks.Game.Managers;
@@ -76,7 +77,7 @@ namespace GeneticTanks.Game
 
       if (!entity.Initialize())
       {
-        Log.ErrorFormat("Could not initialize {0}, discarding", entity.Name);
+        Log.ErrorFmt("Could not initialize {0}, discarding", entity.Name);
         entity.Dispose();
         return null;
       }
@@ -95,14 +96,13 @@ namespace GeneticTanks.Game
     private static Entity CreateTankBase()
     {
       var id = EntityManager.NextId;
-      var name = string.Format("Tank {0}", id);
-      var entity = new Entity(id, name);
+      var entity = new Entity(id, "tank");
 
       entity.AddComponent(new MessageComponent(entity));
       entity.AddComponent(new TankRenderComponent(entity));
       entity.AddComponent(
         new TankPhysicsTransformComponent(entity, Globals.PhysicsManager));
-      entity.AddComponent(new SensorComponent(entity, Globals.PhysicsManager));
+      entity.AddComponent(new TankSensorComponent(entity, Globals.PhysicsManager));
       entity.AddComponent(new TankTurretControllerComponent(entity));
 
       return entity;

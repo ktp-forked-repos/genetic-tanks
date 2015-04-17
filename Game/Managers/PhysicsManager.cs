@@ -11,6 +11,7 @@ namespace GeneticTanks.Game.Managers
   /// Manages the physics world and simulation.
   /// </summary>
   sealed class PhysicsManager
+    : IDisposable
   {
     private static readonly ILog Log = LogManager.GetLogger(
       MethodBase.GetCurrentMethod().DeclaringType);
@@ -141,6 +142,35 @@ namespace GeneticTanks.Game.Managers
       {
         PostStep(deltaTime);
       }
+    }
+
+    #endregion
+
+    #region IDisposable Implementation
+
+    private bool m_disposed = false;
+
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    private void Dispose(bool disposing)
+    {
+      if (m_disposed)
+      {
+        return;
+      }
+
+      World = null;
+
+      m_disposed = true;
+    }
+
+    ~PhysicsManager()
+    {
+      Dispose(false);
     }
 
     #endregion

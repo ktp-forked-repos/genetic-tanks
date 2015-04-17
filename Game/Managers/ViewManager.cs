@@ -12,6 +12,7 @@ namespace GeneticTanks.Game.Managers
   /// Controls the user's view into the game map.
   /// </summary>
   sealed class ViewManager
+    : IDisposable
   {
     private static readonly ILog Log = LogManager.GetLogger(
       MethodBase.GetCurrentMethod().DeclaringType);
@@ -110,11 +111,35 @@ namespace GeneticTanks.Game.Managers
 
     #endregion
 
-    ~ViewManager()
+    #region IDisposable Implementation
+
+    private bool m_disposed = false;
+
+    public void Dispose()
     {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    private void Dispose(bool disposing)
+    {
+      if (m_disposed)
+      {
+        return;
+      }
+
       m_eventManager.RemoveListener<WindowResizeEvent>(HandleWindowResize);
       m_eventManager.RemoveListener<MapDragEvent>(HandleMapDrag);
       m_eventManager.RemoveListener<MapZoomEvent>(HandleMapZoom);
+
+      m_disposed = true;
     }
+
+    ~ViewManager()
+    {
+      Dispose(false);
+    }
+
+    #endregion
   }
 }

@@ -1,5 +1,8 @@
 ﻿namespace GeneticTanks.Game.Components.Messages
 {
+  /// <summary>
+  /// Signals that the tank has fired a shot.
+  /// </summary>
   sealed class ShotFiredMessage
     : Message
   {
@@ -51,6 +54,9 @@
     public float Damage { get; private set; }
   }
 
+  /// <summary>
+  /// Broadcasts that the tank was killed.
+  /// </summary>
   sealed class TankKilledMessage
       : Message
   {

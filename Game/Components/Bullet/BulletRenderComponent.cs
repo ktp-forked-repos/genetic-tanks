@@ -1,11 +1,14 @@
 ﻿using System.Reflection;
-using System.Runtime.Remoting.Messaging;
+using GeneticTanks.Game.Managers;
 using log4net;
 using SFML.Graphics;
 using SFML.Window;
 
 namespace GeneticTanks.Game.Components.Bullet
 {
+  /// <summary>
+  /// Draws a bullet as a simple black circle.
+  /// </summary>
   sealed class BulletRenderComponent
     : RenderComponent
   {
@@ -21,6 +24,7 @@ namespace GeneticTanks.Game.Components.Bullet
     public BulletRenderComponent(Entity parent) 
       : base(parent)
     {
+      ZDepth = RenderDepth.Bullet;
       NeedsUpdate = false;
     }
 

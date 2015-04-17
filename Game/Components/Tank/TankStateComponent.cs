@@ -4,13 +4,13 @@ using GeneticTanks.Game.Components.Messages;
 using GeneticTanks.Game.Events;
 using GeneticTanks.Game.Managers;
 using log4net;
-using log4net.Repository.Hierarchy;
 using Microsoft.Xna.Framework;
 
 namespace GeneticTanks.Game.Components.Tank
 {
   /// <summary>
-  /// Is a data container for various information about the tank state.
+  /// Is a data container for various information about the tank state, and 
+  /// updates the health when the tank is hit.
   /// </summary>
   sealed class TankStateComponent
     : Component
@@ -216,7 +216,6 @@ namespace GeneticTanks.Game.Components.Tank
       {
         m_messenger.QueueMessage(new TankKilledMessage(evt.Shooter));
         m_eventManager.QueueEvent(new TankKilledEvent(Parent.Id, evt.Shooter));
-        m_eventManager.QueueEvent(new RequestEntityRemovalEvent(Parent.Id));
       }
     }
 

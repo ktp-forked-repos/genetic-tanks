@@ -33,6 +33,9 @@
     TurnRightFull
   }
 
+  /// <summary>
+  /// Commands the tank to change its movement.
+  /// </summary>
   sealed class MoveMessage
     : Message
   {

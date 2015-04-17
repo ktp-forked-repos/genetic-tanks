@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using GeneticTanks.Extensions;
 using GeneticTanks.Game.Components.Messages;
 using log4net;
 using Microsoft.Xna.Framework;
@@ -118,7 +119,7 @@ namespace GeneticTanks.Game.Components.Tank
         position, velocity);
       if (bullet == null)
       {
-        Log.ErrorFormat("{0} tried to fire a shot but failed", Parent.FullName);
+        Log.ErrorFmt("{0} tried to fire a shot but failed", Parent.FullName);
       }
       else
       {

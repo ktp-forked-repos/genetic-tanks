@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using GeneticTanks.Extensions;
 using GeneticTanks.Game.Components.Messages;
 using log4net;
 
@@ -104,7 +105,7 @@ namespace GeneticTanks.Game.Components
       {
         m_listeners[type] += listener;
       }
-      Log.DebugFormat("{0} registered listener for {1}",
+      Log.VerboseFmt("{0} registered listener for {1}",
         Parent.FullName, type.Name);
     }
 
@@ -128,7 +129,7 @@ namespace GeneticTanks.Game.Components
       if (m_listeners.ContainsKey(type))
       {
         m_listeners[type] -= listener;
-        Log.DebugFormat("{0} removed listener for {1}",
+        Log.VerboseFmt("{0} removed listener for {1}",
           Parent.FullName, type.Name);
       }
     }
@@ -154,12 +155,12 @@ namespace GeneticTanks.Game.Components
       MessageListener listener;
       if (m_listeners.TryGetValue(type, out listener) && listener != null)
       {
-        Log.DebugFormat("{0} dispatching {1}", Parent.FullName, type.Name);
+        Log.VerboseFmt("{0} dispatching {1}", Parent.FullName, type.Name);
         listener(msg);
       }
       else
       {
-        Log.DebugFormat("{0} discarding {1}, no listeners",
+        Log.VerboseFmt("{0} discarding {1}, no listeners",
           Parent.FullName, type.Name);
       }
     }
@@ -179,7 +180,7 @@ namespace GeneticTanks.Game.Components
       }
 
       m_queue[m_writeIndex].Add(msg);
-      Log.DebugFormat("{0} queued {1}", Parent.FullName, msg.GetType().Name);
+      Log.VerboseFmt("{0} queued {1}", Parent.FullName, msg.GetType().Name);
     }
 
     /// <summary>
@@ -201,7 +202,7 @@ namespace GeneticTanks.Game.Components
       }
 
       m_queue[m_writeIndex].Remove(toRemove);
-      Log.DebugFormat("{0} aborted message {1}", Parent.FullName, type.Name);
+      Log.VerboseFmt("{0} aborted message {1}", Parent.FullName, type.Name);
       return true;
     }
 
@@ -220,7 +221,7 @@ namespace GeneticTanks.Game.Components
       var result = m_queue[m_writeIndex].RemoveAll(m => m.GetType() == type);
       if (result > 0)
       {
-        Log.DebugFormat("{0} aborted {1} {2} messages",
+        Log.VerboseFmt("{0} aborted {1} {2} messages",
           Parent.FullName, result, type.Name);
       }
       return result;
@@ -239,7 +240,7 @@ namespace GeneticTanks.Game.Components
       m_queue[m_writeIndex].Clear();
       if (result > 0)
       {
-        Log.DebugFormat("{0} cleared {1} messages from queue",
+        Log.VerboseFmt("{0} cleared {1} messages from queue",
           Parent.FullName, result);
       }
       return result;
@@ -272,7 +273,7 @@ namespace GeneticTanks.Game.Components
         count++;
       }
 
-      Log.DebugFormat("{0} dispatched {1} messages", Parent.FullName, count);
+      Log.VerboseFmt("{0} dispatched {1} messages", Parent.FullName, count);
     }
 
     #endregion

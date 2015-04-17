@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using GeneticTanks.Extensions;
 using GeneticTanks.Game.Components.Bullet;
 using GeneticTanks.Game.Events;
 using GeneticTanks.Game.Managers;
@@ -16,8 +17,7 @@ namespace GeneticTanks.Game
       Vector2 position, Vector2 velocity)
     {
       var id = EntityManager.NextId;
-      var name = string.Format("bullet {0}", id);
-      Entity bullet = new Entity(id, name);
+      Entity bullet = new Entity(id, "bullet");
       bullet.AddComponent(new BulletPhysicsTransformComponent(bullet,
         Globals.PhysicsManager, Globals.EventManager));
       bullet.AddComponent(new BulletRenderComponent(bullet));
@@ -31,7 +31,7 @@ namespace GeneticTanks.Game
 
       if (!bullet.Initialize())
       {
-        Log.ErrorFormat("Failed to initialize {0}, discarding", bullet.FullName);
+        Log.ErrorFmt("Failed to initialize {0}, discarding", bullet.FullName);
         bullet.Dispose();
         return null;
       }

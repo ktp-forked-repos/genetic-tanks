@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using GeneticTanks.Extensions;
 using GeneticTanks.Game.Events;
 using log4net;
 
@@ -80,7 +81,7 @@ namespace GeneticTanks.Game.Managers
       {
         m_listeners[type] += listener;
       }
-      Log.DebugFormat("Added listener for {0}", type.Name);
+      Log.VerboseFmt("Added listener for {0}", type.Name);
     }
 
     /// <summary>
@@ -103,7 +104,7 @@ namespace GeneticTanks.Game.Managers
       if (m_listeners.ContainsKey(type))
       {
         m_listeners[type] -= listener;
-        Log.DebugFormat("Removed listener for {0}", type.Name);
+        Log.VerboseFmt("Removed listener for {0}", type.Name);
       }
     }
 
@@ -128,12 +129,12 @@ namespace GeneticTanks.Game.Managers
       EventListener listener;
       if (m_listeners.TryGetValue(type, out listener) && listener != null)
       {
-        Log.DebugFormat("Dispatching {0}", type.Name);
+        Log.VerboseFmt("Dispatching {0}", type.Name);
         listener(evt);
       }
       else
       {
-        Log.DebugFormat("Discarding {0}, no listeners", type.Name);
+        Log.VerboseFmt("Discarding {0}, no listeners", type.Name);
       }
     }
 
@@ -152,7 +153,7 @@ namespace GeneticTanks.Game.Managers
       }
 
       m_queue[m_writeIndex].Add(evt);
-      Log.DebugFormat("Queued {0}", evt.GetType().Name);
+      Log.VerboseFmt("Queued {0}", evt.GetType().Name);
     }
 
     /// <summary>
@@ -174,7 +175,7 @@ namespace GeneticTanks.Game.Managers
       }
 
       m_queue[m_writeIndex].Remove(toRemove);
-      Log.DebugFormat("Aborted event {0}", type.Name);
+      Log.VerboseFmt("Aborted event {0}", type.Name);
       return true;
     }
 
@@ -193,7 +194,7 @@ namespace GeneticTanks.Game.Managers
       var result = m_queue[m_writeIndex].RemoveAll(e => e.GetType() == type);
       if (result > 0)
       {
-        Log.DebugFormat("Aborted {0} events of type {1}", result, type.Name);
+        Log.VerboseFmt("Aborted {0} events of type {1}", result, type.Name);
       }
       return result;
     }
@@ -211,7 +212,7 @@ namespace GeneticTanks.Game.Managers
       m_queue[m_writeIndex].Clear();
       if (result > 0)
       {
-        Log.DebugFormat("Cleared {0} events from queue", result);
+        Log.VerboseFmt("Cleared {0} events from queue", result);
       }
       return result;
     }
@@ -242,7 +243,7 @@ namespace GeneticTanks.Game.Managers
       {
         if (m_eventTimer.Elapsed.TotalSeconds >= maxEventTime)
         {
-          Log.DebugFormat(
+          Log.VerboseFmt(
             "Queue processing aborted with {0} events in the queue",
             m_queue[m_readIndex].Count);
           
@@ -257,7 +258,7 @@ namespace GeneticTanks.Game.Managers
         count++;
       }
 
-      Log.DebugFormat("Processed {0} events in {1:F4} s", count,
+      Log.VerboseFmt("Processed {0} events in {1:F4} s", count,
         m_eventTimer.Elapsed.TotalSeconds);
     }
 

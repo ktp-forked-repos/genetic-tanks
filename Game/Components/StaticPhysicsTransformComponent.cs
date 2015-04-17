@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Reflection;
 using FarseerPhysics.Dynamics;
+using GeneticTanks.Extensions;
 using GeneticTanks.Game.Managers;
 using log4net;
 
@@ -47,15 +47,16 @@ namespace GeneticTanks.Game.Components
       Body = m_bodyCreator(World);
       if (Body == null)
       {
-        Log.ErrorFormat("{0} had body creator fail to return a body",
+        Log.ErrorFmt("{0} had body creator fail to return a body",
           Parent.FullName);
         return false;
       }
       
       if (Body.BodyType != BodyType.Static)
       {
-        Log.WarnFormat("{0} created a body that is not static", 
+        Log.ErrorFmt("{0} created a body that is not static", 
           Parent.FullName);
+        return false;
       }
 
       Initialized = true;

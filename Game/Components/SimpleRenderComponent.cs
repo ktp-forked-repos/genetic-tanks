@@ -1,6 +1,9 @@
 ﻿
 using System;
+using System.Diagnostics;
 using System.Reflection;
+using GeneticTanks.Extensions;
+using GeneticTanks.Game.Managers;
 using log4net;
 using SFML.Graphics;
 
@@ -26,7 +29,8 @@ namespace GeneticTanks.Game.Components
     /// </summary>
     /// <param name="parent"></param>
     /// <param name="shapeCreator"></param>
-    public SimpleRenderComponent(Entity parent, Func<Shape> shapeCreator) 
+    public SimpleRenderComponent(Entity parent, RenderDepth zDepth, 
+      Func<Shape> shapeCreator) 
       : base(parent)
     {
       if (shapeCreator == null)
@@ -34,26 +38,60 @@ namespace GeneticTanks.Game.Components
         throw new ArgumentNullException("shapeCreator");
       }
 
+      ZDepth = zDepth;
       m_shapeCreator = shapeCreator;
       NeedsUpdate = false;
     }
 
+    /// <summary>
+    /// Fill color of the shape.  Only valid after initialization.
+    /// </summary>
     public Color FillColor
     {
-      get { return m_shape.FillColor; }
-      set { m_shape.FillColor = value; }
+      get
+      {
+        Debug.Assert(m_shape != null);
+        return m_shape.FillColor;
+      }
+      set
+      {
+        Debug.Assert(m_shape != null);
+        m_shape.FillColor = value;
+      }
     }
 
+    /// <summary>
+    /// Outline color of the shape.  Only valid after initialization.
+    /// </summary>
     public Color OutlineColor
     {
-      get { return m_shape.OutlineColor; }
-      set { m_shape.OutlineColor = value; }
+      get
+      {
+        Debug.Assert(m_shape != null);
+        return m_shape.OutlineColor;
+      }
+      set
+      {
+        Debug.Assert(m_shape != null);
+        m_shape.OutlineColor = value;
+      }
     }
 
+    /// <summary>
+    /// Outline thickness of the shape.  Only valid after initialization.
+    /// </summary>
     public float OutlineThickness
     {
-      get { return m_shape.OutlineThickness; }
-      set { m_shape.OutlineThickness = value; }
+      get
+      {
+        Debug.Assert(m_shape != null);
+        return m_shape.OutlineThickness;
+      }
+      set 
+      { 
+        Debug.Assert(m_shape != null); 
+        m_shape.OutlineThickness = value; 
+      }
     }
 
     #region RenderComponent Implementation
@@ -68,7 +106,7 @@ namespace GeneticTanks.Game.Components
       m_shape = m_shapeCreator();
       if (m_shape == null)
       {
-        Log.ErrorFormat("{0} had shape creator fail to return shape",
+        Log.ErrorFmt("{0} had shape creator fail to return shape",
           Parent.FullName);
         return false;
       }

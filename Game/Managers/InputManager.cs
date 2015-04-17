@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using GeneticTanks.Extensions;
 using GeneticTanks.Game.Components.Tank;
 using GeneticTanks.Game.Events;
 using log4net;
@@ -12,6 +13,7 @@ namespace GeneticTanks.Game.Managers
   /// Captures input from the window and translates it to game events.
   /// </summary>
   sealed class InputManager
+    : IDisposable
   {
     private static readonly ILog Log = LogManager.GetLogger(
       MethodBase.GetCurrentMethod().DeclaringType);
@@ -178,13 +180,39 @@ namespace GeneticTanks.Game.Managers
 
     #endregion
 
-    ~InputManager()
+    #region IDisposable Implementation
+
+    private bool m_disposed = false;
+
+    public void Dispose()
     {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    private void Dispose(bool disposing)
+    {
+      if (m_disposed)
+      {
+        return;
+      }
+
+      Log.Verbose("InputManager disposed");
+
       m_window.Resized -= HandleWindowResized;
       m_window.MouseWheelMoved -= HandleMouseWheelMoved;
       m_window.MouseButtonPressed -= HandleMouseButtonPressed;
       m_window.MouseButtonReleased -= HandleMouseButtonReleased;
       m_window.MouseMoved -= HandleMouseMoved;
+
+      m_disposed = true;
     }
+
+    ~InputManager()
+    {
+      Dispose(false);
+    }
+
+    #endregion
   }
 }

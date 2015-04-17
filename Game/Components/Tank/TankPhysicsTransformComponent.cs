@@ -62,7 +62,8 @@ namespace GeneticTanks.Game.Components.Tank
     public float DesiredRotationRate
     {
       get { return m_desiredRotationRate; }
-      private set {
+      private set 
+      {
         m_desiredRotationRate = value >= 0 
           ? Math.Min(value, m_state.MaxTurnSpeed) 
           : Math.Max(value, -m_state.MaxTurnSpeed);
@@ -110,6 +111,7 @@ namespace GeneticTanks.Game.Components.Tank
       PhysicsManager.PreStep += HandlePreStep;
 
       m_messenger.AddListener<MoveMessage>(HandleMoveMessage);
+      m_messenger.AddListener<TankKilledMessage>(HandleTankKilled);
 
       Initialized = true;
       return true;
@@ -199,6 +201,12 @@ namespace GeneticTanks.Game.Components.Tank
           break;
       }
     }
+
+    private void HandleTankKilled(Message msg)
+    {
+      Body.Enabled = false;
+      PhysicsManager.PreStep -= HandlePreStep;
+    }
     
     #endregion
     #region IDisposable Implementation
@@ -213,6 +221,9 @@ namespace GeneticTanks.Game.Components.Tank
       }
 
       PhysicsManager.PreStep -= HandlePreStep;
+
+      m_messenger.RemoveListener<MoveMessage>(HandleMoveMessage);
+      m_messenger.RemoveListener<TankKilledMessage>(HandleTankKilled);
 
       base.Dispose(disposing);
       m_disposed = true;

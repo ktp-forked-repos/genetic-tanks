@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Reflection;
+using GeneticTanks.Extensions;
+using GeneticTanks.Game.Managers;
 using log4net;
 using SFML.Graphics;
 
@@ -29,13 +31,14 @@ namespace GeneticTanks.Game.Components
         BlendMode = BlendMode.Alpha,
         Transform = Transform.Identity
       };
+
+      ZDepth = RenderDepth.Default;
     }
 
     /// <summary>
-    /// The depth that this component renders at, with smaller numbers being 
-    /// closer to the camera and larger numbers farther away.
+    /// The depth that this component renders at.
     /// </summary>
-    public int ZDepth { get; set; }
+    public RenderDepth ZDepth { get; protected set; }
     
     /// <summary>
     /// Draw the component onto the provided target.
@@ -52,7 +55,14 @@ namespace GeneticTanks.Game.Components
     /// </returns>
     public override bool Initialize()
     {
-      return Parent.Transform != null;
+      if (Parent.Transform == null)
+      {
+        Log.ErrorFmt("{0} tried to initialize a RenderComponent but doesn't " +
+                     "have a transform", Parent.FullName);
+        return false;
+      }
+
+      return true;
     }
 
     #endregion

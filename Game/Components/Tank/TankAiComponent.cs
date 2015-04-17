@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using FarseerPhysics.Dynamics;
+using GeneticTanks.Extensions;
 using GeneticTanks.Game.Components.Messages;
 using GeneticTanks.Game.Events;
 using GeneticTanks.Game.Managers;
@@ -210,6 +211,8 @@ namespace GeneticTanks.Game.Components.Tank
 
     private void SelectCollisionTurnDirection()
     {
+      Log.VerboseFmt("{0} is making a turn decision...", Parent.FullName);
+
       // obstacle on either side, or neither side, random direction
       if ((m_leftObstacle && m_rightObstacle) || 
           (!m_leftObstacle && !m_rightObstacle))
@@ -250,17 +253,16 @@ namespace GeneticTanks.Game.Components.Tank
     private void SetMoveState(MoveState state)
     {
       m_moveState = state;
+      Log.DebugFmt("{0} setting move state {1}", Parent.FullName, state);
 
       switch (m_moveState)
       {
         case MoveState.Stopped:
-          Log.DebugFormat("{0} stopping", Parent.FullName);
           m_messenger.QueueMessage(new MoveMessage(MoveCommand.AllStop));
           break;
 
         case MoveState.Forward:
         case MoveState.ForwardCollision:
-          Log.DebugFormat("{0} moving forward", Parent.FullName);
           m_messenger.QueueMessage(new MoveMessage(MoveCommand.TurnStop));
           m_messenger.QueueMessage(
             new MoveMessage(MoveCommand.SpeedForwardFull));
@@ -268,7 +270,6 @@ namespace GeneticTanks.Game.Components.Tank
 
         case MoveState.TurnLeft:
         case MoveState.TurnLeftCollision:
-          Log.DebugFormat("{0} turning left", Parent.FullName);
           m_messenger.QueueMessage(new MoveMessage(MoveCommand.TurnLeftFull));
           m_messenger.QueueMessage(
             new MoveMessage(MoveCommand.SpeedStop));
@@ -276,7 +277,6 @@ namespace GeneticTanks.Game.Components.Tank
 
         case MoveState.TurnRight:
         case MoveState.TurnRightCollision:
-          Log.DebugFormat("{0} turning right", Parent.FullName);
           m_messenger.QueueMessage(new MoveMessage(MoveCommand.TurnRightFull));
           m_messenger.QueueMessage(
             new MoveMessage(MoveCommand.SpeedStop));
@@ -289,7 +289,7 @@ namespace GeneticTanks.Game.Components.Tank
     private void SetState(AiState state)
     {
       m_aiState = state;
-      Log.DebugFormat("{0} new state {1}", Parent.FullName, m_aiState);
+      Log.DebugFmt("{0} new state {1}", Parent.FullName, m_aiState);
 
       switch (m_aiState)
       {
@@ -385,12 +385,12 @@ namespace GeneticTanks.Game.Components.Tank
 
       if (m_target == null)
       {
-        Log.DebugFormat("{0} cleared target", Parent.FullName);
+        Log.DebugFmt("{0} cleared target", Parent.FullName);
         SetState(AiState.Search);
       }
       else
       {
-        Log.DebugFormat("{0} set target {1}", Parent.FullName, 
+        Log.DebugFmt("{0} set target {1}", Parent.FullName, 
           m_target.FullName);
         SetState(AiState.ApproachEnemy);
       }

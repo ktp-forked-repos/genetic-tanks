@@ -6,42 +6,26 @@ using FarseerPhysics.Dynamics;
 using FarseerPhysics.Dynamics.Contacts;
 using FarseerPhysics.Factories;
 using GeneticTanks.Game.Components.Messages;
-using GeneticTanks.Game.Components.Tank;
 using GeneticTanks.Game.Managers;
 using log4net;
 using SFML.Graphics;
 using SFML.Window;
 
-namespace GeneticTanks.Game.Components
+namespace GeneticTanks.Game.Components.Tank
 {
   /// <summary>
   /// Adds a sensor that will broadcast events when it detects another tank.
   /// </summary>
-  sealed class SensorComponent
-    : RenderComponent
+  sealed class TankSensorComponent
+    : Component
   {
     private static readonly ILog Log = LogManager.GetLogger(
       MethodBase.GetCurrentMethod().DeclaringType);
-
-    private static readonly Color FillColor = new Color
-    {
-      R = Color.Magenta.R,
-      G = Color.Magenta.G,
-      B = Color.Magenta.B,
-      A = 32
-    };
 
     #region Private Fields
     private readonly PhysicsManager m_physicsManager;
     private MessageComponent m_messenger;
     private TankStateComponent m_state;
-
-    private RenderStates m_renderStates = new RenderStates
-    {
-      BlendMode = BlendMode.Alpha,
-      Transform = Transform.Identity
-    };
-    private CircleShape m_shape;
     
     private Body m_body;
     private bool m_sensorEnabled;
@@ -53,7 +37,7 @@ namespace GeneticTanks.Game.Components
     /// </summary>
     /// <param name="parent"></param>
     /// <param name="pm"></param>
-    public SensorComponent(Entity parent, PhysicsManager pm) 
+    public TankSensorComponent(Entity parent, PhysicsManager pm) 
       : base(parent)
     {
       if (pm == null)
@@ -62,9 +46,6 @@ namespace GeneticTanks.Game.Components
       }
 
       m_physicsManager = pm;
-
-      EnableDebugRender = true;
-      ZDepth = 100;
       NeedsUpdate = false;
     }
 
@@ -76,11 +57,6 @@ namespace GeneticTanks.Game.Components
       get { return m_sensorEnabled; }
       set { Enable(value); }
     }
-
-    /// <summary>
-    /// The state of sensor debug drawing.
-    /// </summary>
-    public bool EnableDebugRender { get; set; }
 
     /// <summary>
     /// Enable or disable the sensor.
@@ -113,14 +89,10 @@ namespace GeneticTanks.Game.Components
     /// </summary>
     public List<uint> Contacts { get { return m_contacts.ToList(); } } 
 
-    #region RenderComponent Implementation
+    #region Component Implementation
 
     public override bool Initialize()
     {
-      if (!base.Initialize())
-      {
-        return false;
-      }
       if (!RetrieveSibling(out m_messenger))
       {
         return false;
@@ -129,13 +101,6 @@ namespace GeneticTanks.Game.Components
       {
         return false;
       }
-
-      m_shape = new CircleShape
-      {
-        FillColor = FillColor,
-        Radius = m_state.SensorRadius,
-        Origin = new Vector2f(m_state.SensorRadius, m_state.SensorRadius)
-      };
 
       m_body = BodyFactory.CreateBody(m_physicsManager.World, Parent.Id);
       FixtureFactory.AttachCircle(m_state.SensorRadius, 0, m_body, Parent.Id);
@@ -154,16 +119,6 @@ namespace GeneticTanks.Game.Components
     
     public override void Update(float deltaTime)
     {
-    }
-
-    public override void Draw(RenderTarget target)
-    {
-      if (!EnableDebugRender || target == null)
-      {
-        return;
-      }
-
-      target.Draw(m_shape, m_renderStates);
     }
 
     #endregion
@@ -205,7 +160,6 @@ namespace GeneticTanks.Game.Components
     private void HandlePostStep(float deltaTime)
     {
       m_body.Position = Parent.Transform.Position;
-      m_renderStates.Transform = Parent.Transform.GraphicsTransform;
     }
 
     #endregion
@@ -218,11 +172,6 @@ namespace GeneticTanks.Game.Components
       if (!Initialized || m_disposed)
       {
         return;
-      }
-
-      if (disposing)
-      {
-        m_shape.Dispose();
       }
 
       m_physicsManager.PostStep -= HandlePostStep;

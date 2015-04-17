@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using GeneticTanks.Extensions;
 using GeneticTanks.Game.Events;
 using log4net;
 
@@ -105,7 +106,7 @@ namespace GeneticTanks.Game.Managers
         m_updateEntities.Add(e);
       }
       m_eventManager.QueueEvent(new EntityAddedEvent(e));
-      Log.DebugFormat("Added entity {0}", e.FullName);
+      Log.DebugFmt("Added entity {0}", e.FullName);
     }
 
     /// <summary>
@@ -117,13 +118,13 @@ namespace GeneticTanks.Game.Managers
       var e = GetEntity(id);
       if (e == null)
       {
-        Log.WarnFormat("Tried to remove non existing entity {0}", id);
+        Log.WarnFmt("Tried to remove non existing entity {0}", id);
         return;
       }
 
       m_pendingRemovalQueue.Enqueue(e);
       m_eventManager.QueueEvent(new EntityRemovedEvent(e));
-      Log.DebugFormat("Entity {0} queued for removal", e.Id);
+      Log.DebugFmt("Entity {0} queued for removal", e.Id);
     }
 
     /// <summary>
@@ -158,7 +159,7 @@ namespace GeneticTanks.Game.Managers
       m_updateEntities.Remove(e);
       m_entities.Remove(e.Id);
       e.Dispose();
-      Log.DebugFormat("Removed entity {0}", name);
+      Log.DebugFmt("Removed entity {0}", name);
     }
 
     #endregion
@@ -173,12 +174,12 @@ namespace GeneticTanks.Game.Managers
       var entity = GetEntity(evt.Id);
       if (entity == null)
       {
-        Log.WarnFormat("Request to remove non existing entity {0}", evt.Id);
+        Log.WarnFmt("Request to remove non existing entity {0}", evt.Id);
         return;
       }
 
       m_pendingRemovalQueue.Enqueue(entity);
-      Log.DebugFormat("Entity {0} queued for removal", evt.Id);
+      Log.DebugFmt("Entity {0} queued for removal", evt.Id);
       // event must be manually triggered so the entity can be removed
       // in the next frame
       m_eventManager.TriggerEvent(new EntityRemovedEvent(entity));
@@ -205,6 +206,8 @@ namespace GeneticTanks.Game.Managers
       {
         return;
       }
+
+      Log.Verbose("EntityManager disposing");
 
       if (disposing)
       {

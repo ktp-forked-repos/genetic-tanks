@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 using FarseerPhysics.Dynamics;
 using GeneticTanks.Game.Managers;
@@ -66,8 +67,15 @@ namespace GeneticTanks.Game.Components
     /// </summary>
     public sealed override Vector2 Position
     {
-      get { return Body.Position; }
-      set { Body.Position = value;
+      get
+      {
+        Debug.Assert(Body != null);
+        return Body.Position;
+      }
+      set 
+      {
+        Debug.Assert(Body != null);
+        Body.Position = value;
       }
     }
 
@@ -77,8 +85,16 @@ namespace GeneticTanks.Game.Components
     /// </summary>
     public sealed override float Rotation
     {
-      get { return MathHelper.ToDegrees(Body.Rotation); }
-      set { Body.Rotation = MathHelper.ToRadians(value); }
+      get
+      {
+        Debug.Assert(Body != null);
+        return MathHelper.ToDegrees(Body.Rotation);
+      }
+      set
+      {
+        Debug.Assert(Body != null);
+        Body.Rotation = MathHelper.ToRadians(value);
+      }
     }
 
     /// <summary>
