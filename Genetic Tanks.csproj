@@ -88,6 +88,7 @@
     <Compile Include="Game\Components\Tank\TankTurretControllerComponent.cs" />
     <Compile Include="Game\Components\TransformComponent.cs" />
     <Compile Include="Game\Entity.cs" />
+    <Compile Include="Game\Globals.cs" />
     <Compile Include="Game\Managers\EntityManager.cs" />
     <Compile Include="Game\Managers\EventManager.cs" />
     <Compile Include="Game\Events\EntityEvents.cs" />

@@ -54,13 +54,6 @@ namespace GeneticTanks
     #region Private Fields
     private MainWindow m_window;
     private RenderWindow m_renderWindow;
-
-    private EventManager m_eventManager;
-    private EntityManager m_entityManager;
-    private RenderManager m_renderManager;
-    private InputManager m_inputManager;
-    private ViewManager m_viewManager;
-    private PhysicsManager m_physicsManager;
     #endregion
 
     public void Run()
@@ -82,23 +75,8 @@ namespace GeneticTanks
       m_renderWindow = new RenderWindow(m_window.DrawingPanelHandle,
         new ContextSettings { AntialiasingLevel = 8 });
       
-      m_eventManager = new EventManager();
-      m_entityManager = new EntityManager(m_eventManager);
-      m_renderManager = new RenderManager(m_eventManager);
-      m_inputManager = new InputManager(m_renderWindow, m_eventManager);
-      m_viewManager = new ViewManager(m_eventManager, m_renderWindow);
-      m_physicsManager = new PhysicsManager(m_eventManager);
-
-
-      TankFactory.EntityManager = m_entityManager;
-      TankFactory.EventManager = m_eventManager;
-      TankFactory.PhysicsManager = m_physicsManager;
-
-      BulletFactory.EntityManager = m_entityManager;
-      BulletFactory.EventManager = m_eventManager;
-      BulletFactory.PhysicsManager = m_physicsManager;
-
-      m_physicsManager.CreateWorld();
+      Globals.Initialize(m_renderWindow);
+      Globals.PhysicsManager.CreateWorld();
       CreateArena();
 
       //TankFactory.CreateControlledTestTank(Vector2.Zero, 0);
@@ -119,19 +97,19 @@ namespace GeneticTanks
         float lastFrameTime = (float)frameTime.Elapsed.TotalSeconds;
         frameTime.Restart();
 
-        m_renderWindow.SetView(m_viewManager.View);
-        if (m_renderManager.Update(lastFrameTime, m_renderWindow))
+        m_renderWindow.SetView(Globals.ViewManager.View);
+        if (Globals.RenderManager.Update(lastFrameTime, m_renderWindow))
         {
           m_renderWindow.Display();
         }
 
         Application.DoEvents();
-        m_inputManager.Update(lastFrameTime);
-        m_entityManager.Update(lastFrameTime);
-        m_physicsManager.Update(lastFrameTime);
+        Globals.InputManager.Update(lastFrameTime);
+        Globals.EntityManager.Update(lastFrameTime);
+        Globals.PhysicsManager.Update(lastFrameTime);
 
         var maxEventTime = MaxFrameTime - (float)frameTime.Elapsed.TotalSeconds;
-        m_eventManager.Update(maxEventTime);
+        Globals.EventManager.Update(maxEventTime);
 
         if (frameTime.Elapsed.TotalSeconds < MaxFrameTime)
         {
@@ -151,7 +129,7 @@ namespace GeneticTanks
 
       var entity = new Entity(EntityManager.NextId, "wall");
       entity.AddComponent(new StaticPhysicsTransformComponent(
-        entity, m_physicsManager, world =>
+        entity, Globals.PhysicsManager, world =>
         {
           var body = BodyFactory.CreateBody(world, Vector2.Zero, entity.Id);
           FixtureFactory.AttachEdge(upperLeft, lowerLeft, body, entity.Id);
@@ -183,7 +161,7 @@ namespace GeneticTanks
       src.FillColor = Color.Transparent;
       src.OutlineColor = Color.Black;
       src.OutlineThickness = 1f;
-      m_entityManager.AddEntity(entity);
+      Globals.EntityManager.AddEntity(entity);
     }
 
     #endregion

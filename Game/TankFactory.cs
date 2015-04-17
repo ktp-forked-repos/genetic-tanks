@@ -13,10 +13,6 @@ namespace GeneticTanks.Game
     private static readonly ILog Log = LogManager.GetLogger(
       MethodBase.GetCurrentMethod().DeclaringType);
 
-    public static EntityManager EntityManager { get; set; }
-    public static PhysicsManager PhysicsManager { get; set; }
-    public static EventManager EventManager { get; set; }
-
 //     public static Entity CreateControlledTestTank(Vector2 position, 
 //       float rotation)
 //     {
@@ -54,7 +50,7 @@ namespace GeneticTanks.Game
     {
       var entity = CreateTankBase();
 
-      var state = new TankStateComponent(entity, EventManager)
+      var state = new TankStateComponent(entity, Globals.EventManager)
       {
         Dimensions = new Vector2(10, 6),
         TrackWidth = 1,
@@ -74,8 +70,8 @@ namespace GeneticTanks.Game
         MaxTurretRotationRate = 30
       };
       entity.AddComponent(state);
-      entity.AddComponent(new TankAiComponent(entity, EntityManager, 
-        EventManager, PhysicsManager));
+      entity.AddComponent(new TankAiComponent(entity, Globals.EntityManager,
+        Globals.EventManager, Globals.PhysicsManager));
       
 
       if (!entity.Initialize())
@@ -87,7 +83,7 @@ namespace GeneticTanks.Game
 
       entity.Transform.Position = position;
       entity.Transform.Rotation = rotation;
-      EntityManager.AddEntity(entity);
+      Globals.EntityManager.AddEntity(entity);
       return entity;
     }
 
@@ -105,8 +101,8 @@ namespace GeneticTanks.Game
       entity.AddComponent(new MessageComponent(entity));
       entity.AddComponent(new TankRenderComponent(entity));
       entity.AddComponent(
-        new TankPhysicsTransformComponent(entity, PhysicsManager));
-      entity.AddComponent(new SensorComponent(entity, PhysicsManager));
+        new TankPhysicsTransformComponent(entity, Globals.PhysicsManager));
+      entity.AddComponent(new SensorComponent(entity, Globals.PhysicsManager));
       entity.AddComponent(new TankTurretControllerComponent(entity));
 
       return entity;
