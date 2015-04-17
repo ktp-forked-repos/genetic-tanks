@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Reflection;
-using GeneticTanks.Game.Components;
 using GeneticTanks.Game.Components.Tank;
 using GeneticTanks.Game.Events;
 using log4net;
 using Microsoft.Xna.Framework;
 using SFML.Window;
 
-namespace GeneticTanks.Game
+namespace GeneticTanks.Game.Managers
 {
   /// <summary>
   /// Captures input from the window and translates it to game events.

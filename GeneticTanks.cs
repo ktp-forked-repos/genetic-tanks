@@ -9,6 +9,7 @@ using FarseerPhysics.Factories;
 using GeneticTanks.Extensions;
 using GeneticTanks.Game;
 using GeneticTanks.Game.Components;
+using GeneticTanks.Game.Managers;
 using GeneticTanks.UI;
 using log4net;
 using Microsoft.Xna.Framework;

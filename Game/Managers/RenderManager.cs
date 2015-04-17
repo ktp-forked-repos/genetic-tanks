@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
 using GeneticTanks.Game.Components;
 using GeneticTanks.Game.Events;
@@ -8,7 +7,7 @@ using log4net;
 using SFML.Graphics;
 using Event = GeneticTanks.Game.Events.Event;
 
-namespace GeneticTanks.Game
+namespace GeneticTanks.Game.Managers
 {
   /// <summary>
   /// Manages the rendering of all graphical components.

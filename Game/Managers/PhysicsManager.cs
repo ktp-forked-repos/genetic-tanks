@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Reflection;
-using FarseerPhysics.Collision;
 using FarseerPhysics.Dynamics;
 using GeneticTanks.Game.Events;
 using log4net;
 using Microsoft.Xna.Framework;
 
-namespace GeneticTanks.Game
+namespace GeneticTanks.Game.Managers
 {
   /// <summary>
   /// Manages the physics world and simulation.

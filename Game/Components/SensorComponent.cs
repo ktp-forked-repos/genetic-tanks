@@ -7,6 +7,7 @@ using FarseerPhysics.Dynamics.Contacts;
 using FarseerPhysics.Factories;
 using GeneticTanks.Game.Components.Messages;
 using GeneticTanks.Game.Components.Tank;
+using GeneticTanks.Game.Managers;
 using log4net;
 using SFML.Graphics;
 using SFML.Window;

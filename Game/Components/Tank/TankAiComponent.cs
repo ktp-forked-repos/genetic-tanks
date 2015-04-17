@@ -4,6 +4,7 @@ using System.Reflection;
 using FarseerPhysics.Dynamics;
 using GeneticTanks.Game.Components.Messages;
 using GeneticTanks.Game.Events;
+using GeneticTanks.Game.Managers;
 using log4net;
 using Microsoft.Xna.Framework;
 

@@ -4,7 +4,7 @@ using System.Reflection;
 using GeneticTanks.Game.Events;
 using log4net;
 
-namespace GeneticTanks.Game
+namespace GeneticTanks.Game.Managers
 {
   /// <summary>
   /// Owns and manages all entities in the game.

@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using FarseerPhysics.Dynamics;
+using GeneticTanks.Game.Managers;
 using log4net;
 
 namespace GeneticTanks.Game.Components

@@ -2,6 +2,7 @@
 using System.Reflection;
 using GeneticTanks.Game.Components.Messages;
 using GeneticTanks.Game.Events;
+using GeneticTanks.Game.Managers;
 using log4net;
 using log4net.Repository.Hierarchy;
 using Microsoft.Xna.Framework;

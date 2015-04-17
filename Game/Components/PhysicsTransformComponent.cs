@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using FarseerPhysics.Dynamics;
+using GeneticTanks.Game.Managers;
 using log4net;
 using Microsoft.Xna.Framework;
 

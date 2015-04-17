@@ -6,7 +6,7 @@ using System.Reflection;
 using GeneticTanks.Game.Events;
 using log4net;
 
-namespace GeneticTanks.Game
+namespace GeneticTanks.Game.Managers
 {
   /// <summary>
   /// Manages the queueing and dispatching of events in the game.

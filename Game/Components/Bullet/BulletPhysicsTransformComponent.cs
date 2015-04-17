@@ -4,6 +4,7 @@ using FarseerPhysics.Dynamics;
 using FarseerPhysics.Dynamics.Contacts;
 using FarseerPhysics.Factories;
 using GeneticTanks.Game.Events;
+using GeneticTanks.Game.Managers;
 using log4net;
 
 namespace GeneticTanks.Game.Components.Bullet

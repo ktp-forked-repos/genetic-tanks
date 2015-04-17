@@ -6,7 +6,7 @@ using SFML.Graphics;
 using SFML.Window;
 using Event = GeneticTanks.Game.Events.Event;
 
-namespace GeneticTanks.Game
+namespace GeneticTanks.Game.Managers
 {
   /// <summary>
   /// Controls the user's view into the game map.
