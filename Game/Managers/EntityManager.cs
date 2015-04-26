@@ -42,6 +42,7 @@ namespace GeneticTanks.Game.Managers
       new Dictionary<uint, Entity>();
     private readonly List<Entity> m_updateEntities = new List<Entity>(50);
     private readonly Queue<Entity> m_pendingRemovalQueue = new Queue<Entity>();
+    private bool m_paused = false;
     #endregion
 
     /// <summary>
@@ -59,8 +60,10 @@ namespace GeneticTanks.Game.Managers
       }
 
       m_eventManager = em;
+      
       m_eventManager.AddListener<RequestEntityRemovalEvent>(
         HandleRequestEntityRemoval);
+      m_eventManager.AddListener<PauseGameEvent>(HandlePauseGame);
     }
 
     /// <summary>
@@ -71,6 +74,11 @@ namespace GeneticTanks.Game.Managers
     /// </param>
     public void Update(float deltaTime)
     {
+      if (m_paused)
+      {
+        return;
+      }
+
       while (m_pendingRemovalQueue.Count > 0)
       {
         var e = m_pendingRemovalQueue.Dequeue();
@@ -202,6 +210,12 @@ namespace GeneticTanks.Game.Managers
       m_eventManager.TriggerEvent(new EntityRemovedEvent(entity));
     }
 
+    private void HandlePauseGame(Event e)
+    {
+      var evt = (PauseGameEvent) e;
+      m_paused = evt.Paused;
+    }
+
     #endregion
 
     #region IDisposable Implementation
@@ -236,8 +250,10 @@ namespace GeneticTanks.Game.Managers
 
       m_entities.Clear();
       m_updateEntities.Clear();
+
       m_eventManager.RemoveListener<RequestEntityRemovalEvent>(
         HandleRequestEntityRemoval);
+      m_eventManager.RemoveListener<PauseGameEvent>(HandlePauseGame);
 
       m_disposed = true;
     }

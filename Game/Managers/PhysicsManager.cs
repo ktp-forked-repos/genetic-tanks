@@ -43,6 +43,7 @@ namespace GeneticTanks.Game.Managers
     #region Private Fields
     private readonly EventManager m_eventManager;
     private float m_timeSinceLastStep = 0f;
+    private bool m_paused = false;
     #endregion
 
     /// <summary>
@@ -57,6 +58,8 @@ namespace GeneticTanks.Game.Managers
       }
 
       m_eventManager = em;
+
+      m_eventManager.AddListener<PauseGameEvent>(HandlePauseGame);
     }
 
     /// <summary>
@@ -109,7 +112,7 @@ namespace GeneticTanks.Game.Managers
     /// <param name="deltaTime"></param>
     private void StepWorld(float deltaTime)
     {
-      if (World == null)
+      if (m_paused || World == null)
       {
         return;
       }
@@ -146,6 +149,16 @@ namespace GeneticTanks.Game.Managers
 
     #endregion
 
+    #region Callbacks
+
+    private void HandlePauseGame(Event e)
+    {
+      var evt = (PauseGameEvent) e;
+      m_paused = evt.Paused;
+    }
+
+    #endregion
+
     #region IDisposable Implementation
 
     private bool m_disposed = false;
@@ -163,6 +176,7 @@ namespace GeneticTanks.Game.Managers
         return;
       }
 
+      m_eventManager.RemoveListener<PauseGameEvent>(HandlePauseGame);
       World = null;
 
       m_disposed = true;

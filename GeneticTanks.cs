@@ -4,12 +4,9 @@ using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using FarseerPhysics;
-using FarseerPhysics.Dynamics;
-using FarseerPhysics.Factories;
 using GeneticTanks.Extensions;
 using GeneticTanks.Game;
-using GeneticTanks.Game.Components;
-using GeneticTanks.Game.Managers;
+using GeneticTanks.Game.Events;
 using GeneticTanks.UI;
 using log4net;
 using Microsoft.Xna.Framework;
@@ -24,8 +21,6 @@ namespace GeneticTanks
       MethodBase.GetCurrentMethod().DeclaringType);
 
     private const float MaxFrameTime = 1f / 30f;
-    private static readonly Vector2 ArenaSize = 
-      new Vector2(500, 500);
 
     /// <summary>
     /// The main entry point for the application.
@@ -88,6 +83,11 @@ namespace GeneticTanks
       TankFactory.CreateTestTank(new Vector2(-100, 200), 0);
       TankFactory.CreateTestTank(new Vector2(-100, -100), 135);
       TankFactory.CreateTestTank(new Vector2(-200, 0), -90);
+
+      if (Properties.Settings.Default.PauseOnStart)
+      {
+        // TODO: pause here
+      }
     }
 
     private void MainLoop()

@@ -6,6 +6,7 @@ using GeneticTanks.Game.Events;
 using log4net;
 using Microsoft.Xna.Framework;
 using SFML.Window;
+using Event = GeneticTanks.Game.Events.Event;
 
 namespace GeneticTanks.Game.Managers
 {
@@ -21,6 +22,8 @@ namespace GeneticTanks.Game.Managers
     #region Private Fields
     private readonly Window m_window;
     private readonly EventManager m_eventManager;
+    private bool m_paused = false;
+    private bool m_spacePressed = false;
     private bool m_dragging = false;
     private Vector2i m_mousePos;
     #endregion
@@ -45,6 +48,8 @@ namespace GeneticTanks.Game.Managers
       m_window = window;
       m_eventManager = em;
 
+      m_eventManager.AddListener<PauseGameEvent>(HandlePauseGame);
+
       m_window.Resized += HandleWindowResized;
       m_window.MouseWheelMoved += HandleMouseWheelMoved;
       m_window.MouseButtonPressed += HandleMouseButtonPressed;
@@ -53,7 +58,7 @@ namespace GeneticTanks.Game.Managers
       m_window.KeyPressed += HandleKeyPressed;
       m_window.KeyReleased += HandleKeyReleased;
     }
-    
+
     /// <summary>
     /// Dispatches events for the controlled window.
     /// </summary>
@@ -64,6 +69,12 @@ namespace GeneticTanks.Game.Managers
     }
 
     #region Callbacks
+
+    private void HandlePauseGame(Event e)
+    {
+      var evt = (PauseGameEvent) e;
+      m_paused = evt.Paused;
+    }
 
     // Forwards window resize events
     private void HandleWindowResized(object sender, SizeEventArgs sizeEventArgs)
@@ -149,6 +160,15 @@ namespace GeneticTanks.Game.Managers
           m_eventManager.QueueEvent(
             new UserMoveEvent(MoveState.Begin, MoveDirection.Back));
           break;
+
+        case Keyboard.Key.Space:
+          if (!m_spacePressed)
+          {
+            m_spacePressed = true;
+            m_paused = !m_paused;
+            m_eventManager.QueueEvent(new PauseGameEvent(m_paused));
+          }
+          break;
       }
     }
 
@@ -175,6 +195,10 @@ namespace GeneticTanks.Game.Managers
           m_eventManager.QueueEvent(
             new UserMoveEvent(MoveState.End, MoveDirection.Back));
           break;
+
+        case Keyboard.Key.Space:
+          m_spacePressed = false;
+          break;
       }
     }
 
@@ -198,6 +222,8 @@ namespace GeneticTanks.Game.Managers
       }
 
       Log.Verbose("InputManager disposed");
+
+      m_eventManager.RemoveListener<PauseGameEvent>(HandlePauseGame);
 
       m_window.Resized -= HandleWindowResized;
       m_window.MouseWheelMoved -= HandleMouseWheelMoved;

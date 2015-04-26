@@ -87,4 +87,18 @@ namespace GeneticTanks.Game.Events
     /// </summary>
     public Vector2u Size { get; private set; }
   }
+
+  /// <summary>
+  /// Signals to pause or unpause the game.
+  /// </summary>
+  sealed class PauseGameEvent
+    : InputEvent
+  {
+    public PauseGameEvent(bool paused)
+    {
+      Paused = paused;
+    }
+
+    public bool Paused { get; private set; }
+  }
 }
