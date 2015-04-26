@@ -7,6 +7,10 @@ using log4net;
 
 namespace GeneticTanks.Game.Processes
 {
+  /// <summary>
+  /// A process encapsulates any action that takes more than one frame.  
+  /// Processes can be chained together to form sequences of actions.
+  /// </summary>
   abstract class Process
     : IDisposable
   {
@@ -70,23 +74,42 @@ namespace GeneticTanks.Game.Processes
     /// <summary>
     /// Determine if the process is alive (running or paused).
     /// </summary>
-    public bool IsAlive
+    public bool Alive
     {
       get
       {
-        return CurrentState == State.Running || IsPaused;
+        return CurrentState == State.Running || Paused;
       }
     }
 
     /// <summary>
     /// Determine if the process is paused.
     /// </summary>
-    public bool IsPaused { get { return CurrentState == State.Paused; } }
+    public bool Paused
+    {
+      get { return CurrentState == State.Paused; }
+      set
+      {
+        if (!value && CurrentState == State.Paused)
+        {
+          CurrentState = State.Running;
+        }
+        else if (value && CurrentState == State.Running)
+        {
+          CurrentState = State.Paused;
+        }
+        else
+        {
+          Log.WarnFmt("{0} attempted to {1} but is in state {2}",
+            Name, value ? "pause" : "unpause", CurrentState);
+        }
+      }
+    }
 
     /// <summary>
     /// Determine if the process is dead (succeeded, failed, or aborted).
     /// </summary>
-    public bool IsDead
+    public bool Dead
     {
       get
       {
@@ -95,7 +118,7 @@ namespace GeneticTanks.Game.Processes
       }
     }
 
-    #region ProcessManager Control Methods
+    #region Control Methods
 
     /// <summary>
     /// Initialize the process.
@@ -124,7 +147,7 @@ namespace GeneticTanks.Game.Processes
     /// <param name="deltaTime"></param>
     public void Update(float deltaTime)
     {
-      Debug.Assert(IsAlive);
+      Debug.Assert(Alive);
 
       if (CurrentState == State.Running)
       {
@@ -138,7 +161,7 @@ namespace GeneticTanks.Game.Processes
     /// </summary>
     public void Succeed()
     {
-      Debug.Assert(!IsDead);
+      Debug.Assert(!Dead);
 
       Log.VerboseFmt("{0} succeeded", Name);
       CurrentState = State.Succeeded;
@@ -150,7 +173,7 @@ namespace GeneticTanks.Game.Processes
     /// </summary>
     public void Fail()
     {
-      Debug.Assert(!IsDead);
+      Debug.Assert(!Dead);
 
       Log.VerboseFmt("{0} failed", Name);
       CurrentState = State.Failed;
@@ -163,7 +186,7 @@ namespace GeneticTanks.Game.Processes
     /// </summary>
     public void Abort()
     {
-      Debug.Assert(!IsDead);
+      Debug.Assert(!Dead);
 
       Log.VerboseFmt("{0} aborted", Name);
       CurrentState = State.Aborted;

@@ -86,7 +86,7 @@ namespace GeneticTanks
 
       if (Properties.Settings.Default.PauseOnStart)
       {
-        // TODO: pause here
+        Globals.EventManager.QueueEvent(new PauseGameEvent(true));
       }
     }
 

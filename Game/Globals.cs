@@ -15,6 +15,7 @@ namespace GeneticTanks.Game
     public static PhysicsManager PhysicsManager { get; private set; }
     public static RenderManager RenderManager { get; private set; }
     public static ViewManager ViewManager { get; private set; }
+    public static ProcessManager ProcessManager { get; private set; }
 
     public static Arena Arena { get; private set; }
 
@@ -31,6 +32,7 @@ namespace GeneticTanks.Game
       InputManager = new InputManager(window, EventManager);
       ViewManager = new ViewManager(EventManager, window);
       PhysicsManager = new PhysicsManager(EventManager);
+      ProcessManager = new ProcessManager();
 
       PhysicsManager.CreateWorld();
 
@@ -52,6 +54,7 @@ namespace GeneticTanks.Game
     {
       Arena.Dispose();
 
+      ProcessManager.Dispose();
       EntityManager.Dispose();
       InputManager.Dispose();
       ViewManager.Dispose();
