@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using log4net;
 
@@ -35,13 +37,14 @@ namespace GeneticTanks.GeneticAlgorithm
     /// <summary>
     /// The max value for any single attribute.
     /// </summary>
-    public const int MaxAttributeValue = 5;
+    public static readonly int MaxAttributeValue = 
+      Properties.Settings.Default.TankMaxAttributeValue;
     
     /// <summary>
     /// The total number of attribute points distributed in the genome.
     /// </summary>
     public static readonly int TotalAttributePoints =
-      2 * Attributes.Length;
+      Properties.Settings.Default.TankPointsPerAttribute * Attributes.Length;
     
     private static readonly Random Random = new Random();
 
@@ -73,10 +76,11 @@ namespace GeneticTanks.GeneticAlgorithm
       // distribute the remaining points
       while (points > 0)
       {
-        result.m_attributes[result.GetRandomAtribute()]++;
+        result.m_attributes[result.GetRandomAttribute(false, true, null)]++;
         points--;
       }
 
+      Debug.Assert(result.Validate());
       return result;
     }
 
@@ -90,17 +94,50 @@ namespace GeneticTanks.GeneticAlgorithm
     {
       Clear();
     }
-    
+
+    /// <summary>
+    /// Identifier for this genome.
+    /// </summary>
+    public int Id { get; set; }
+
+    /// <summary>
+    /// Tracks the damage done by this genome's tank.
+    /// </summary>
     public float DamageDealt { get; set; }
+
+    /// <summary>
+    /// Tracks the time in seconds this tank has survived.
+    /// </summary>
     public float SurvivalTime { get; set; }
+
+    /// <summary>
+    /// Tracks the number of kills this genome's tank has achieved.
+    /// </summary>
     public int NumKills { get; set; }
 
+    /// <summary>
+    /// Calculate the fitness of this tank by comparing its stats to the 
+    /// population average.
+    /// </summary>
+    /// <param name="avgDamageDealt"></param>
+    /// <param name="avgSurvivalTime"></param>
+    /// <returns></returns>
     public float GetFitness(float avgDamageDealt, float avgSurvivalTime )
     {
       var result = DamageDealt / avgDamageDealt;
       result += SurvivalTime / avgSurvivalTime;
       result += NumKills;
       return result;
+    }
+
+    /// <summary>
+    /// Reset all the stats tracked in the genome.
+    /// </summary>
+    public void ResetStats()
+    {
+      DamageDealt = 0f;
+      SurvivalTime = 0f;
+      NumKills = 0;
     }
 
     /// <summary>
@@ -125,16 +162,20 @@ namespace GeneticTanks.GeneticAlgorithm
     }
 
     /// <summary>
-    /// Clears the attributes and 
+    /// Clears the attributes and randomizes them.
     /// </summary>
     public void Randomize()
     {
-      int points = TotalAttributePoints;
+      Clear();
+
+      var points = TotalAttributePoints;
       while (points > 0)
       {
-        m_attributes[GetRandomAtribute()]++;
+        m_attributes[GetRandomAttribute(false, true, null)]++;
         points--;
       }
+
+      Debug.Assert(Validate());
     }
 
     /// <summary>
@@ -143,29 +184,55 @@ namespace GeneticTanks.GeneticAlgorithm
     /// </summary>
     public void Mutate()
     {
-      var source = GetRandomAtribute();
-      Attribute target;
-
-      do
-      {
-        target = GetRandomAtribute();
-      } while (source == target);
+      var source = GetRandomAttribute(true, false, null);
+      var target = GetRandomAttribute(false, true, source);
 
       m_attributes[source]--;
       m_attributes[target]++;
+
+      Debug.Assert(Validate());
+    }
+
+    /// <summary>
+    /// Returns true if all the attributes in this genome are valid.
+    /// </summary>
+    /// <returns></returns>
+    public bool Validate()
+    {
+
+      var badCount = m_attributes.Values
+        .Count(v => v < 0 || v > MaxAttributeValue);
+      return badCount == 0 && m_attributes.Count == Attributes.Length;
     }
 
     #region Private Methods
 
-    // gets a random attribute that is not at max value
-    private Attribute GetRandomAtribute()
+    // gets a random attribute that excludes attributes at 0 and/or max, and/or
+    // the specified attribute
+    private Attribute GetRandomAttribute(bool excludeZero, bool excludeMax,
+      Attribute? excludeValue)
     {
-      Attribute result;
+      var result = Attributes.First();
+      var valid = false;
 
-      do
+      while (!valid)
       {
         result = Attributes[Random.Next(Attributes.Length)];
-      } while (m_attributes[result] == MaxAttributeValue);
+        valid = true;
+
+        if (excludeZero)
+        {
+          valid = m_attributes[result] != 0;
+        }
+        if (excludeMax)
+        {
+          valid = valid && m_attributes[result] != MaxAttributeValue;
+        }
+        if (excludeValue != null)
+        {
+          valid = valid && result != excludeValue;
+        }
+      }
 
       return result;
     }

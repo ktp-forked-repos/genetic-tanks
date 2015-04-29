@@ -104,7 +104,7 @@
     <Compile Include="Game\Processes\Process.cs" />
     <Compile Include="Game\TankFactory.cs" />
     <Compile Include="Game\Managers\ViewManager.cs" />
-    <Compile Include="GeneticAlgorithm\Population.cs" />
+    <Compile Include="GeneticAlgorithm\TankPopulation.cs" />
     <Compile Include="GeneticAlgorithm\TankGenome.cs" />
     <Compile Include="GeneticTanks.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

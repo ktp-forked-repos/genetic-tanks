@@ -92,10 +92,15 @@ namespace GeneticTanks.Game
 
     public static Entity CreateFromGenome(TankGenome genome)
     {
-      var tank = CreateTankBase();
+      if (genome == null)
+      {
+        throw new ArgumentNullException("genome");
+      }
 
+      var tank = CreateTankBase();
       tank.AddComponent(new TankAiComponent(tank, Globals.EntityManager,
         Globals.EventManager, Globals.PhysicsManager));
+      BuildTankState(tank, genome);
 
       if (!tank.Initialize())
       {
@@ -136,79 +141,106 @@ namespace GeneticTanks.Game
         TrackWidth = 1f
       };
 
-      foreach (var a in TankGenome.Attributes)
+      foreach (var attribute in TankGenome.Attributes)
       {
-        var percent = (float)genome.GetAttribute(a) / 
+        var percent = (float)genome.GetAttribute(attribute) / 
           TankGenome.MaxAttributeValue;
-        float min;
-        float max;
-        float value;
+        
+        SetStateAttribute(state, attribute, percent);
+      }
 
-        switch (a)
-        {
-          case Attribute.Health:
-            min = Properties.Settings.Default.TankMinHealth;
-            max = Properties.Settings.Default.TankMaxHealth;
-            value = ((max - min) * percent) + min;
-            state.MaxHealth = value;
-            break;
+      tank.AddComponent(state);
+    }
 
-          // size is backwards, more points means a smaller size
-          case Attribute.Size:
-            percent = 1f - (percent / 2f);
-            var length = percent * Properties.Settings.Default.TankBaseLength;
-            var width = percent * Properties.Settings.Default.TankBaseWidth;
-            state.Dimensions = new Vector2(length, width);
-            state.TurretWidth = width * 0.75f;
-            break;
+    private static void SetStateAttribute(TankStateComponent state, 
+      Attribute attribute, float percent)
+    {
+      float min;
+      float max;
+      float value;
 
-          case Attribute.Speed:
-            min = Properties.Settings.Default.TankMinSpeed;
-            max = Properties.Settings.Default.TankMaxSpeed;
-            value = ((max - min) * percent) + min;
-            state.MaxSpeed = value;
-            break;
+      switch (attribute)
+      {
+        case Attribute.Health:
+          min = Properties.Settings.Default.TankMinHealth;
+          max = Properties.Settings.Default.TankMaxHealth;
+          value = ((max - min) * percent) + min;
+          state.MaxHealth = value;
+          break;
 
-          case Attribute.TurnSpeed:
-            min = Properties.Settings.Default.TankMinTurnSpeed;
-            max = Properties.Settings.Default.TankMaxTurnSpeed;
-            value = ((max - min) * percent) + min;
-            state.MaxTurnSpeed = value;
-            break;
+        // size is backwards, more points means a smaller size
+        case Attribute.Size:
+          percent = 1f - (percent / 2f);
+          var length = percent * Properties.Settings.Default.TankBaseLength;
+          var width = percent * Properties.Settings.Default.TankBaseWidth;
+          state.Dimensions = new Vector2(length, width);
+          state.TurretWidth = width * 0.75f;
+          break;
 
-          case Attribute.TurretRotationSpeed:
-            min = Properties.Settings.Default.TankMinTurretSpeed;
-            max = Properties.Settings.Default.TankMaxTurretSpeed;
-            value = ((max - min) * percent) + min;
-            state.MaxTurretRotationRate = value;
-            break;
+        case Attribute.Speed:
+          min = Properties.Settings.Default.TankMinSpeed;
+          max = Properties.Settings.Default.TankMaxSpeed;
+          value = ((max - min) * percent) + min;
+          state.MaxSpeed = value;
+          break;
 
-//           case Attribute.TurretRangeOfMotion:
-//             value = ((max - min) * percent) + min;
-//             break;
-// 
-//           case Attribute.SensorRange:
-//             value = ((max - min) * percent) + min;
-//             break;
-//             
-//           case Attribute.GunRange:
-//             value = ((max - min) * percent) + min;
-//             break;
-// 
-//           case Attribute.GunDamage:
-//             value = ((max - min) * percent) + min;
-//             break;
-// 
-//           case Attribute.GunSpeed:
-//             value = ((max - min) * percent) + min;
-//             break;
-// 
-//           case Attribute.GunReloadTime:
-//             value = ((max - min) * percent) + min;
-//             break;
-        }
+        case Attribute.TurnSpeed:
+          min = Properties.Settings.Default.TankMinTurnSpeed;
+          max = Properties.Settings.Default.TankMaxTurnSpeed;
+          value = ((max - min) * percent) + min;
+          state.MaxTurnSpeed = value;
+          break;
 
-        tank.AddComponent(state);
+        case Attribute.TurretRotationSpeed:
+          min = Properties.Settings.Default.TankMinTurretSpeed;
+          max = Properties.Settings.Default.TankMaxTurretSpeed;
+          value = ((max - min) * percent) + min;
+          state.MaxTurretRotationRate = value;
+          break;
+
+        case Attribute.TurretRangeOfMotion:
+          min = Properties.Settings.Default.TankMinTurretRangeOfMotion;
+          max = Properties.Settings.Default.TankMaxTurretRangeOfMotion;
+          value = ((max - min) * percent) + min;
+          state.TurretRangeOfMotion = value;
+          break;
+
+        case Attribute.SensorRange:
+          min = Properties.Settings.Default.TankMinSensorRange;
+          max = Properties.Settings.Default.TankMaxSensorRange;
+          value = ((max - min) * percent) + min;
+          state.SensorRadius = value;
+          break;
+
+        case Attribute.GunRange:
+          min = Properties.Settings.Default.TankMinGunRange;
+          max = Properties.Settings.Default.TankMaxGunRange;
+          value = ((max - min) * percent) + min;
+          state.GunRange = value;
+          break;
+
+        case Attribute.GunDamage:
+          min = Properties.Settings.Default.TankMinGunDamage;
+          max = Properties.Settings.Default.TankMaxGunDamage;
+          value = ((max - min) * percent) + min;
+          state.GunDamage = value;
+          break;
+
+        case Attribute.GunSpeed:
+          min = Properties.Settings.Default.TankMinGunSpeed;
+          max = Properties.Settings.Default.TankMaxGunSpeed;
+          value = ((max - min) * percent) + min;
+          state.GunSpeed = value;
+          break;
+
+        case Attribute.GunReloadTime:
+          // min and max intentionally reversed so that more points gives 
+          // a shorter reload time
+          min = Properties.Settings.Default.TankMaxReloadSpeed;
+          max = Properties.Settings.Default.TankMinReloadSpeed;
+          value = ((max - min) * percent) + min;
+          state.ReloadTime = value;
+          break;
       }
     }
 
