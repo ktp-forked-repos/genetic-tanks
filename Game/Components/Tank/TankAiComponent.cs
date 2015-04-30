@@ -260,7 +260,7 @@ namespace GeneticTanks.Game.Components.Tank
     private void SetMoveState(MoveState state)
     {
       m_moveState = state;
-      Log.DebugFmt("{0} setting move state {1}", Parent.FullName, state);
+      //Log.DebugFmt("{0} setting move state {1}", Parent.FullName, state);
 
       switch (m_moveState)
       {
@@ -296,7 +296,7 @@ namespace GeneticTanks.Game.Components.Tank
     private void SetState(AiState state)
     {
       m_aiState = state;
-      Log.DebugFmt("{0} new state {1}", Parent.FullName, m_aiState);
+      //Log.DebugFmt("{0} new state {1}", Parent.FullName, m_aiState);
 
       switch (m_aiState)
       {
@@ -432,7 +432,7 @@ namespace GeneticTanks.Game.Components.Tank
       }
 
       m_contacts.Remove(entity);
-      if (entity.Id == m_target.Id)
+      if (m_target != null && entity.Id == m_target.Id)
       {
         SelectTarget();
       }

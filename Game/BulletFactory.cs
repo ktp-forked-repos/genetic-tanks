@@ -14,7 +14,7 @@ namespace GeneticTanks.Game
       MethodBase.GetCurrentMethod().DeclaringType);
 
     public static Entity CreateBullet(uint shooter, float damage, 
-      Vector2 position, Vector2 velocity)
+      Vector2 position, Vector2 velocity, float radius)
     {
       var id = EntityManager.NextId;
       Entity bullet = new Entity(id, "bullet");
@@ -25,7 +25,7 @@ namespace GeneticTanks.Game
       {
         Damage = damage,
         FiringEntity = shooter,
-        Radius = 0.25f,
+        Radius = radius,
         Velocity = velocity
       });
 

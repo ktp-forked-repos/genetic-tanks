@@ -13,7 +13,7 @@ namespace GeneticTanks.GeneticAlgorithm
       MethodBase.GetCurrentMethod().DeclaringType);
 
     private static readonly Random Random = new Random();
-    private static readonly int NumClones = Settings.Default.NumClones;
+    public static readonly int NumClones = Settings.Default.NumClones;
 
     private readonly int m_size;
     private float m_mutationRate = 0.25f;

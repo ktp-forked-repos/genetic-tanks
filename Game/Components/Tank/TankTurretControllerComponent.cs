@@ -117,7 +117,7 @@ namespace GeneticTanks.Game.Components.Tank
       var velocity = m_targetDirection * m_state.GunSpeed;
 
       var bullet = BulletFactory.CreateBullet(Parent.Id, m_state.GunDamage, 
-        position, velocity);
+        position, velocity, m_state.BarrelDimensions.Y * 0.9f);
       if (bullet == null)
       {
         Log.ErrorFmt("{0} tried to fire a shot but failed", Parent.FullName);

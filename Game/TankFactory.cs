@@ -149,6 +149,16 @@ namespace GeneticTanks.Game
         SetStateAttribute(state, attribute, percent);
       }
 
+      var rangePercent =  (float)genome.GetAttribute(Attribute.GunRange) /
+          TankGenome.MaxAttributeValue;
+      var damagePercent = (float)genome.GetAttribute(Attribute.GunDamage) /
+          TankGenome.MaxAttributeValue;
+      var lengthBase = state.Dimensions.X / 2f;
+      var length = (lengthBase * 0.5f) * rangePercent + (lengthBase * 0.5f);
+      var widthBase = state.TurretWidth / 4f;
+      var width = (widthBase * 0.5f) * damagePercent + (widthBase * 0.5f);
+      state.BarrelDimensions = new Vector2(length, width);
+
       tank.AddComponent(state);
     }
 

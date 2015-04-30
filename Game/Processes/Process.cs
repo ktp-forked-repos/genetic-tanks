@@ -72,6 +72,14 @@ namespace GeneticTanks.Game.Processes
     public Process Child { get; private set; }
 
     /// <summary>
+    /// Determines if the process was initialized successfully.
+    /// </summary>
+    public bool Initialized
+    {
+      get { return CurrentState != State.NotInitialized; }
+    }
+
+    /// <summary>
     /// Determine if the process is alive (running or paused).
     /// </summary>
     public bool Alive
@@ -128,7 +136,7 @@ namespace GeneticTanks.Game.Processes
     /// </returns>
     public bool Initialize()
     {
-      Debug.Assert(CurrentState == State.NotInitialized);
+      Debug.Assert(!Initialized);
 
       if (!OnInitialize())
       {
@@ -161,11 +169,11 @@ namespace GeneticTanks.Game.Processes
     /// </summary>
     public void Succeed()
     {
-      Debug.Assert(!Dead);
+      Debug.Assert(Initialized && !Dead);
 
       Log.VerboseFmt("{0} succeeded", Name);
-      CurrentState = State.Succeeded;
       OnSucceed();
+      CurrentState = State.Succeeded;
     }
 
     /// <summary>
@@ -173,11 +181,11 @@ namespace GeneticTanks.Game.Processes
     /// </summary>
     public void Fail()
     {
-      Debug.Assert(!Dead);
+      Debug.Assert(Initialized && !Dead);
 
       Log.VerboseFmt("{0} failed", Name);
-      CurrentState = State.Failed;
       OnFail();
+      CurrentState = State.Failed;
     }
 
     /// <summary>
@@ -186,11 +194,11 @@ namespace GeneticTanks.Game.Processes
     /// </summary>
     public void Abort()
     {
-      Debug.Assert(!Dead);
+      Debug.Assert(Initialized && !Dead);
 
       Log.VerboseFmt("{0} aborted", Name);
-      CurrentState = State.Aborted;
       OnAbort();
+      CurrentState = State.Aborted;
     }
 
     /// <summary>
@@ -309,7 +317,7 @@ namespace GeneticTanks.Game.Processes
 
     protected virtual void Dispose(bool disposing)
     {
-      if (m_disposed)
+      if (!Initialized || m_disposed)
       {
         return;
       }

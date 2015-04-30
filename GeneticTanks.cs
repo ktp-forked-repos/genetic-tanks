@@ -7,11 +7,13 @@ using FarseerPhysics;
 using GeneticTanks.Extensions;
 using GeneticTanks.Game;
 using GeneticTanks.Game.Events;
+using GeneticTanks.Game.Processes;
 using GeneticTanks.UI;
 using log4net;
 using Microsoft.Xna.Framework;
 using SFML.Graphics;
 using SFML.Window;
+using Process = System.Diagnostics.Process;
 
 namespace GeneticTanks
 {
@@ -77,17 +79,21 @@ namespace GeneticTanks
       Globals.Initialize(m_renderWindow);
 
       //TankFactory.CreateControlledTestTank(Vector2.Zero, 0);
-      TankFactory.CreateTestTank(new Vector2(-200, -200), 90);
-      TankFactory.CreateTestTank(new Vector2(200, -200), 180);
-      TankFactory.CreateTestTank(new Vector2(0, 100), 90);
-      TankFactory.CreateTestTank(new Vector2(-100, 200), 0);
-      TankFactory.CreateTestTank(new Vector2(-100, -100), 135);
-      TankFactory.CreateTestTank(new Vector2(-200, 0), -90);
+//       TankFactory.CreateTestTank(new Vector2(-200, -200), 90);
+//       TankFactory.CreateTestTank(new Vector2(200, -200), 180);
+//       TankFactory.CreateTestTank(new Vector2(0, 100), 90);
+//       TankFactory.CreateTestTank(new Vector2(-100, 200), 0);
+//       TankFactory.CreateTestTank(new Vector2(-100, -100), 135);
+//       TankFactory.CreateTestTank(new Vector2(-200, 0), -90);
 
       if (Properties.Settings.Default.PauseOnStart)
       {
         Globals.EventManager.QueueEvent(new PauseGameEvent(true));
       }
+
+      var ga = new TankGeneticAlgorithmProcess(Globals.Arena,
+        Globals.EventManager, Globals.PhysicsManager);
+      Globals.ProcessManager.AddProcess(ga);
     }
 
     private void MainLoop()
@@ -109,6 +115,7 @@ namespace GeneticTanks
         Globals.InputManager.Update(lastFrameTime);
         Globals.EntityManager.Update(lastFrameTime);
         Globals.PhysicsManager.Update(lastFrameTime);
+        Globals.ProcessManager.Update(lastFrameTime);
 
         var maxEventTime = MaxFrameTime - (float)frameTime.Elapsed.TotalSeconds;
         Globals.EventManager.Update(maxEventTime);

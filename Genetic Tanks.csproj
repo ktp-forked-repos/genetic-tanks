@@ -102,6 +102,7 @@
     <Compile Include="Game\Managers\ProcessManager.cs" />
     <Compile Include="Game\Managers\RenderManager.cs" />
     <Compile Include="Game\Processes\Process.cs" />
+    <Compile Include="Game\Processes\TankGeneticAlgorithmProcess.cs" />
     <Compile Include="Game\TankFactory.cs" />
     <Compile Include="Game\Managers\ViewManager.cs" />
     <Compile Include="GeneticAlgorithm\TankPopulation.cs" />
