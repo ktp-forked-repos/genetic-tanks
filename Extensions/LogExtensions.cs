@@ -35,6 +35,15 @@ namespace GeneticTanks.Extensions
       }
     }
 
+    public static void VerboseFmtIf(this ILog log, bool condition,
+      string format, params object[] args)
+    {
+      if (condition)
+      {
+        log.VerboseFmt(format, args);
+      }
+    }
+
     public static void DebugFmt(this ILog log, string format,
       params object[] args)
     {
@@ -45,6 +54,15 @@ namespace GeneticTanks.Extensions
           System.Reflection.MethodBase.GetCurrentMethod().DeclaringType,
           Level.Debug, msg, null
           );
+      }
+    }
+
+    public static void DebugFmtIf(this ILog log, bool condition,
+      string format, params object[] args)
+    {
+      if (condition)
+      {
+        log.DebugFmt(format, args);
       }
     }
 
@@ -61,6 +79,15 @@ namespace GeneticTanks.Extensions
       }
     }
 
+    public static void InfoFmtIf(this ILog log, bool condition,
+      string format, params object[] args)
+    {
+      if (condition)
+      {
+        log.InfoFmt(format, args);
+      }
+    }
+
     public static void WarnFmt(this ILog log, string format,
       params object[] args)
     {
@@ -74,6 +101,15 @@ namespace GeneticTanks.Extensions
       }
     }
 
+    public static void WarnFmtIf(this ILog log, bool condition,
+      string format, params object[] args)
+    {
+      if (condition)
+      {
+        log.WarnFmt(format, args);
+      }
+    }
+
     public static void ErrorFmt(this ILog log, string format,
       params object[] args)
     {
@@ -84,6 +120,15 @@ namespace GeneticTanks.Extensions
           System.Reflection.MethodBase.GetCurrentMethod().DeclaringType,
           Level.Error, msg, null
           );
+      }
+    }
+
+    public static void ErrorFmtIf(this ILog log, bool condition,
+      string format, params object[] args)
+    {
+      if (condition)
+      {
+        log.ErrorFmt(format, args);
       }
     }
   }

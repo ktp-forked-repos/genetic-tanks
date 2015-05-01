@@ -220,11 +220,8 @@ namespace GeneticTanks.Game.Components
     {
       var type = typeof (T);
       var result = WriteQueue.RemoveAll(m => m.GetType() == type);
-      if (result > 0)
-      {
-        Log.VerboseFmt("{0} aborted {1} {2} messages",
-          Parent.FullName, result, type.Name);
-      }
+      Log.VerboseFmtIf(result > 0,
+        "{0} aborted {1} {2} messages", Parent.FullName, result, type.Name);
       return result;
     }
 
@@ -239,11 +236,8 @@ namespace GeneticTanks.Game.Components
     {
       var result = WriteQueue.Count;
       WriteQueue.Clear();
-      if (result > 0)
-      {
-        Log.VerboseFmt("{0} cleared {1} messages from queue",
-          Parent.FullName, result);
-      }
+      Log.VerboseFmtIf(result > 0,
+        "{0} cleared {1} messages from queue",Parent.FullName, result);
       return result;
     }
 
@@ -269,7 +263,8 @@ namespace GeneticTanks.Game.Components
         count++;
       }
 
-      Log.VerboseFmt("{0} dispatched {1} messages", Parent.FullName, count);
+      Log.VerboseFmtIf(count > 0, 
+        "{0} dispatched {1} messages", Parent.FullName, count);
     }
 
     #endregion
