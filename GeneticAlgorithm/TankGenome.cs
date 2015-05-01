@@ -23,6 +23,13 @@ namespace GeneticTanks.GeneticAlgorithm
     GunReloadTime
   }
 
+  enum GenomeType
+  {
+    Random,
+    Clone,
+    CrossOver
+  }
+
   sealed class TankGenome
   {
     private static readonly ILog Log = LogManager.GetLogger(
@@ -80,6 +87,7 @@ namespace GeneticTanks.GeneticAlgorithm
         points--;
       }
 
+      result.GenomeType = GenomeType.CrossOver;
       Debug.Assert(result.Validate());
       return result;
     }
@@ -99,6 +107,8 @@ namespace GeneticTanks.GeneticAlgorithm
     /// Identifier for this genome.
     /// </summary>
     public int Id { get; set; }
+
+    public GenomeType GenomeType { get; set; }
 
     /// <summary>
     /// Tracks the damage done by this genome's tank.
@@ -175,6 +185,7 @@ namespace GeneticTanks.GeneticAlgorithm
         points--;
       }
 
+      GenomeType = GenomeType.Random;
       Debug.Assert(Validate());
     }
 

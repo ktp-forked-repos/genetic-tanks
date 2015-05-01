@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using GeneticTanks.Extensions;
 using GeneticTanks.Game.Managers;
 using log4net;
@@ -48,13 +49,29 @@ namespace GeneticTanks.Game.Components.Tank
     {
       NeedsUpdate = false;
       ZDepth = RenderDepth.Tank;
-      BodyColor = Color.Red;
     }
 
     /// <summary>
     /// The fill color of the tank's body.
     /// </summary>
-    public Color BodyColor { get; set; }
+    public Color BodyColor
+    {
+      get
+      {
+        Debug.Assert(m_bodyFillShape != null);
+        return m_bodyFillShape.FillColor;
+      }
+      set
+      {
+        Debug.Assert(m_bodyFillShape != null);
+        Debug.Assert(m_turretShape != null);
+        Debug.Assert(m_barrelShape != null);
+
+        m_bodyFillShape.FillColor = value;
+        m_turretShape.FillColor = value;
+        m_barrelShape.FillColor = value;
+      }
+    }
 
     #region RenderComponent Implementation
 
@@ -82,7 +99,6 @@ namespace GeneticTanks.Game.Components.Tank
       // fill is positioned at the base of the body so it acts as a health bar
       m_bodyFillShape = new RectangleShape
       {
-        FillColor = BodyColor,
         Size = size.ToVector2f(),
         Origin = new Vector2f(0, size.Y / 2)
       };

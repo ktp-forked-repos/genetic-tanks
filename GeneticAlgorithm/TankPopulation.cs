@@ -152,6 +152,7 @@ namespace GeneticTanks.GeneticAlgorithm
         {
           m_genomes[i] = orderedGenomes[i];
           orderedGenomes[i].Id = i;
+          orderedGenomes[i].GenomeType = GenomeType.Clone;
           orderedGenomes[i].ResetStats();
         }
         else

@@ -12,9 +12,15 @@ using GeneticTanks.GeneticAlgorithm;
 using GeneticTanks.Properties;
 using log4net;
 using Microsoft.Xna.Framework;
+using SFML.Graphics;
 
 namespace GeneticTanks.Game.Processes
 {
+  /// <summary>
+  /// The GA process binds the core genetic algorithm classes to the entities 
+  /// that represent the population in the game world.  It is fully responsible 
+  /// for the lifetime of all the tanks controlled by the algorithm.
+  /// </summary>
   sealed class TankGeneticAlgorithmProcess
     : Process
   {
@@ -27,6 +33,12 @@ namespace GeneticTanks.Game.Processes
     private const float LastHitTimeout = 10f;
     private static readonly Random Random = new Random();
 
+    private class DeadTank
+    {
+      public uint Id { get; set; }
+      public float TimeSinceDeath { get; set; }
+    }
+
     #region Private Fields
 
     private readonly Arena m_arena;
@@ -35,16 +47,22 @@ namespace GeneticTanks.Game.Processes
 
     private TankPopulation m_population;
     private bool m_doNextGeneration = false;
-    private float m_survivalTime;
+    private float m_currentRoundTime;
     private float m_lastHitTime;
     // maps game entities back to genomes
     private readonly Dictionary<uint, int> m_entityMapping = 
       new Dictionary<uint, int>();
-    private readonly Dictionary<uint, float> m_deadList = 
-      new Dictionary<uint, float>();
+    private readonly List<DeadTank> m_deadList = 
+      new List<DeadTank>(Size / 2);
     
     #endregion
 
+    /// <summary>
+    /// Create the process.
+    /// </summary>
+    /// <param name="arena"></param>
+    /// <param name="eventManager"></param>
+    /// <param name="physicsManager"></param>
     public TankGeneticAlgorithmProcess(Arena arena, EventManager eventManager,
       PhysicsManager physicsManager)
     {
@@ -90,19 +108,24 @@ namespace GeneticTanks.Game.Processes
         return;
       }
 
-      m_survivalTime += deltaTime;
+      m_currentRoundTime += deltaTime;
       m_lastHitTime += deltaTime;
 
-      foreach (var id in m_deadList.Keys.ToList())
+      // remove any tanks that have been dead long enough
+      for (var i = m_deadList.Count - 1; i >= 0; i--)
       {
-        m_deadList[id] += deltaTime;
-        if (m_deadList[id] >= DeathRemovalDelay)
+        m_deadList[i].TimeSinceDeath += deltaTime;
+        if (m_deadList[i].TimeSinceDeath >= DeathRemovalDelay)
         {
+          var id = m_deadList[i].Id;
           Log.DebugFmt("Clearing dead entity {0}", id);
           m_eventManager.QueueEvent(new RequestEntityRemovalEvent(id));
+          m_deadList.RemoveAt(i);
         }
       }
 
+      // when conditions are met, clear any remaining tanks in this frame, so
+      // the new ones can be created next frame
       if (m_lastHitTime >= LastHitTimeout &&
           m_entityMapping.Count <= TankPopulation.NumClones)
       {
@@ -151,11 +174,26 @@ namespace GeneticTanks.Game.Processes
           continue;
         }
 
+        var renderComponent = tank.GetComponent<TankRenderComponent>();
+        Debug.Assert(renderComponent != null);
+        switch (genome.GenomeType)
+        {
+          case GenomeType.Random:
+            renderComponent.BodyColor = Color.Magenta;
+            break;
+          case GenomeType.Clone:
+            renderComponent.BodyColor = Color.Blue;
+            break;
+          case GenomeType.CrossOver:
+            renderComponent.BodyColor = Color.Red;
+            break;
+        }
+
         m_entityMapping[tank.Id] = genome.Id;
         entities.Add(tank);
       }
 
-      m_survivalTime = 0f;
+      m_currentRoundTime = 0f;
       m_lastHitTime = -5f;
       PositionEntities(entities);
     }
@@ -185,7 +223,9 @@ namespace GeneticTanks.Game.Processes
           placed = true;
           m_physicsManager.World.QueryAABB(fixture =>
           {
-            if ((fixture.CollisionCategories & PhysicsManager.TankCategory) != 0)
+            var categories = PhysicsManager.TankCategory |
+              PhysicsManager.TerrainCategory;
+            if ((fixture.CollisionCategories & categories) != 0)
             {
               placed = false;
               return false;
@@ -254,8 +294,8 @@ namespace GeneticTanks.Game.Processes
         return;
       }
 
-      m_deadList[evt.Id] = 0f;
-      victim.SurvivalTime = m_survivalTime;
+      m_deadList.Add(new DeadTank { Id = evt.Id, TimeSinceDeath = 0f });
+      victim.SurvivalTime = m_currentRoundTime;
       killer.NumKills++;
     }
 
@@ -264,7 +304,6 @@ namespace GeneticTanks.Game.Processes
       var evt = (EntityRemovedEvent) e;
 
       m_entityMapping.Remove(evt.Entity.Id);
-      m_deadList.Remove(evt.Entity.Id);
     }
 
     #endregion
