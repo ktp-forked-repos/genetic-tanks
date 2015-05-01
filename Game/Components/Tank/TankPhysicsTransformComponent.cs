@@ -205,6 +205,9 @@ namespace GeneticTanks.Game.Components.Tank
     private void HandleTankKilled(Message msg)
     {
       Body.CollisionCategories = PhysicsManager.TerrainCategory;
+      Body.LinearVelocity = Vector2.Zero;
+      Body.AngularVelocity = 0f;
+      Body.BodyType = BodyType.Static;
       PhysicsManager.PreStep -= HandlePreStep;
     }
     

@@ -13,10 +13,7 @@ namespace GeneticTanks.Game.Components
   {
     private static readonly ILog Log = LogManager.GetLogger(
       MethodBase.GetCurrentMethod().DeclaringType);
-
-    // messages are only dispatched 30x per second
-    private const float UpdateInterval = 1f / 30f;
-
+    
     /// <summary>
     /// The base type for all message handlers.
     /// </summary>
@@ -27,9 +24,7 @@ namespace GeneticTanks.Game.Components
     public delegate void MessageListener(Message msg);
 
     #region Private Fields
-
-    private float m_timeSinceLastUpdate = 0f;
-
+    
     private readonly Dictionary<Type, MessageListener> m_listeners = 
       new Dictionary<Type, MessageListener>();
 
@@ -42,6 +37,9 @@ namespace GeneticTanks.Game.Components
     private int m_readIndex = 0;
     private int m_writeIndex = 1;
     #endregion
+
+    private List<Message> ReadQueue { get { return m_queue[m_readIndex]; } }
+    private List<Message> WriteQueue { get { return m_queue[m_writeIndex]; } }
 
     /// <summary>
     /// Create the component.
@@ -57,6 +55,11 @@ namespace GeneticTanks.Game.Components
       Initialized = true;
     }
 
+    /// <summary>
+    /// Number of message waiting to dispatch.
+    /// </summary>
+    public int PendingMessages { get { return WriteQueue.Count; } }
+
     #region Component Implementation
 
     public override bool Initialize()
@@ -66,12 +69,10 @@ namespace GeneticTanks.Game.Components
 
     public override void Update(float deltaTime)
     {
-      m_timeSinceLastUpdate += deltaTime;
-      if (m_timeSinceLastUpdate < UpdateInterval)
+      if (WriteQueue.Count == 0)
       {
         return;
       }
-      m_timeSinceLastUpdate = m_timeSinceLastUpdate % UpdateInterval;
 
       SwapQueues();
       DispatchMessages();
@@ -179,7 +180,7 @@ namespace GeneticTanks.Game.Components
         throw new ArgumentNullException("msg");
       }
 
-      m_queue[m_writeIndex].Add(msg);
+      WriteQueue.Add(msg);
       Log.VerboseFmt("{0} queued {1}", Parent.FullName, msg.GetType().Name);
     }
 
@@ -195,13 +196,13 @@ namespace GeneticTanks.Game.Components
       where T : Message
     {
       var type = typeof (T);
-      var toRemove = m_queue[m_writeIndex].First(m => m.GetType() == type);
+      var toRemove = WriteQueue.First(m => m.GetType() == type);
       if (toRemove == null)
       {
         return false;
       }
 
-      m_queue[m_writeIndex].Remove(toRemove);
+      WriteQueue.Remove(toRemove);
       Log.VerboseFmt("{0} aborted message {1}", Parent.FullName, type.Name);
       return true;
     }
@@ -218,7 +219,7 @@ namespace GeneticTanks.Game.Components
       where T : Message
     {
       var type = typeof (T);
-      var result = m_queue[m_writeIndex].RemoveAll(m => m.GetType() == type);
+      var result = WriteQueue.RemoveAll(m => m.GetType() == type);
       if (result > 0)
       {
         Log.VerboseFmt("{0} aborted {1} {2} messages",
@@ -236,8 +237,8 @@ namespace GeneticTanks.Game.Components
     /// </returns>
     public int RemoveAllMessages()
     {
-      var result = m_queue[m_writeIndex].Count;
-      m_queue[m_writeIndex].Clear();
+      var result = WriteQueue.Count;
+      WriteQueue.Clear();
       if (result > 0)
       {
         Log.VerboseFmt("{0} cleared {1} messages from queue",
@@ -259,16 +260,11 @@ namespace GeneticTanks.Game.Components
     // dispatches all pending messages in the read queue
     private void DispatchMessages()
     {
-      if (m_queue[m_readIndex].Count == 0)
-      {
-        return;
-      }
-
       var count = 0;
-      while (m_queue[m_readIndex].Count > 0)
+      while (ReadQueue.Count > 0)
       {
-        var msg = m_queue[m_readIndex].First();
-        m_queue[m_readIndex].RemoveAt(0);
+        var msg = ReadQueue.First();
+        ReadQueue.RemoveAt(0);
         TriggerMessage(msg);
         count++;
       }
