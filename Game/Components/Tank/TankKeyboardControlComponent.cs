@@ -35,7 +35,6 @@ namespace GeneticTanks.Game.Components.Tank
 
     #region Private Fields
     private readonly EventManager m_eventManager;
-    private MessageComponent m_messenger;
     #endregion
 
     /// <summary>
@@ -59,11 +58,6 @@ namespace GeneticTanks.Game.Components.Tank
 
     public override bool Initialize()
     {
-      if (!RetrieveSibling(out m_messenger))
-      {
-        return false;
-      }
-
       m_eventManager.AddListener<UserMoveEvent>(HandleUserMove);
 
       Initialized = true;
@@ -111,7 +105,7 @@ namespace GeneticTanks.Game.Components.Tank
 
       if (moveCommand != MoveCommand.AllStop)
       {
-        m_messenger.QueueMessage(new MoveMessage(moveCommand));
+        Parent.QueueMessage(new MoveMessage(moveCommand));
       }
     }
 

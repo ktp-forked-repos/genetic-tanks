@@ -22,7 +22,6 @@ namespace GeneticTanks.Game.Components.Tank
 
     #region Private Fields
     private readonly PhysicsManager m_physicsManager;
-    private MessageComponent m_messenger;
     private TankStateComponent m_state;
     
     private Body m_body;
@@ -91,10 +90,6 @@ namespace GeneticTanks.Game.Components.Tank
 
     public override bool Initialize()
     {
-      if (!RetrieveSibling(out m_messenger))
-      {
-        return false;
-      }
       if (!RetrieveSibling(out m_state))
       {
         return false;
@@ -110,7 +105,7 @@ namespace GeneticTanks.Game.Components.Tank
       m_physicsManager.PreStep += HandlePreStep;
       m_physicsManager.PostStep += HandlePostStep;
 
-      m_messenger.AddListener<TankKilledMessage>(HandleTankKilled);
+      Parent.AddListener<TankKilledMessage>(HandleTankKilled);
       
       Initialized = true;
       Enabled = true;
@@ -133,7 +128,7 @@ namespace GeneticTanks.Game.Components.Tank
         if (id != Parent.Id && !m_contacts.Contains(id))
         {
           m_contacts.Add(id);
-          m_messenger.QueueMessage(new SensorNewContactMessage(id));
+          Parent.QueueMessage(new SensorNewContactMessage(id));
         }
       }
 
@@ -145,7 +140,7 @@ namespace GeneticTanks.Game.Components.Tank
       var id = Convert.ToUInt32(fixtureB.UserData);
       if (m_contacts.Remove(id))
       {
-        m_messenger.QueueMessage(new SensorLostContactMessage(id));
+        Parent.QueueMessage(new SensorLostContactMessage(id));
       }
     }
 
@@ -189,7 +184,7 @@ namespace GeneticTanks.Game.Components.Tank
       m_physicsManager.World.RemoveBody(m_body);
       m_body = null;
 
-      m_messenger.RemoveListener<TankKilledMessage>(HandleTankKilled);
+      Parent.RemoveListener<TankKilledMessage>(HandleTankKilled);
 
       base.Dispose(disposing);
       m_disposed = true;
