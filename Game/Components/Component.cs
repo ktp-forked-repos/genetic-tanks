@@ -72,6 +72,20 @@ namespace GeneticTanks.Game.Components
     public abstract void Update(float deltaTime);
 
     /// <summary>
+    /// Notifies the component that its parent entity was enabled.
+    /// </summary>
+    public virtual void Enable()
+    {
+    }
+
+    /// <summary>
+    /// Notifies the component that its parent entity was disabled.
+    /// </summary>
+    public virtual void Disable()
+    {
+    }
+
+    /// <summary>
     /// Searches the parent for a component of the requested type.  Logs an 
     /// error message if the component was not found.
     /// </summary>

@@ -68,7 +68,7 @@ namespace GeneticTanks.Game.Events
   }
 
   /// <summary>
-  /// Signals that an entity is queued for removal in the next frame.  The 
+  /// Signals that an entity is no longer active.  The 
   /// entity is valid for retrieval when this event fires.
   /// </summary>
   sealed class EntityRemovedEvent
@@ -84,7 +84,7 @@ namespace GeneticTanks.Game.Events
     {
     }
   }
-
+  
   /// <summary>
   /// Requests that the entity manager remove an entity.
   /// </summary>
@@ -100,7 +100,7 @@ namespace GeneticTanks.Game.Events
     {
     }
   }
-
+  
   /// <summary>
   /// Signals that a tank was killed.
   /// </summary>
