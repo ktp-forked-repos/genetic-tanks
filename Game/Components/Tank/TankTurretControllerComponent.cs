@@ -17,6 +17,7 @@ namespace GeneticTanks.Game.Components.Tank
     private const float TargetAlignmentThreshold = 0.1f;
 
     #region Private Fields
+    private MessageComponent m_messenger;
     private PhysicsTransformComponent m_physics;
     private TankStateComponent m_state;
 
@@ -49,6 +50,10 @@ namespace GeneticTanks.Game.Components.Tank
 
     public override bool Initialize()
     {
+      if (!RetrieveSibling(out m_messenger))
+      {
+        return false;
+      }
       if (!RetrieveBaseSibling(out m_physics))
       {
         return false;
@@ -58,9 +63,9 @@ namespace GeneticTanks.Game.Components.Tank
         return false;
       }
 
-      Parent.AddListener<SetTargetMessage>(HandleSetTarget);
-      Parent.AddListener<ShootingStateMessage>(HandleShootingStateChange);
-      Parent.AddListener<TankKilledMessage>(HandleTankKilled);
+      m_messenger.AddListener<SetTargetMessage>(HandleSetTarget);
+      m_messenger.AddListener<ShootingStateMessage>(HandleShootingStateChange);
+      m_messenger.AddListener<TankKilledMessage>(HandleTankKilled);
 
       Initialized = true;
       return true;
@@ -119,7 +124,7 @@ namespace GeneticTanks.Game.Components.Tank
       }
       else
       {
-        Parent.QueueMessage(new ShotFiredMessage(bullet.Id));
+        m_messenger.QueueMessage(new ShotFiredMessage(bullet.Id));
       }
 
       m_reloading = true;
@@ -210,8 +215,8 @@ namespace GeneticTanks.Game.Components.Tank
         return;
       }
 
-      Parent.RemoveListener<SetTargetMessage>(HandleSetTarget);
-      Parent.RemoveListener<ShootingStateMessage>(HandleShootingStateChange);
+      m_messenger.RemoveListener<SetTargetMessage>(HandleSetTarget);
+      m_messenger.RemoveListener<ShootingStateMessage>(HandleShootingStateChange);
 
       base.Dispose(disposing);
       m_disposed = true;

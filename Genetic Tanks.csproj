@@ -71,6 +71,7 @@
     <Compile Include="Game\Components\Bullet\BulletPhysicsTransformComponent.cs" />
     <Compile Include="Game\Components\Bullet\BulletRenderComponent.cs" />
     <Compile Include="Game\Components\Component.cs" />
+    <Compile Include="Game\Components\MessageComponent.cs" />
     <Compile Include="Game\Components\Messages\Message.cs" />
     <Compile Include="Game\Components\Messages\MoveMessage.cs" />
     <Compile Include="Game\Components\Messages\SensorMessages.cs" />

@@ -123,6 +123,7 @@ namespace GeneticTanks.Game
       var id = EntityManager.NextId;
       var entity = new Entity(id, "tank");
 
+      entity.AddComponent(new MessageComponent(entity));
       entity.AddComponent(new TankRenderComponent(entity));
       entity.AddComponent(
         new TankPhysicsTransformComponent(entity, Globals.PhysicsManager));
