@@ -60,13 +60,31 @@ namespace GeneticTanks.Game.Components.Bullet
       Body.CollidesWith =
         PhysicsManager.TankCategory | PhysicsManager.TerrainCategory;
       Body.LinearVelocity = m_data.Velocity;
-
-      Body.OnCollision += HandleCollision;
-
+      
+      Enable();
       Initialized = true;
       return true;
     }
-    
+
+    public override void Enable()
+    {
+      base.Enable();
+
+      Body.OnCollision += HandleCollision;
+    }
+
+    public override void Disable()
+    {
+      Body.OnCollision -= HandleCollision;
+      base.Disable();
+    }
+
+    public override void Deactivate()
+    {
+      Disable();
+      base.Deactivate();
+    }
+
     #endregion
     #region Callbacks
 
@@ -98,24 +116,6 @@ namespace GeneticTanks.Game.Components.Bullet
       }
       
       return false;
-    }
-
-    #endregion
-    #region IDisposable Implementation
-
-    private bool m_disposed = false;
-
-    protected override void Dispose(bool disposing)
-    {
-      if (!Initialized || m_disposed)
-      {
-        return;
-      }
-
-      Body.OnCollision -= HandleCollision;
-
-      base.Dispose(disposing);
-      m_disposed = true;
     }
 
     #endregion

@@ -177,9 +177,7 @@ namespace GeneticTanks.Game.Components.Tank
       {
         return false;
       }
-
-      m_eventManager.AddListener<TankHitEvent>(HandleTankHit);
-
+      
       Health = MaxHealth;
 
       if (TurretRangeOfMotion < 360f)
@@ -188,10 +186,26 @@ namespace GeneticTanks.Game.Components.Tank
         m_rightTurretLimit = 360f - m_leftTurretLimit;
       }
 
+      Enable();
       Initialized = true;
       return true;
     }
-    
+
+    public override void Enable()
+    {
+      m_eventManager.AddListener<TankHitEvent>(HandleTankHit);
+    }
+
+    public override void Disable()
+    {
+      m_eventManager.RemoveListener<TankHitEvent>(HandleTankHit);
+    }
+
+    public override void Deactivate()
+    {
+      Disable();
+    }
+
     public override void Update(float deltaTime)
     {
     }
@@ -217,25 +231,6 @@ namespace GeneticTanks.Game.Components.Tank
         m_messenger.QueueMessage(new TankKilledMessage(evt.Shooter));
         m_eventManager.QueueEvent(new TankKilledEvent(Parent.Id, evt.Shooter));
       }
-    }
-
-    #endregion
-
-    #region IDisposable Implementation
-
-    private bool m_disposed = false;
-
-    protected override void Dispose(bool disposing)
-    {
-      if (!Initialized || m_disposed)
-      {
-        return;
-      }
-
-      m_eventManager.RemoveListener<TankHitEvent>(HandleTankHit);
-
-      base.Dispose(disposing);
-      m_disposed = true;
     }
 
     #endregion

@@ -28,6 +28,7 @@ namespace GeneticTanks.Game.Components
     /// Create the component.
     /// </summary>
     /// <param name="parent"></param>
+    /// <param name="zDepth"></param>
     /// <param name="shapeCreator"></param>
     public SimpleRenderComponent(Entity parent, RenderDepth zDepth, 
       Func<Shape> shapeCreator) 
@@ -42,6 +43,8 @@ namespace GeneticTanks.Game.Components
       m_shapeCreator = shapeCreator;
       NeedsUpdate = false;
     }
+
+    #region Properties
 
     /// <summary>
     /// Fill color of the shape.  Only valid after initialization.
@@ -94,6 +97,7 @@ namespace GeneticTanks.Game.Components
       }
     }
 
+    #endregion
     #region RenderComponent Implementation
 
     public override bool Initialize()
@@ -113,6 +117,18 @@ namespace GeneticTanks.Game.Components
 
       Initialized = true;
       return true;
+    }
+
+    public override void Enable()
+    {
+    }
+
+    public override void Disable()
+    {
+    }
+
+    public override void Deactivate()
+    {
     }
 
     public override void Update(float deltaTime)

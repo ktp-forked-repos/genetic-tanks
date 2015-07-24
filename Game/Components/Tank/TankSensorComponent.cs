@@ -50,17 +50,17 @@ namespace GeneticTanks.Game.Components.Tank
     /// <summary>
     /// The state of the sensor.
     /// </summary>
-    public bool Enabled
+    public bool SensorEnabled
     {
       get { return m_sensorEnabled; }
-      set { Enable(value); }
+      set { EnableSensor(value); }
     }
 
     /// <summary>
     /// Enable or disable the sensor.
     /// </summary>
     /// <param name="state"></param>
-    public void Enable(bool state)
+    public void EnableSensor(bool state)
     {
       m_sensorEnabled = state;
 
@@ -104,17 +104,36 @@ namespace GeneticTanks.Game.Components.Tank
       FixtureFactory.AttachCircle(m_state.SensorRadius, 0, m_body, Parent.Id);
       m_body.BodyType = BodyType.Dynamic;
       m_body.IsSensor = true;
+      
+      Enable();
+      Initialized = true;
+      SensorEnabled = true;
+      return true;
+    }
 
+    public override void Enable()
+    {
       m_body.OnCollision += HandleSensorCollision;
       m_body.OnSeparation += HandleSensorSeparation;
       m_physicsManager.PreStep += HandlePreStep;
       m_physicsManager.PostStep += HandlePostStep;
 
       m_messenger.AddListener<TankKilledMessage>(HandleTankKilled);
+    }
+
+    public override void Disable()
+    {
+      m_physicsManager.PostStep -= HandlePostStep;
+      m_body.OnCollision -= HandleSensorCollision;
+      m_body.OnSeparation -= HandleSensorSeparation;
       
-      Initialized = true;
-      Enabled = true;
-      return true;
+      m_messenger.RemoveListener<TankKilledMessage>(HandleTankKilled);
+    }
+
+    public override void Deactivate()
+    {
+      Disable();
+      m_physicsManager.World.RemoveBody(m_body);
     }
 
     public override void Update(float deltaTime)
@@ -164,7 +183,7 @@ namespace GeneticTanks.Game.Components.Tank
 
     private void HandleTankKilled(Message msg)
     {
-      Enabled = false;
+      SensorEnabled = false;
       m_physicsManager.PostStep -= HandlePostStep;
       m_body.Enabled = false;
     }

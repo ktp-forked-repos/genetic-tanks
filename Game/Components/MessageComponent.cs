@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using GeneticTanks.Extensions;
@@ -36,6 +37,7 @@ namespace GeneticTanks.Game.Components
 
     private int m_readIndex = 0;
     private int m_writeIndex = 1;
+    private bool m_enabled = false;
     #endregion
 
     private List<Message> ReadQueue { get { return m_queue[m_readIndex]; } }
@@ -64,7 +66,23 @@ namespace GeneticTanks.Game.Components
 
     public override bool Initialize()
     {
+      m_enabled = true;
       return true;
+    }
+
+    public override void Enable()
+    {
+      m_enabled = true;
+    }
+
+    public override void Disable()
+    {
+      RemoveAllMessages();
+      m_enabled = false;
+    }
+
+    public override void Deactivate()
+    {
     }
 
     public override void Update(float deltaTime)
@@ -129,6 +147,7 @@ namespace GeneticTanks.Game.Components
       var type = typeof (T);
       if (m_listeners.ContainsKey(type))
       {
+        // ReSharper disable once DelegateSubtraction
         m_listeners[type] -= listener;
         Log.VerboseFmt("{0} removed listener for {1}",
           Parent.FullName, type.Name);
@@ -151,6 +170,8 @@ namespace GeneticTanks.Game.Components
       {
         throw new ArgumentNullException("msg");
       }
+      
+      Debug.Assert(m_enabled);
 
       var type = msg.GetType();
       MessageListener listener;
@@ -180,6 +201,8 @@ namespace GeneticTanks.Game.Components
         throw new ArgumentNullException("msg");
       }
 
+      Debug.Assert(m_enabled);
+
       WriteQueue.Add(msg);
       Log.VerboseFmt("{0} queued {1}", Parent.FullName, msg.GetType().Name);
     }
@@ -195,6 +218,8 @@ namespace GeneticTanks.Game.Components
     public bool RemoveFirstMessage<T>()
       where T : Message
     {
+      Debug.Assert(m_enabled);
+
       var type = typeof (T);
       var toRemove = WriteQueue.First(m => m.GetType() == type);
       if (toRemove == null)
@@ -218,6 +243,8 @@ namespace GeneticTanks.Game.Components
     public int RemoveMessages<T>()
       where T : Message
     {
+      Debug.Assert(m_enabled);
+
       var type = typeof (T);
       var result = WriteQueue.RemoveAll(m => m.GetType() == type);
       Log.VerboseFmtIf(result > 0,
@@ -234,6 +261,8 @@ namespace GeneticTanks.Game.Components
     /// </returns>
     public int RemoveAllMessages()
     {
+      Debug.Assert(m_enabled);
+
       var result = WriteQueue.Count;
       WriteQueue.Clear();
       Log.VerboseFmtIf(result > 0,

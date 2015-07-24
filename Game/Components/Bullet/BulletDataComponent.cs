@@ -21,6 +21,8 @@ namespace GeneticTanks.Game.Components.Bullet
       NeedsUpdate = false;
     }
 
+    #region Properties
+
     /// <summary>
     /// The bullet's radius in meters.
     /// </summary>
@@ -41,11 +43,24 @@ namespace GeneticTanks.Game.Components.Bullet
     /// </summary>
     public uint FiringEntity { get; set; }
 
+    #endregion
     #region Component Implementation
 
     public override bool Initialize()
     {
       return true;
+    }
+
+    public override void Enable()
+    {
+    }
+
+    public override void Disable()
+    {
+    }
+
+    public override void Deactivate()
+    {
     }
 
     public override void Update(float deltaTime)

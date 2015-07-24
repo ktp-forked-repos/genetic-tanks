@@ -51,6 +51,8 @@ namespace GeneticTanks.Game.Components.Tank
       ZDepth = RenderDepth.Tank;
     }
 
+    #region Properties
+
     /// <summary>
     /// The fill color of the tank's body.
     /// </summary>
@@ -73,6 +75,7 @@ namespace GeneticTanks.Game.Components.Tank
       }
     }
 
+    #endregion
     #region RenderComponent Implementation
 
     public override bool Initialize()
@@ -137,6 +140,18 @@ namespace GeneticTanks.Game.Components.Tank
 
       Initialized = true;
       return true;
+    }
+
+    public override void Enable()
+    {
+    }
+
+    public override void Disable()
+    {
+    }
+
+    public override void Deactivate()
+    {
     }
 
     public override void Update(float deltaTime)

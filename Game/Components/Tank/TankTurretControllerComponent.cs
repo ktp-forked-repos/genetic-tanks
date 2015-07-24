@@ -62,13 +62,29 @@ namespace GeneticTanks.Game.Components.Tank
       {
         return false;
       }
+      
+      Enable();
+      Initialized = true;
+      return true;
+    }
 
+    public override void Enable()
+    {
       m_messenger.AddListener<SetTargetMessage>(HandleSetTarget);
       m_messenger.AddListener<ShootingStateMessage>(HandleShootingStateChange);
       m_messenger.AddListener<TankKilledMessage>(HandleTankKilled);
+    }
 
-      Initialized = true;
-      return true;
+    public override void Disable()
+    {
+      m_messenger.RemoveListener<SetTargetMessage>(HandleSetTarget);
+      m_messenger.RemoveListener<ShootingStateMessage>(HandleShootingStateChange);
+      m_messenger.RemoveListener<TankKilledMessage>(HandleTankKilled);
+    }
+
+    public override void Deactivate()
+    {
+      Disable();
     }
 
     public override void Update(float deltaTime)
@@ -203,25 +219,6 @@ namespace GeneticTanks.Game.Components.Tank
       m_enabled = false;
     }
     
-    #endregion
-    #region IDisposable Implementation
-
-    private bool m_disposed = false;
-
-    protected override void Dispose(bool disposing)
-    {
-      if (!Initialized || m_disposed)
-      {
-        return;
-      }
-
-      m_messenger.RemoveListener<SetTargetMessage>(HandleSetTarget);
-      m_messenger.RemoveListener<ShootingStateMessage>(HandleShootingStateChange);
-
-      base.Dispose(disposing);
-      m_disposed = true;
-    }
-
     #endregion
   }
 }
