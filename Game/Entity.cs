@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Remoting.Messaging;
 using GeneticTanks.Extensions;
 using GeneticTanks.Game.Components;
 using log4net;
@@ -22,18 +23,6 @@ namespace GeneticTanks.Game
     /// The only id number that it's not valid to use.
     /// </summary>
     public const uint InvalidId = 0;
-
-    public enum EntityState
-    {
-      // initial state
-      NotInitialized,
-      // currently in use
-      Active,
-      // not in use, but not dead
-      Disabled,
-      // totally finished
-      Deactivated
-    }
 
     #region Private Fields
     private readonly Dictionary<Type, Component> m_components =
@@ -61,7 +50,6 @@ namespace GeneticTanks.Game
       Name = name;
       FullName = string.Format("{0} ({1})", 
         string.IsNullOrEmpty(name) ? "<unnamed>" : name, Id);
-      State = EntityState.NotInitialized;
       NeedsUpdate = false;
     }
 
@@ -82,11 +70,6 @@ namespace GeneticTanks.Game
     public string FullName { get; private set; }
 
     /// <summary>
-    /// Current state of the entity.
-    /// </summary>
-    public EntityState State { get; private set; }
-
-    /// <summary>
     /// Signifies that the entity has components that require logic updates.  
     /// Should only be considered valid after all components are added to the 
     /// entity.
@@ -100,39 +83,14 @@ namespace GeneticTanks.Game
     public TransformComponent Transform { get; private set; }
 
     /// <summary>
-    /// Performs a logic update on the entity.
-    /// </summary>
-    /// <param name="deltaTime">
-    /// The seconds elapsed since the last update.
-    /// </param>
-    public void Update(float deltaTime)
-    {
-      foreach (var component in m_updateComponents)
-      {
-        component.Update(deltaTime);
-      }
-    }
-
-    #region State Change Methods
-
-    /// <summary>
     /// Initializes all the components in the entity.
     /// </summary>
     /// <returns>
     /// Initialization success or failure.  After failed initialization an 
     /// entity should be considered unusable and immediately disposed.
     /// </returns>
-    /// <remarks>
-    /// Changes state from NotInitialized -> Active on success.
-    /// </remarks>
     public bool Initialize()
     {
-      if (State != EntityState.NotInitialized)
-      {
-        Log.ErrorFmt("Duplicate initialization of {0}", FullName);
-        return false;
-      }
-
       var transforms = GetComponentsByBase<TransformComponent>();
       switch (transforms.Count)
       {
@@ -161,70 +119,25 @@ namespace GeneticTanks.Game
         }
       }
 
-      Log.VerboseFmt("{0} initialized {1} components", FullName,
+      Log.VerboseFmt("{0} initialized {1} components", FullName, 
         m_components.Count);
-      State = EntityState.Active;
       return true;
     }
 
     /// <summary>
-    /// Enables a disabled entity.
+    /// Performs a logic update on the entity.
     /// </summary>
-    /// <remarks>
-    /// State change from Disabled -> Active.
-    /// </remarks>
-    public void Enable()
+    /// <param name="deltaTime">
+    /// The seconds elapsed since the last update.
+    /// </param>
+    public void Update(float deltaTime)
     {
-      if (State != EntityState.Disabled)
+      foreach (var component in m_updateComponents)
       {
-        Log.ErrorFmt("{0} is not disabled", FullName);
-        return;
+        component.Update(deltaTime);
       }
-
-      foreach (var component in m_components.Values)
-      {
-        component.Enable();
-      }
-      State = EntityState.Active;
     }
 
-    /// <summary>
-    /// Disables an active entity.
-    /// </summary>
-    /// <remarks>
-    /// State change from Active -> Disabled.
-    /// </remarks>
-    public void Disable()
-    {
-      if (State != EntityState.Active)
-      {
-        Log.ErrorFmt("{0} is not active", FullName);
-        return;
-      }
-
-      foreach (var component in m_components.Values)
-      {
-        component.Disable();
-      }
-      State = EntityState.Disabled;
-    }
-
-    /// <summary>
-    /// Cleans up an entity to make it inactive.
-    /// </summary>
-    /// <remarks>
-    /// State change from (any) -> Deactivated.
-    /// </remarks>
-    public void Deactivate()
-    {
-      foreach (var component in m_components.Values)
-      {
-        component.Deactivate();
-      }
-      State = EntityState.Deactivated;
-    }
-
-    #endregion
     #region Component Access Methods
 
     /// <summary>
@@ -357,15 +270,24 @@ namespace GeneticTanks.Game
       {
         return;
       }
-      
+
       Log.VerboseFmt("{0} disposing", FullName);
-      Deactivate();
 
       if (disposing)
       {
-        foreach (var component in m_components.Values)
+        // HACK: Components can't remove listeners from MessageComponent after 
+        // it has been disposed
+        var messenger = GetComponent<MessageComponent>();
+        var nonMessenger = m_components.Values
+          .Where(c => c.GetType() != typeof (MessageComponent));
+        foreach (var component in nonMessenger)
         {
           component.Dispose();
+        }
+
+        if (messenger != null)
+        {
+          messenger.Dispose();
         }
       }
 

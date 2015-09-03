@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using GeneticTanks.Extensions;
@@ -56,18 +55,14 @@ namespace GeneticTanks.Game.Components
     public bool NeedsUpdate { get; protected set; }
 
     /// <summary>
-    /// The state of the component's parent.  The component state will always 
-    /// match its parent's state.
+    /// Initialize the component to a useable state.  Is called after all 
+    /// components have been added to an entity.
     /// </summary>
-    public Entity.EntityState State
-    {
-      get
-      {
-        Debug.Assert(Parent != null);
-        return Parent.State;
-      }
-    }
-    
+    /// <returns>
+    /// The success or failure of initialization.
+    /// </returns>
+    public abstract bool Initialize();
+
     /// <summary>
     /// Performs a logic update on the component.
     /// </summary>
@@ -75,42 +70,6 @@ namespace GeneticTanks.Game.Components
     /// The seconds elapsed since the last update.
     /// </param>
     public abstract void Update(float deltaTime);
-
-    /// <summary>
-    /// Initialize the component to a useable state.  Is called after all 
-    /// components have been added to an entity.
-    /// </summary>
-    /// <returns>
-    /// The success or failure of initialization.
-    /// </returns>
-    /// <remarks>
-    /// To be called only be <see cref="Entity"/>.
-    /// </remarks>
-    public abstract bool Initialize();
-
-    /// <summary>
-    /// Enable a previously disabled component.
-    /// </summary>
-    /// <remarks>
-    /// To be called only be <see cref="Entity"/>.
-    /// </remarks>
-    public abstract void Enable();
-
-    /// <summary>
-    /// Disable an enabled component.
-    /// </summary>
-    /// <remarks>
-    /// To be called only be <see cref="Entity"/>.
-    /// </remarks>
-    public abstract void Disable();
-
-    /// <summary>
-    /// Deactivate the component from any state.
-    /// </summary>
-    /// <remarks>
-    /// To be called only be <see cref="Entity"/>.
-    /// </remarks>
-    public abstract void Deactivate();
 
     /// <summary>
     /// Searches the parent for a component of the requested type.  Logs an 
@@ -124,8 +83,6 @@ namespace GeneticTanks.Game.Components
     protected bool RetrieveSibling<T>(out T component)
       where T : Component
     {
-      Debug.Assert(Parent != null);
-
       component = Parent.GetComponent<T>();
       if (component != null)
       {
@@ -151,8 +108,6 @@ namespace GeneticTanks.Game.Components
     protected bool RetrieveBaseSibling<T>(out T component)
       where T : Component
     {
-      Debug.Assert(Parent != null);
-
       component = null;
       var result = Parent.GetComponentsByBase<T>();
       if (result.Count == 0)

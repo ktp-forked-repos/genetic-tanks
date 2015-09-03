@@ -63,24 +63,11 @@ namespace GeneticTanks.Game.Components.Tank
       {
         return false;
       }
-      
+
+      m_eventManager.AddListener<UserMoveEvent>(HandleUserMove);
+
       Initialized = true;
       return true;
-    }
-
-    public override void Enable()
-    {
-      m_eventManager.AddListener<UserMoveEvent>(HandleUserMove);
-    }
-
-    public override void Disable()
-    {
-      m_eventManager.RemoveListener<UserMoveEvent>(HandleUserMove);
-    }
-
-    public override void Deactivate()
-    {
-      Disable();
     }
 
     public override void Update(float deltaTime)
@@ -126,6 +113,23 @@ namespace GeneticTanks.Game.Components.Tank
       {
         m_messenger.QueueMessage(new MoveMessage(moveCommand));
       }
+    }
+
+    #endregion
+    #region IDisposable Implementation
+
+    private bool m_disposed = false;
+
+    protected override void Dispose(bool disposing)
+    {
+      if (m_disposed || !Initialized)
+      {
+        return;
+      }
+
+      m_eventManager.RemoveListener<UserMoveEvent>(HandleUserMove);
+      base.Dispose(disposing);
+      m_disposed = true;
     }
 
     #endregion

@@ -6,7 +6,6 @@ using SFML.Window;
 
 namespace GeneticTanks.Game.Components.Bullet
 {
-  // TODO: Replace me with a SimpleRenderComponent
   /// <summary>
   /// Draws a bullet as a simple black circle.
   /// </summary>
@@ -53,18 +52,6 @@ namespace GeneticTanks.Game.Components.Bullet
 
       Initialized = true;
       return true;
-    }
-
-    public override void Enable()
-    {
-    }
-
-    public override void Disable()
-    {
-    }
-
-    public override void Deactivate()
-    {
     }
 
     public override void Update(float deltaTime)

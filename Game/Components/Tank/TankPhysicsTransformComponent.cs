@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using FarseerPhysics.Dynamics;
+using FarseerPhysics.Dynamics.Contacts;
 using FarseerPhysics.Factories;
 using GeneticTanks.Game.Components.Messages;
 using GeneticTanks.Game.Managers;
@@ -13,20 +14,18 @@ namespace GeneticTanks.Game.Components.Tank
   /// Handles tank collision and movement physics, uses the physics object to
   /// provide the tank's transform.
   /// </summary>
-  internal sealed class TankPhysicsTransformComponent
+  sealed class TankPhysicsTransformComponent
     : PhysicsTransformComponent
   {
     private static readonly ILog Log = LogManager.GetLogger(
       MethodBase.GetCurrentMethod().DeclaringType);
-
+    
     #region Private Fields
-
     private TankStateComponent m_state;
     private MessageComponent m_messenger;
 
     private float m_desiredRotationRate = 0f;
     private float m_desiredSpeed = 0f;
-
     #endregion
 
     /// <summary>
@@ -34,13 +33,11 @@ namespace GeneticTanks.Game.Components.Tank
     /// </summary>
     /// <param name="parent"></param>
     /// <param name="pm"></param>
-    public TankPhysicsTransformComponent(Entity parent, PhysicsManager pm)
+    public TankPhysicsTransformComponent(Entity parent, PhysicsManager pm) 
       : base(parent, pm)
     {
       NeedsUpdate = false;
     }
-
-    #region Properties
 
     /// <summary>
     /// The rate at which the tank is actually rotating.
@@ -65,10 +62,10 @@ namespace GeneticTanks.Game.Components.Tank
     public float DesiredRotationRate
     {
       get { return m_desiredRotationRate; }
-      private set
+      private set 
       {
-        m_desiredRotationRate = value >= 0
-          ? Math.Min(value, m_state.MaxTurnSpeed)
+        m_desiredRotationRate = value >= 0 
+          ? Math.Min(value, m_state.MaxTurnSpeed) 
           : Math.Max(value, -m_state.MaxTurnSpeed);
       }
     }
@@ -88,10 +85,8 @@ namespace GeneticTanks.Game.Components.Tank
       }
     }
 
-    #endregion
-
     #region TransformComponent Implementation
-
+    
     public override bool Initialize()
     {
       if (!RetrieveSibling(out m_state))
@@ -107,51 +102,28 @@ namespace GeneticTanks.Game.Components.Tank
       size.Y += m_state.TrackWidth * 2;
 
       Body = BodyFactory.CreateBody(World, Parent.Id);
-      FixtureFactory.AttachRectangle(size.X, size.Y, 1, Vector2.Zero, Body,
+      FixtureFactory.AttachRectangle(size.X, size.Y, 1, Vector2.Zero, Body, 
         Parent.Id);
       Body.BodyType = BodyType.Dynamic;
       Body.CollisionCategories = PhysicsManager.TankCategory;
       Body.CollidesWith = Category.All;
-
-      Enable();
-      Initialized = true;
-      return true;
-    }
-
-    public override void Enable()
-    {
-      base.Enable();
-
+      
       PhysicsManager.PreStep += HandlePreStep;
 
       m_messenger.AddListener<MoveMessage>(HandleMoveMessage);
       m_messenger.AddListener<TankKilledMessage>(HandleTankKilled);
-    }
 
-    public override void Disable()
-    {
-      PhysicsManager.PreStep -= HandlePreStep;
-
-      m_messenger.RemoveListener<MoveMessage>(HandleMoveMessage);
-      m_messenger.RemoveListener<TankKilledMessage>(HandleTankKilled);
-
-      base.Disable();
-    }
-
-    public override void Deactivate()
-    {
-      Disable();
-      base.Deactivate();
+      Initialized = true;
+      return true;
     }
 
     #endregion
-
     #region Callbacks
-
+    
     // applies impulses to make the tank move and turn
     private void HandlePreStep(float deltaTime)
     {
-      var deltaRot =
+      var deltaRot = 
         MathHelper.ToRadians(m_desiredRotationRate) - Body.AngularVelocity;
       var impulseRot = deltaRot * Body.Mass;
       Body.ApplyAngularImpulse(impulseRot);
@@ -169,62 +141,62 @@ namespace GeneticTanks.Game.Components.Tank
 
       switch (msg.MoveCommand)
       {
-        case MoveCommand.AllStop:
+        case Messages.MoveCommand.AllStop:
           DesiredRotationRate = 0;
           DesiredSpeed = 0;
           break;
-        case MoveCommand.SpeedForwardIncrease:
+        case Messages.MoveCommand.SpeedForwardIncrease:
           DesiredSpeed += m_state.MaxSpeed / 10f;
           break;
-        case MoveCommand.SpeedReverseIncrease:
+        case Messages.MoveCommand.SpeedReverseIncrease:
           DesiredSpeed -= m_state.MaxSpeed / 10f;
           break;
-        case MoveCommand.TurnLeftIncrease:
+        case Messages.MoveCommand.TurnLeftIncrease:
           DesiredRotationRate += m_state.MaxTurnSpeed / 10f;
           break;
-        case MoveCommand.TurnRightIncrease:
+        case Messages.MoveCommand.TurnRightIncrease:
           DesiredRotationRate -= m_state.MaxTurnSpeed / 10f;
           break;
-        case MoveCommand.SpeedForwardSlow:
+        case Messages.MoveCommand.SpeedForwardSlow:
           DesiredSpeed = m_state.MaxSpeed / 4f;
           break;
-        case MoveCommand.SpeedForwardHalf:
+        case Messages.MoveCommand.SpeedForwardHalf:
           DesiredSpeed = m_state.MaxSpeed / 2f;
           break;
-        case MoveCommand.SpeedForwardFull:
+        case Messages.MoveCommand.SpeedForwardFull:
           DesiredSpeed = m_state.MaxSpeed;
           break;
-        case MoveCommand.SpeedStop:
+        case Messages.MoveCommand.SpeedStop:
           DesiredSpeed = 0;
           break;
-        case MoveCommand.SpeedReverseSlow:
+        case Messages.MoveCommand.SpeedReverseSlow:
           DesiredSpeed = -(m_state.MaxSpeed / 4f);
           break;
-        case MoveCommand.SpeedReverseHalf:
+        case Messages.MoveCommand.SpeedReverseHalf:
           DesiredSpeed = -(m_state.MaxSpeed / 2f);
           break;
-        case MoveCommand.SpeedReverseFull:
+        case Messages.MoveCommand.SpeedReverseFull:
           DesiredSpeed = -m_state.MaxSpeed;
           break;
-        case MoveCommand.TurnLeftSlow:
+        case Messages.MoveCommand.TurnLeftSlow:
           DesiredRotationRate = m_state.MaxTurnSpeed / 4f;
           break;
-        case MoveCommand.TurnLeftHalf:
+        case Messages.MoveCommand.TurnLeftHalf:
           DesiredRotationRate = m_state.MaxTurnSpeed / 2f;
           break;
-        case MoveCommand.TurnLeftFull:
+        case Messages.MoveCommand.TurnLeftFull:
           DesiredRotationRate = m_state.MaxTurnSpeed;
           break;
-        case MoveCommand.TurnStop:
+        case Messages.MoveCommand.TurnStop:
           DesiredRotationRate = 0;
           break;
-        case MoveCommand.TurnRightSlow:
+        case Messages.MoveCommand.TurnRightSlow:
           DesiredRotationRate = -(m_state.MaxTurnSpeed / 4f);
           break;
-        case MoveCommand.TurnRightHalf:
+        case Messages.MoveCommand.TurnRightHalf:
           DesiredRotationRate = -(m_state.MaxTurnSpeed / 2f);
           break;
-        case MoveCommand.TurnRightFull:
+        case Messages.MoveCommand.TurnRightFull:
           DesiredRotationRate = -m_state.MaxTurnSpeed;
           break;
       }
@@ -237,6 +209,27 @@ namespace GeneticTanks.Game.Components.Tank
       Body.AngularVelocity = 0f;
       Body.BodyType = BodyType.Static;
       PhysicsManager.PreStep -= HandlePreStep;
+    }
+    
+    #endregion
+    #region IDisposable Implementation
+
+    private bool m_disposed = false;
+
+    protected override void Dispose(bool disposing)
+    {
+      if (m_disposed || !Initialized)
+      {
+        return;
+      }
+
+      PhysicsManager.PreStep -= HandlePreStep;
+
+      m_messenger.RemoveListener<MoveMessage>(HandleMoveMessage);
+      m_messenger.RemoveListener<TankKilledMessage>(HandleTankKilled);
+
+      base.Dispose(disposing);
+      m_disposed = true;
     }
 
     #endregion

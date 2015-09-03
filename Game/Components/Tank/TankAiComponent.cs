@@ -143,41 +143,17 @@ namespace GeneticTanks.Game.Components.Tank
 
       m_rayOrigin = new Vector2(m_state.Dimensions.X, 0);
       
-      Enable();
-      Initialized = true;
-      return true;
-    }
-
-    public override void Enable()
-    {
       m_messenger.AddListener<SensorNewContactMessage>(HandleSensorNewContact);
       m_messenger.AddListener<SensorLostContactMessage>(
         HandleSensorLostContact);
       m_messenger.AddListener<TankKilledMessage>(HandleTankKilledMessage);
-      
       m_eventManager.AddListener<TankKilledEvent>(HandleTankKilledEvent);
-      
       m_physicsManager.PostStep += HandlePostStep;
 
       SetState(AiState.Search);
-    }
 
-    public override void Disable()
-    {
-      m_messenger.RemoveListener<SensorNewContactMessage>(
-        HandleSensorNewContact);
-      m_messenger.RemoveListener<SensorNewContactMessage>(
-        HandleSensorLostContact);
-      m_messenger.RemoveListener<TankKilledMessage>(HandleTankKilledMessage);
-      
-      m_eventManager.RemoveListener<TankKilledEvent>(HandleTankKilledEvent);
-
-      m_physicsManager.PostStep -= HandlePostStep;
-    }
-
-    public override void Deactivate()
-    {
-      Disable();
+      Initialized = true;
+      return true;
     }
 
     public override void Update(float deltaTime)
@@ -498,6 +474,29 @@ namespace GeneticTanks.Game.Components.Tank
       }
     }
     
+    #endregion
+    #region IDisposable
+
+    private bool m_disposed = false;
+
+    protected override void Dispose(bool disposing)
+    {
+      if (!Initialized || m_disposed)
+      {
+        return;
+      }
+
+      m_messenger.RemoveListener<SensorNewContactMessage>(
+        HandleSensorNewContact);
+      m_messenger.RemoveListener<SensorNewContactMessage>(
+        HandleSensorLostContact);
+      m_eventManager.RemoveListener<TankKilledEvent>(HandleTankKilledEvent);
+      m_physicsManager.PostStep -= HandlePostStep;
+
+      base.Dispose(disposing);
+      m_disposed = true;
+    }
+
     #endregion
   }
 }

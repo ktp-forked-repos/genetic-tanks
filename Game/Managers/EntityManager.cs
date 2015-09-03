@@ -127,7 +127,7 @@ namespace GeneticTanks.Game.Managers
       var entity = GetEntity(id);
       if (entity == null)
       {
-        Log.WarnFmt("entity {0} does not exist", id);
+        Log.WarnFmt("Request to remove non existing entity {0}", id);
         return;
       }
 

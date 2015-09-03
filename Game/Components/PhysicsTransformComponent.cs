@@ -46,8 +46,6 @@ namespace GeneticTanks.Game.Components
       World = PhysicsManager.World;
     }
 
-    #region Properties
-
     /// <summary>
     /// The physics world the object lives in.
     /// </summary>
@@ -99,9 +97,6 @@ namespace GeneticTanks.Game.Components
       }
     }
 
-    #endregion
-    #region Raycast Methods
-
     /// <summary>
     /// Performs a raycast between points relative to the body of this object,
     /// allowing filtering by category.
@@ -142,33 +137,8 @@ namespace GeneticTanks.Game.Components
       return RaycastPoint(localSource, localTarget, category).Length();
     }
 
-    #endregion
     #region TransformComponent Implementation
-
-    public override void Enable()
-    {
-      Debug.Assert(World != null);
-      Debug.Assert(Body != null);
-
-      Body.Enabled = true;
-    }
-
-    public override void Disable()
-    {
-      Debug.Assert(World != null);
-      Debug.Assert(Body != null);
-
-      Body.Enabled = false;
-    }
-
-    public override void Deactivate()
-    {
-      Debug.Assert(World != null);
-      Debug.Assert(Body != null);
-
-      World.RemoveBody(Body);
-    }
-
+    
     public override void Update(float deltaTime)
     {
     }
@@ -193,6 +163,26 @@ namespace GeneticTanks.Game.Components
       }
 
       return 1;
+    }
+
+    #endregion
+    #region IDisposable Implementation
+
+    private bool m_disposed = false;
+
+    protected override void Dispose(bool disposing)
+    {
+      if (!Initialized || m_disposed)
+      {
+        return;
+      }
+      
+      World.RemoveBody(Body);
+      Body = null;
+      World = null;
+
+      base.Dispose(disposing);
+      m_disposed = true;
     }
 
     #endregion
