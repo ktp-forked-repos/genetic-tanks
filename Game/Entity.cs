@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Remoting.Messaging;
 using GeneticTanks.Extensions;
 using GeneticTanks.Game.Components;
 using log4net;
@@ -24,7 +25,6 @@ namespace GeneticTanks.Game
     public const uint InvalidId = 0;
 
     #region Private Fields
-    private bool m_disabled = false;
     private readonly Dictionary<Type, Component> m_components =
       new Dictionary<Type, Component>();
     // Only the components that require update calls
@@ -41,7 +41,10 @@ namespace GeneticTanks.Game
     /// </exception>
     public Entity(uint id, string name = "<unnamed>")
     {
-      if (id == InvalidId) throw new ArgumentOutOfRangeException("id");
+      if (id == InvalidId)
+      {
+        throw new ArgumentOutOfRangeException("id");
+      }
 
       Id = id;
       Name = name;
@@ -55,41 +58,6 @@ namespace GeneticTanks.Game
     /// by id rather than holding a reference directly to the object.
     /// </summary>
     public uint Id { get; private set; }
-
-    public bool Enabled
-    {
-      get { return !m_disabled; }
-      set
-      {
-        // enable when enabled or disable when disabled, aka nops
-        if ((value && m_disabled) || (!value && !m_disabled)) return;
-
-        // enable when disabled (reset)
-        if (value && m_disabled)
-        {
-          m_updateComponents.Clear();
-          foreach (var component in m_components.Values)
-          {
-            component.Enable();
-            if (component.NeedsUpdate)
-            {
-              m_updateComponents.Add(component);
-              NeedsUpdate = true;
-            }
-          }
-        }
-        // disable when enabled
-        else
-        {
-          foreach (var component in m_components.Values)
-          {
-            component.Disable();
-          }
-        }
-
-        m_disabled = !value;
-      }
-    }
 
     /// <summary>
     /// The optional name of the entity.

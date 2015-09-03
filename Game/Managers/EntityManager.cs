@@ -109,16 +109,12 @@ namespace GeneticTanks.Game.Managers
       }
 
       m_entities[e.Id] = e;
-      Log.DebugFmt("Added entity {0}", e.FullName);
-
-      if (e.Enabled)
+      if (e.NeedsUpdate)
       {
-        if (e.NeedsUpdate)
-        {
-          m_updateEntities.Add(e);
-        }
-        m_eventManager.QueueEvent(new EntityAddedEvent(e));
+        m_updateEntities.Add(e);
       }
+      m_eventManager.QueueEvent(new EntityAddedEvent(e));
+      Log.DebugFmt("Added entity {0}", e.FullName);
     }
 
     /// <summary>
@@ -137,55 +133,6 @@ namespace GeneticTanks.Game.Managers
 
       m_eventManager.TriggerEvent(new EntityRemovedEvent(entity));
       RemoveEntity(entity);
-    }
-
-    /// <summary>
-    /// Enables a previously disabled entity.
-    /// </summary>
-    /// <param name="id"></param>
-    public void EnableEntity(uint id)
-    {
-      var entity = GetEntity(id);
-      if (entity == null)
-      {
-        Log.ErrorFmt("Request to enable non existing entity {0}", id);
-        return;
-      }
-      if (entity.Enabled)
-      {
-        Log.WarnFmt("Entity {0} is already enabled", id);
-      }
-
-      Log.DebugFmt("Enabling entity {0}", id);
-      entity.Enabled = true;
-      if (entity.NeedsUpdate)
-      {
-        m_updateEntities.Add(entity);
-      }
-      m_eventManager.QueueEvent(new EntityAddedEvent(entity));
-    }
-
-    /// <summary>
-    /// Disables a currently enabled entity
-    /// </summary>
-    /// <param name="id"></param>
-    public void DisableEntity(uint id)
-    {
-      var entity = GetEntity(id);
-      if (entity == null)
-      {
-        Log.ErrorFmt("Request to disable non existing entity {0}", id);
-        return;
-      }
-      if (!entity.Enabled)
-      {
-        Log.WarnFmt("Entity {0} is already disabled", id);
-      }
-
-      Log.DebugFmt("Disabling entity {0}", id);
-      entity.Enabled = false;
-      m_updateEntities.Remove(entity);
-      m_eventManager.QueueEvent(new EntityRemovedEvent(entity));
     }
 
     /// <summary>
