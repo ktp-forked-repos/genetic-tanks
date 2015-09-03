@@ -20,7 +20,6 @@ namespace GeneticTanks.Game.Components.Tank
 
     #region Private Fields
     private readonly EventManager m_eventManager;
-    private MessageComponent m_messenger;
 
     private float m_turretRotation = 0f;
     private float m_leftTurretLimit = 0f;
@@ -173,11 +172,6 @@ namespace GeneticTanks.Game.Components.Tank
 
     public override bool Initialize()
     {
-      if (!RetrieveSibling(out m_messenger))
-      {
-        return false;
-      }
-
       m_eventManager.AddListener<TankHitEvent>(HandleTankHit);
 
       Health = MaxHealth;
@@ -208,13 +202,13 @@ namespace GeneticTanks.Game.Components.Tank
         return;
       }
 
-      m_messenger.QueueMessage(new TankHitMessage(evt.Shooter, evt.Damage));
+      Parent.QueueMessage(new TankHitMessage(evt.Shooter, evt.Damage));
       m_health -= evt.Damage;
       m_health = Math.Max(m_health, 0f);
 
       if (HealthPercent <= 0f)
       {
-        m_messenger.QueueMessage(new TankKilledMessage(evt.Shooter));
+        Parent.QueueMessage(new TankKilledMessage(evt.Shooter));
         m_eventManager.QueueEvent(new TankKilledEvent(Parent.Id, evt.Shooter));
       }
     }

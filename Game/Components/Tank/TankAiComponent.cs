@@ -70,7 +70,6 @@ namespace GeneticTanks.Game.Components.Tank
     private readonly EventManager m_eventManager;
     private readonly PhysicsManager m_physicsManager;
 
-    private MessageComponent m_messenger;
     private TankPhysicsTransformComponent m_physics;
     private TankStateComponent m_state;
 
@@ -128,10 +127,6 @@ namespace GeneticTanks.Game.Components.Tank
 
     public override bool Initialize()
     {
-      if (!RetrieveSibling(out m_messenger))
-      {
-        return false;
-      }
       if (!RetrieveSibling(out m_physics))
       {
         return false;
@@ -143,10 +138,10 @@ namespace GeneticTanks.Game.Components.Tank
 
       m_rayOrigin = new Vector2(m_state.Dimensions.X, 0);
       
-      m_messenger.AddListener<SensorNewContactMessage>(HandleSensorNewContact);
-      m_messenger.AddListener<SensorLostContactMessage>(
+      Parent.AddListener<SensorNewContactMessage>(HandleSensorNewContact);
+      Parent.AddListener<SensorLostContactMessage>(
         HandleSensorLostContact);
-      m_messenger.AddListener<TankKilledMessage>(HandleTankKilledMessage);
+      Parent.AddListener<TankKilledMessage>(HandleTankKilledMessage);
       m_eventManager.AddListener<TankKilledEvent>(HandleTankKilledEvent);
       m_physicsManager.PostStep += HandlePostStep;
 
@@ -265,27 +260,27 @@ namespace GeneticTanks.Game.Components.Tank
       switch (m_moveState)
       {
         case MoveState.Stopped:
-          m_messenger.QueueMessage(new MoveMessage(MoveCommand.AllStop));
+          Parent.QueueMessage(new MoveMessage(MoveCommand.AllStop));
           break;
 
         case MoveState.Forward:
         case MoveState.ForwardCollision:
-          m_messenger.QueueMessage(new MoveMessage(MoveCommand.TurnStop));
-          m_messenger.QueueMessage(
+          Parent.QueueMessage(new MoveMessage(MoveCommand.TurnStop));
+          Parent.QueueMessage(
             new MoveMessage(MoveCommand.SpeedForwardFull));
           break;
 
         case MoveState.TurnLeft:
         case MoveState.TurnLeftCollision:
-          m_messenger.QueueMessage(new MoveMessage(MoveCommand.TurnLeftFull));
-          m_messenger.QueueMessage(
+          Parent.QueueMessage(new MoveMessage(MoveCommand.TurnLeftFull));
+          Parent.QueueMessage(
             new MoveMessage(MoveCommand.SpeedStop));
           break;
 
         case MoveState.TurnRight:
         case MoveState.TurnRightCollision:
-          m_messenger.QueueMessage(new MoveMessage(MoveCommand.TurnRightFull));
-          m_messenger.QueueMessage(
+          Parent.QueueMessage(new MoveMessage(MoveCommand.TurnRightFull));
+          Parent.QueueMessage(
             new MoveMessage(MoveCommand.SpeedStop));
           break;
       }
@@ -310,7 +305,7 @@ namespace GeneticTanks.Game.Components.Tank
 
         case AiState.Attack:
           SetMoveState(MoveState.Stopped);
-          m_messenger.QueueMessage(new ShootingStateMessage(true));
+          Parent.QueueMessage(new ShootingStateMessage(true));
           break;
       }
     }
@@ -388,7 +383,7 @@ namespace GeneticTanks.Game.Components.Tank
       // Must be trigger so that components holding a reference to the target
       // can immediately update.  Otherwise causes crashes when the target
       // was destroyed
-      m_messenger.TriggerMessage(new SetTargetMessage(m_target));
+      Parent.TriggerMessage(new SetTargetMessage(m_target));
 
       if (m_target == null)
       {
@@ -486,9 +481,9 @@ namespace GeneticTanks.Game.Components.Tank
         return;
       }
 
-      m_messenger.RemoveListener<SensorNewContactMessage>(
+      Parent.RemoveListener<SensorNewContactMessage>(
         HandleSensorNewContact);
-      m_messenger.RemoveListener<SensorNewContactMessage>(
+      Parent.RemoveListener<SensorNewContactMessage>(
         HandleSensorLostContact);
       m_eventManager.RemoveListener<TankKilledEvent>(HandleTankKilledEvent);
       m_physicsManager.PostStep -= HandlePostStep;
