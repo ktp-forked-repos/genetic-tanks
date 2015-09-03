@@ -6,7 +6,7 @@ namespace GeneticTanks.Extensions
   /// <summary>
   /// Extensions to help with conversions between the vector classes.
   /// </summary>
-  static class VectorExtensions
+  static class Vector
   {
     /// <summary>
     /// Converts <see cref="Vector2"/> to <see cref="Vector2f"/>.
